@@ -1,0 +1,224 @@
+import * as React from 'react';
+import * as d3 from 'd3';
+import axios from 'axios';
+
+interface Props{
+    url:string;
+    parent:any
+}
+//定义边数组
+type edges=Array<number>;
+//定义散点数据接口
+interface PointData {
+    id: number,
+    nodes: Array<number>,
+    edges:Array<edges>,
+    x:number,
+    y:number,
+    cluster:number,
+}
+type ChoosePointData ={
+    id: number,
+    nodes: Array<number>,
+    edges:Array<edges>,
+    [propName:string]:any,
+}
+//圈选数据接口
+interface PathData{
+    pathPoints:Array<edges>,
+    dashArray:Array<number>,
+    noDash:Array<number>,
+    isFill:string,
+    drawFlag:boolean,
+}
+
+class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:Array<ChoosePointData>}>{
+    private svgRef:React.RefObject<SVGSVGElement>;
+    private canvasRef:React.RefObject<HTMLCanvasElement>;
+    public svgWidth:number=0;
+    public svgHeight:number=0;
+    public padding={top:10,bottom:10,left:10,right:10};
+    public ctx:CanvasRenderingContext2D | null=null;
+    public color:Array<string>=['black', 'blue', 'green', 'yellow', 'red', 'purple', 'orange', 'brown','white'];
+    public path:PathData={
+        pathPoints:[],
+        dashArray:[7,7],
+        noDash:[0,0],
+        isFill:'none',
+        drawFlag:false,
+    }
+    constructor(props:Props){
+        super(props);
+        this.svgRef=React.createRef();
+        this.canvasRef=React.createRef();
+        this.getPointsData=this.getPointsData.bind(this);
+        this.onMouseDown=this.onMouseDown.bind(this);
+        this.onMouseMove=this.onMouseMove.bind(this);
+        this.onMouseUp=this.onMouseUp.bind(this);
+        this.state={
+            data:[],
+            choosePoints:[]
+        };
+        
+
+    }
+    //请求散点数据并做比例尺映射
+    getPointsData(url:string,width:number,height:number):void{
+        axios.post(url).then(res=>{
+            let x_max:number=d3.max(res.data.data,(d:PointData):number=>d.x) || 0;
+            let x_min:number=d3.min(res.data.data,(d:PointData):number=>d.x) || 0;
+            let y_max:number=d3.max(res.data.data,(d:PointData):number=>d.y) || 0;
+            let y_min:number=d3.min(res.data.data,(d:PointData):number=>d.y) || 0;
+            let xScale: d3.ScaleLinear<number, number>=d3.scaleLinear().domain([x_min,x_max]).range([this.padding.left,this.svgWidth-this.padding.right]);
+            let yScale: d3.ScaleLinear<number, number>=d3.scaleLinear().domain([y_min,y_max]).range([this.padding.top,this.svgHeight-this.padding.bottom]);
+            res.data.data.forEach((value:PointData)=>{
+                value.x=xScale(value.x);
+                value.y=yScale(value.y);
+            })
+            this.setState({data:res.data.data});
+        })
+    }
+    onMouseDown(event:React.MouseEvent<HTMLCanvasElement, MouseEvent>):void{
+        let path=this.path;
+        path.isFill='none';
+        path.pathPoints=[];
+        if(this.canvasRef.current && this.ctx){
+            this.ctx.clearRect(0,0,this.svgWidth,this.svgHeight);
+            let x=event.nativeEvent.offsetX;
+            let y=event.nativeEvent.offsetY;
+            path.pathPoints.push([x,y]);
+            this.ctx.setLineDash(path.dashArray);
+        }
+        path.drawFlag=true;
+    }
+    onMouseMove(event:React.MouseEvent<HTMLCanvasElement, MouseEvent>):void{
+
+        let path=this.path;
+        if(path.drawFlag && this.ctx && this.canvasRef.current){
+            this.ctx.clearRect(0,0,this.svgWidth,this.svgHeight);
+            let x=event.nativeEvent.offsetX;
+            let y=event.nativeEvent.offsetY;
+            this.ctx.beginPath();
+            this.ctx.moveTo(path.pathPoints[0][0],path.pathPoints[0][1]);
+            path.pathPoints.push([x,y]);
+            for(let i=1;i<path.pathPoints.length;i++){
+                this.ctx.lineTo(path.pathPoints[i][0], path.pathPoints[i][1]);
+            }
+            this.ctx.lineTo(path.pathPoints[0][0],path.pathPoints[0][1]);
+            this.ctx.stroke();
+            this.ctx.fill();
+        }
+    }
+    onMouseUp(event:React.MouseEvent<HTMLCanvasElement, MouseEvent>):void{
+        let path=this.path;
+        if(path.drawFlag && this.ctx && this.canvasRef.current){
+            this.ctx.clearRect(0,0,this.svgWidth,this.svgHeight);
+            this.ctx.beginPath();
+            this.ctx.setLineDash(path.noDash);
+            this.ctx.moveTo(path.pathPoints[0][0],path.pathPoints[0][1]);
+            for(let i=1;i<path.pathPoints.length;i++){
+                this.ctx.lineTo(path.pathPoints[i][0], path.pathPoints[i][1]);
+            }
+            this.ctx.closePath();
+            this.ctx.stroke();
+            this.ctx.fill();
+        }
+            
+        path.drawFlag=false;
+        path.isFill="none";
+
+        //获取全选的子图对应的数据
+        let data=this.state.data;
+        let choosePoints=[];
+        for(let i=0;i<data.length;i++){
+            if(this.isInPolygon([data[i].x,data[i].y],this.path.pathPoints)){
+                choosePoints.push({
+                    id:data[i].id,
+                    nodes:data[i].nodes,
+                    edges:data[i].edges,
+                })
+            }
+        }
+        this.setState({choosePoints:choosePoints});
+        this.props.parent(choosePoints);
+        
+    }
+    componentDidMount():void{
+        this.svgWidth=this.svgRef.current?.clientWidth || 0;
+        this.svgHeight=this.svgRef.current?.clientHeight || 0;
+        this.getPointsData(this.props.url,this.svgWidth,this.svgHeight);
+        let canvas = this.canvasRef.current;
+        if(canvas){
+            canvas.width=this.svgWidth;
+            canvas.height=this.svgHeight;
+            this.ctx=canvas.getContext('2d');
+            if(this.ctx){
+                // 设置线条颜色
+                this.ctx.strokeStyle = '#000';
+                this.ctx.fillStyle="rgba(204,204,204,0.5)";
+                this.ctx.lineWidth = 1;
+                this.ctx.lineJoin = 'round';
+                this.ctx.lineCap = 'round';   
+            }
+            
+        }
+    }
+    isInPolygon(checkPoint:Array<number>, polygonPoints:Array<edges>) {//判断一个点是否在多边形内
+        var counter = 0;
+        var i;
+        var xinters;
+        var p1, p2;
+        var pointCount = polygonPoints.length;
+        p1 = polygonPoints[0];
+    
+        for (i = 1; i <= pointCount; i++) {
+            p2 = polygonPoints[i % pointCount];
+            if (
+                checkPoint[0] > Math.min(p1[0], p2[0]) &&
+                checkPoint[0] <= Math.max(p1[0], p2[0])
+            ) {
+                if (checkPoint[1] <= Math.max(p1[1], p2[1])) {
+                    if (p1[0] != p2[0]) {
+                        xinters =
+                            (checkPoint[0] - p1[0]) *
+                                (p2[1] - p1[1]) /
+                                (p2[0] - p1[0]) +
+                            p1[1];
+                        if (p1[1] == p2[1] || checkPoint[1] <= xinters) {
+                            counter++;
+                        }
+                    }
+                }
+            }
+            p1 = p2;
+        }
+        if (counter % 2 == 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+    render():React.ReactElement{
+        let data=this.state.data;
+        
+        let points=[];
+        for(let i=0;i<data.length;i++){
+            points.push(
+                <circle r="2px" cx={data[i].x} cy={data[i].y} key={data[i].id} fill={this.color[0]}></circle>
+            )
+        }
+        // let pointsChoose=this.state.choosePoints.map((value:ChoosePointData)=>
+        //     <circle r="2px" cx={data[i].x} cy={value.y} key={value.id+'_'} fill={this.color[0]}></circle>
+        // )
+        return(
+            <div className="scatter">
+                <svg style={{width:'100%',height:'100%'}} ref={this.svgRef} >
+                    {points}
+                </svg>
+                <canvas ref={this.canvasRef} style={{position:'absolute',top:'0',left:'0'}}
+                onMouseMove={this.onMouseMove} onMouseDown={this.onMouseDown} onMouseUp={this.onMouseUp}></canvas>
+            </div>
+        )
+    }
+}
+export default Scatter

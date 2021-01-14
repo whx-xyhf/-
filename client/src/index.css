@@ -1,0 +1,142 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 62.5% !important;
+    /* 10÷16=62.5% */
+    width:100%;
+    height:100%;
+    overflow: hidden;
+}
+
+@media only screen and (min-width: 481px) {
+    html {
+        font-size: 94% !important;
+        /* 15.04÷16=94% */
+    }
+}
+
+@media only screen and (min-width: 561px) {
+    html {
+        font-size: 109% !important;
+        /* 17.44÷16=109% */
+    }
+}
+
+@media only screen and (min-width: 641px) {
+    html {
+        font-size: 125% !important;
+        /* 20÷16=125% */
+    }
+}
+body {
+    width:100%;
+    height:100%;
+}
+
+#root{
+    width:100%;
+    height:100%;
+    box-sizing: border-box;
+    padding:8px 8px;
+}
+.App{
+    width:100%;
+    height:100%;
+    /* border: 3px solid #ccc;
+    box-sizing: border-box; */
+}
+
+.controlView{
+    width:20%;
+    height:100%;
+    float:left;
+    border: 3px solid #ccc;
+    box-sizing: border-box;
+}
+.nodeList{
+    width:100%;
+    height:100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+.nodeList li{
+    list-style: none;
+    font-size: 1rem;
+    text-align: left;
+    width:100%;
+    height:auto;
+    border-top: 1px solid #ccc;
+    box-sizing: border-box;
+    padding: 5px;
+}
+.nodeList li:nth-of-type(1){
+    margin-top: 10px;
+}
+.nodeList li:last-child{
+    border-bottom: 1px solid #ccc;
+}
+
+.infoView{
+    width:30%;
+    height:100%;
+    float:left;
+    border: 3px solid #ccc;
+    box-sizing: border-box;
+}
+.info{
+    width:100%;
+    height:100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+.infoBox{
+    float:left;
+    width: 100%;
+    height:50%;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    position: relative;
+}
+.infoBox input{
+    position: absolute;
+    left:0;
+}
+.infoName::-webkit-scrollbar {
+    display: none; /* Chrome Safari */
+  }
+.scatterView{
+    width:50%;
+    height:50%;
+    float:left;
+    border: 3px solid #ccc;
+    box-sizing: border-box;
+}
+.scatter{
+    width:100%;
+    height:100%;
+    position: relative;
+}
+.forceComputeView{
+    height:50%;
+    width:50%;
+    float: left;
+    border: 3px solid #ccc;
+    box-sizing: border-box;
+}
+.forceCompute{
+    height:100%;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+.forceBox{
+    float:left;
+    width: 50%;
+    height:50%;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
