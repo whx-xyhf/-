@@ -4,6 +4,7 @@ import axios from 'axios'
 interface Props{
     url:string;
     parent:any,
+    dimensions:number,
 }
 
 class NodeList extends React.Component<Props,any>{
@@ -22,13 +23,13 @@ class NodeList extends React.Component<Props,any>{
     }
     //搜索
     search():void{//根据搜索框的字段搜索作者
-        axios.post(this.props.url+'/search',{wd:this.state.wd})
+        axios.post(this.props.url+'/searchPerson',{wd:this.state.wd})
         .then(res=>{
             this.setState({searchValue:res.data.data});
         })
     }
     searchGraph(e:any):void{//根据名字搜索包含该节点的网络
-        axios.post(this.props.url+'/searchGraph',{wd:e.target.dataset['num']})
+        axios.post(this.props.url+'/searchGraphByPersonId',{wd:e.target.dataset['num'],dimensions:this.props.dimensions})
         .then(res=>{
             // console.log(res.data.data);
             this.props.parent(res.data.data);

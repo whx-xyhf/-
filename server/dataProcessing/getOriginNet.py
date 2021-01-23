@@ -139,7 +139,7 @@ def getNetWithTimeTnterval(data,node2num,time_interval,dir_path,fileName1,fileNa
 
 if __name__=="__main__" :
     start = datetime.now()
-    time_interval=2
+    time_interval=1
     jsonData=getJson('./data/paper/data_weight.json')
     # node2num=getNet(jsonData,'./data/paper','orignNet.csv','orignNetNum.csv','node2Num.json')
     node2num=getJson('./data/paper/node2Num.json')

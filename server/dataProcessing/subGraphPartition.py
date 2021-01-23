@@ -27,16 +27,16 @@ def readGraph(url):#读取原始数字大图
 
 def getFeatures(G,edges):
     nodes=list(G.nodes())
-    nodesDic=dict.fromkeys(nodes)
-    for edge in edges:
-        if nodesDic[edge[0]]!=None:
-            nodesDic[edge[0]]+=edge[2]
-        if nodesDic[edge[0]]==None:
-            nodesDic[edge[0]] = edge[2]
-        if nodesDic[edge[1]]!=None:
-            nodesDic[edge[1]]+=edge[2]
-        if nodesDic[edge[1]]==None:
-            nodesDic[edge[1]] = edge[2]
+    nodesDic=dict.fromkeys(nodes,1)
+    # for edge in edges:
+        # if nodesDic[edge[0]]!=None:
+        #     nodesDic[edge[0]]+=edge[2]
+        # if nodesDic[edge[0]]==None:
+        #     nodesDic[edge[0]] = edge[2]
+        # if nodesDic[edge[1]]!=None:
+        #     nodesDic[edge[1]]+=edge[2]
+        # if nodesDic[edge[1]]==None:
+        #     nodesDic[edge[1]] = edge[2]
     return nodesDic
 
 def getCommunities(G):
@@ -83,21 +83,21 @@ def del_file(filepath):
     elif os.path.exists(filepath)==False:
         os.makedirs(filepath)
 
-def saveSubGraph(G,subGraphNodes,features,url,index):
+def saveSubGraph(G,subGraphNodes,features,url,index,yearPath):
     subGraphArray = [];
     for key in subGraphNodes:
         if isinstance(subGraphNodes[key],list):
             subGraph = G.subgraph(subGraphNodes[key])
             subEdges = list(subGraph.edges())
             subNodes = list(subGraph.nodes())
-            subGraphArray.append({'id': index, 'nodes': subNodes, 'edges': subEdges})
+            subGraphArray.append({'id': index, 'nodes': subNodes, 'edges': subEdges,'year':yearPath})
             with open(url + str(index) + ".json", 'w', encoding="utf-8") as fw:
                 output = {"edges": subEdges, "features": {}}
                 for node in subNodes:
                     output["features"][node] = features[node]
                 json.dump(output, fw)
         elif isinstance(subGraphNodes[key],dict):
-            value1,value2=saveSubGraph(G,subGraphNodes[key],features,url,index)
+            value1,value2=saveSubGraph(G,subGraphNodes[key],features,url,index,yearPath)
             subGraphArray.extend(value1)
             index=value2-1
         index+=1
@@ -105,16 +105,18 @@ def saveSubGraph(G,subGraphNodes,features,url,index):
     # with open(filePath, 'w', encoding='utf-8') as fw:
     #     json.dump(subGraphArray, fw)
 
-def getSubGraphs(G,value,features,url,index):
+def getSubGraphs(G,value,features,url,index,yearPath):
     """
         提取子图
-        :param G:大图 value:每个子图点的数量阈值 features:点的特征值 url: 子图存储文件夹 filePath：子图文件名（所有子图放一起）index:子图id起点命名
+        :param G:大图 value:每个子图点的数量阈值 features:点的特征值 url: 子图存储文件夹
+        filePath：子图文件名（所有子图放一起）index:子图id起点命名
+        yearPath:哪一段时间的图
         :return:
     """
     subGraphNodes=getSubGraphNodes(getCommunities(G),G,value)
 
     #根据社区构建子图
-    subGraphArray,index1=saveSubGraph(G,subGraphNodes,features,url,index);
+    subGraphArray,index1=saveSubGraph(G,subGraphNodes,features,url,index,yearPath);
 
     print("子图数量："+str(len(subGraphArray))+' '+str(index1-index))
     return subGraphArray,index1
@@ -125,7 +127,7 @@ def getSubGraphs(G,value,features,url,index):
 if __name__=="__main__":
     start = datetime.now()
     yearPath = ''
-    time_interval=2
+    time_interval=1
     dirPath='./data/paper/'
     num_net_fileName='orignNetNum.csv'
     community_fileName='communities.json'
@@ -149,7 +151,7 @@ if __name__=="__main__":
             print(yearPath)
             G,edges=readGraph(dirPath+yearPath+'/'+num_net_fileName)
             features=getFeatures(G,edges)
-            subGraphArray,index=getSubGraphs(G,value,features, dirPath+subGraphs_dirName+'/',index)
+            subGraphArray,index=getSubGraphs(G,value,features, dirPath+subGraphs_dirName+'/',index,yearPath)
             out.extend(subGraphArray)
             # print(index)
     with open(dirPath+subGraphs_fileName,'w',encoding='utf-8') as fw:

@@ -3,8 +3,11 @@ import * as d3 from 'd3';
 import axios from 'axios';
 
 interface Props{
-    url:string;
-    parent:any
+    url:string,
+    choosePoints:Array<ChoosePointData>,//匹配的数据
+    centerPoint:ChoosePointData,
+    parent:any,
+    dimensions:number,
 }
 //定义边数组
 type edges=Array<number>;
@@ -32,14 +35,16 @@ interface PathData{
     drawFlag:boolean,
 }
 
-class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:Array<ChoosePointData>}>{
+class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:Array<ChoosePointData>,centerPoint:any}>{
     private svgRef:React.RefObject<SVGSVGElement>;
     private canvasRef:React.RefObject<HTMLCanvasElement>;
     public svgWidth:number=0;
     public svgHeight:number=0;
     public padding={top:10,bottom:10,left:10,right:10};
     public ctx:CanvasRenderingContext2D | null=null;
-    public color:Array<string>=['black', 'blue', 'green', 'yellow', 'red', 'purple', 'orange', 'brown','white'];
+    public color:Array<string>=['white','black', 'blue', 'green', 'yellow', 'red', 'purple', 'orange', 'brown'];
+    public lightColor:string='orange';
+    public centerColor:string='red';
     public path:PathData={
         pathPoints:[],
         dashArray:[7,7],
@@ -57,14 +62,15 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
         this.onMouseUp=this.onMouseUp.bind(this);
         this.state={
             data:[],
-            choosePoints:[]
+            choosePoints:[],
+            centerPoint:null,
         };
         
 
     }
     //请求散点数据并做比例尺映射
-    getPointsData(url:string,width:number,height:number):void{
-        axios.post(url).then(res=>{
+    getPointsData(url:string,width:number,height:number,dimensions:number):void{
+        axios.post(url,{dimensions:dimensions}).then(res=>{
             let x_max:number=d3.max(res.data.data,(d:PointData):number=>d.x) || 0;
             let x_min:number=d3.min(res.data.data,(d:PointData):number=>d.x) || 0;
             let y_max:number=d3.max(res.data.data,(d:PointData):number=>d.y) || 0;
@@ -136,17 +142,19 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
                     id:data[i].id,
                     nodes:data[i].nodes,
                     edges:data[i].edges,
+                    x:data[i].x,
+                    y:data[i].y,
                 })
             }
         }
         this.setState({choosePoints:choosePoints});
-        this.props.parent(choosePoints);
+        this.props.parent.setChoosePoints(choosePoints);
         
     }
     componentDidMount():void{
         this.svgWidth=this.svgRef.current?.clientWidth || 0;
         this.svgHeight=this.svgRef.current?.clientHeight || 0;
-        this.getPointsData(this.props.url,this.svgWidth,this.svgHeight);
+        this.getPointsData(this.props.url,this.svgWidth,this.svgHeight,this.props.dimensions);
         let canvas = this.canvasRef.current;
         if(canvas){
             canvas.width=this.svgWidth;
@@ -178,13 +186,13 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
                 checkPoint[0] <= Math.max(p1[0], p2[0])
             ) {
                 if (checkPoint[1] <= Math.max(p1[1], p2[1])) {
-                    if (p1[0] != p2[0]) {
+                    if (p1[0] !== p2[0]) {
                         xinters =
                             (checkPoint[0] - p1[0]) *
                                 (p2[1] - p1[1]) /
                                 (p2[0] - p1[0]) +
                             p1[1];
-                        if (p1[1] == p2[1] || checkPoint[1] <= xinters) {
+                        if (p1[1] === p2[1] || checkPoint[1] <= xinters) {
                             counter++;
                         }
                     }
@@ -192,28 +200,74 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
             }
             p1 = p2;
         }
-        if (counter % 2 == 0) {
+        if (counter % 2 === 0) {
             return false;
         } else {
             return true;
         }
     }
+    searchGraph(pointData:ChoosePointData):void{//根据名字搜索包含该节点的网络
+        axios.post(this.props.url+'/searchGraphByGraphId',{wd:pointData.id})
+        .then(res=>{
+            // console.log(res.data.data);
+            this.props.parent.setPersonGraphs(res.data.data);
+        })
+        this.setState({centerPoint:pointData})
+    }
+    componentWillReceiveProps(nextProps:Props):void{
+        if(nextProps.choosePoints!==this.props.choosePoints){
+            let choosePoints=[];
+            for(let j in nextProps.choosePoints){
+                for(let i in this.state.data){
+                    if(this.state.data[i].id===nextProps.choosePoints[j].id){
+                        choosePoints.push(this.state.data[i]);
+                        break;
+                    }
+                }
+            }
+            this.setState({choosePoints:choosePoints});
+        }
+        if(nextProps.centerPoint!==this.props.centerPoint){
+            for(let i in this.state.data){
+                if(this.state.data[i].id===nextProps.centerPoint.id){
+                    this.setState({centerPoint:this.state.data[i]});
+                    break;
+                }
+            }
+        }
+        if(!nextProps.centerPoint.id){
+            this.setState({centerPoint:null});
+        }
+        if(nextProps.dimensions!==this.props.dimensions){
+            this.getPointsData(this.props.url,this.svgWidth,this.svgHeight,nextProps.dimensions);
+        }
+        
+    }
     render():React.ReactElement{
         let data=this.state.data;
-        
+        //所有点
         let points=[];
         for(let i=0;i<data.length;i++){
             points.push(
-                <circle r="2px" cx={data[i].x} cy={data[i].y} key={data[i].id} fill={this.color[0]}></circle>
+                <circle r="2px" cx={data[i].x} cy={data[i].y} key={data[i].id} fill='none' 
+                strokeWidth='1px' stroke='#666' onClick={this.searchGraph.bind(this,data[i])}></circle>
             )
         }
-        // let pointsChoose=this.state.choosePoints.map((value:ChoosePointData)=>
-        //     <circle r="2px" cx={data[i].x} cy={value.y} key={value.id+'_'} fill={this.color[0]}></circle>
-        // )
+        //圈选的点，匹配到的点
+        let pointsChoose=this.state.choosePoints.map((value:ChoosePointData,index:number)=>
+            <circle r="2px" cx={value.x} cy={value.y} key={index} fill={this.lightColor} onClick={this.searchGraph.bind(this,value)}></circle>
+        )
+        //点击的点，需要匹配的点
+        let centerPoint=null;
+        if(this.state.centerPoint!=null){
+            centerPoint=<circle r="2px" cx={this.state.centerPoint.x} cy={this.state.centerPoint.y} fill={this.centerColor} onClick={this.searchGraph.bind(this,this.state.centerPoint)}></circle>
+        }
         return(
             <div className="scatter">
                 <svg style={{width:'100%',height:'100%'}} ref={this.svgRef} >
                     {points}
+                    {pointsChoose}
+                    {centerPoint}
                 </svg>
                 <canvas ref={this.canvasRef} style={{position:'absolute',top:'0',left:'0'}}
                 onMouseMove={this.onMouseMove} onMouseDown={this.onMouseDown} onMouseUp={this.onMouseUp}></canvas>

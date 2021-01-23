@@ -130,10 +130,12 @@ def main(args):
 
 if __name__ == "__main__":
     args = parser()
-    time_interval = 2
+    time_interval = 1
+    dimensions=128
     dirPath = './data/paper/'
     subGraphs_dirName = 'subGraphs' + '_' + str(time_interval)+'/'
     args.input_path=dirPath+subGraphs_dirName
-    args.output_path=dirPath+'vectors_'+str(time_interval)+'.csv'
+    args.output_path=dirPath+'vectors_'+str(time_interval)+'_'+str(dimensions)+'.csv'
+    args.dimensions=dimensions
     main(args)
     print("ok")

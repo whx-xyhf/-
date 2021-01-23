@@ -32,33 +32,38 @@ def plotFeature(data, clusters, clusterNum):
 if __name__ == '__main__':
     print("正在进行dbscan聚类！！！")
     dirPath = './data/paper/'
-    time_interval = 2
-    points,ids=loadDataSet(dirPath+'vectors2d_'+str(time_interval)+'.json')
-    clustering = DBSCAN(eps=3, min_samples=0).fit(points)
-    labels = set(clustering.labels_)
-    pointsM=np.mat(points).transpose()
-    plotFeature(pointsM,clustering.labels_,len(labels))
-    plt.show()
-    dic={}
-    subGraphs=[]
-    for label in labels:
-        dic[str(label)]=[]
-    index=0
-    for label in clustering.labels_:
-        dic[str(label)].append(ids[index])
-        index+=1
-    with open(dirPath+'cluster_points_'+str(time_interval)+'.json','w') as fw:#每个标签有哪些点
-        json.dump(dic,fw)
+    time_interval = 1
+    dimensions = 128
+    points,ids=loadDataSet(dirPath+'vectors2d_'+str(time_interval)+'_'+str(dimensions)+'.json')
+    # clustering = DBSCAN(eps=3, min_samples=0).fit(points)
+    # labels = set(clustering.labels_)
+    # pointsM=np.mat(points).transpose()
+    # plotFeature(pointsM,clustering.labels_,len(labels))
+    # plt.show()
+    # dic={}
+    # subGraphs=[]
+    # for label in labels:
+    #     dic[str(label)]=[]
+    # index=0
+    # for label in clustering.labels_:
+    #     dic[str(label)].append(ids[index])
+    #     index+=1
+    # with open(dirPath+'cluster_points_'+str(time_interval)+'_'+str(dimensions)+'.json','w') as fw:#每个标签有哪些点
+    #     json.dump(dic,fw)
     with open(dirPath+'subGraphs_'+str(time_interval)+'.json','r') as fr:#读取所有子图
         subGraphs=json.load(fr)
     with open(dirPath+'subGraphs_'+str(time_interval)+'.json','w') as fw:#重新写入代标签的坐标
         out={}
         for i in range(len(ids)):
-            out[ids[i]]={'id':ids[i],'x':points[i][0],'y':points[i][1],'cluster':int(clustering.labels_[i])}
+            out[ids[i]]={'id':ids[i],'x':points[i][0],'y':points[i][1]}#,'cluster':int(clustering.labels_[i])
         for subGraph in subGraphs:
-            subGraph['x']=out[str(subGraph['id'])]['x']
-            subGraph['y'] = out[str(subGraph['id'])]['y']
-            subGraph['cluster'] = out[str(subGraph['id'])]['cluster']
+            if 'x' in subGraph.keys():
+                subGraph['x'][str(dimensions)] = out[str(subGraph['id'])]['x']
+                subGraph['y'][str(dimensions)] = out[str(subGraph['id'])]['y']
+            else:
+                subGraph['x']={str(dimensions):out[str(subGraph['id'])]['x']}
+                subGraph['y'] = {str(dimensions):out[str(subGraph['id'])]['y']}
+            # subGraph['cluster'] = out[str(subGraph['id'])]['cluster']
         json.dump(subGraphs,fw)
     print("聚类完成！！！")
-    print("共"+str(len(labels))+"类")
+    # print("共"+str(len(labels))+"类")

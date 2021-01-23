@@ -1,4 +1,8 @@
-a={1:2,3:4,5:{6:7}}
-for i in a:
-    if isinstance(a[i],dict):
-        print(a[i])
+
+import networkx as nx
+g=nx.Graph()
+g.add_edge("A","B")
+g2=g.copy()
+g.add_edge("A","C")
+from ged4py.algorithm import graph_edit_dist
+print(graph_edit_dist.compare(g,g2))
