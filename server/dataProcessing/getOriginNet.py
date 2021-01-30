@@ -143,6 +143,7 @@ if __name__=="__main__" :
     jsonData=getJson('./data/paper/data_weight.json')
     # node2num=getNet(jsonData,'./data/paper','orignNet.csv','orignNetNum.csv','node2Num.json')
     node2num=getJson('./data/paper/node2Num.json')
+
     getNetWithTimeTnterval(jsonData,node2num,time_interval, './data/paper', 'orignNet.csv', 'orignNetNum.csv', 'node2Num.json')
     end = datetime.now()
     print("用时"+str((end - start).seconds)+"秒！！！")

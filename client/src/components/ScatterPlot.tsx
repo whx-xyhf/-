@@ -8,6 +8,8 @@ interface Props{
     centerPoint:ChoosePointData,
     parent:any,
     dimensions:number,
+    strWeight:number,
+    attrWeight:number,
 }
 //定义边数组
 type edges=Array<number>;
@@ -69,8 +71,8 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
 
     }
     //请求散点数据并做比例尺映射
-    getPointsData(url:string,width:number,height:number,dimensions:number):void{
-        axios.post(url,{dimensions:dimensions}).then(res=>{
+    getPointsData(url:string,width:number,height:number,dimensions:number,strWeight:number,attrWeight:number):void{
+        axios.post(url,{dimensions:dimensions,strWeight:strWeight,attrWeight:attrWeight}).then(res=>{
             let x_max:number=d3.max(res.data.data,(d:PointData):number=>d.x) || 0;
             let x_min:number=d3.min(res.data.data,(d:PointData):number=>d.x) || 0;
             let y_max:number=d3.max(res.data.data,(d:PointData):number=>d.y) || 0;
@@ -154,7 +156,7 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
     componentDidMount():void{
         this.svgWidth=this.svgRef.current?.clientWidth || 0;
         this.svgHeight=this.svgRef.current?.clientHeight || 0;
-        this.getPointsData(this.props.url,this.svgWidth,this.svgHeight,this.props.dimensions);
+        this.getPointsData(this.props.url,this.svgWidth,this.svgHeight,this.props.dimensions,this.props.strWeight,this.props.attrWeight);
         let canvas = this.canvasRef.current;
         if(canvas){
             canvas.width=this.svgWidth;
@@ -207,12 +209,13 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
         }
     }
     searchGraph(pointData:ChoosePointData):void{//根据名字搜索包含该节点的网络
-        axios.post(this.props.url+'/searchGraphByGraphId',{wd:pointData.id})
+        const {url,dimensions,attrWeight,strWeight}=this.props;
+        axios.post(url+'/searchGraphByGraphId',{wd:pointData.id,dimensions:dimensions,attrWeight:attrWeight,strWeight:strWeight})
         .then(res=>{
             // console.log(res.data.data);
             this.props.parent.setPersonGraphs(res.data.data);
         })
-        this.setState({centerPoint:pointData})
+        this.setState({centerPoint:pointData});
     }
     componentWillReceiveProps(nextProps:Props):void{
         if(nextProps.choosePoints!==this.props.choosePoints){
@@ -238,8 +241,9 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
         if(!nextProps.centerPoint.id){
             this.setState({centerPoint:null});
         }
-        if(nextProps.dimensions!==this.props.dimensions){
-            this.getPointsData(this.props.url,this.svgWidth,this.svgHeight,nextProps.dimensions);
+        if(nextProps.dimensions!==this.props.dimensions || nextProps.attrWeight!==this.props.attrWeight || nextProps.strWeight!==this.props.strWeight){
+            
+            this.getPointsData(this.props.url,this.svgWidth,this.svgHeight,nextProps.dimensions,nextProps.strWeight,nextProps.attrWeight);
         }
         
     }
@@ -269,8 +273,8 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
                     {pointsChoose}
                     {centerPoint}
                 </svg>
-                <canvas ref={this.canvasRef} style={{position:'absolute',top:'0',left:'0'}}
-                onMouseMove={this.onMouseMove} onMouseDown={this.onMouseDown} onMouseUp={this.onMouseUp}></canvas>
+                {/* <canvas ref={this.canvasRef} style={{position:'absolute',top:'0',left:'0'}}
+                onMouseMove={this.onMouseMove} onMouseDown={this.onMouseDown} onMouseUp={this.onMouseUp}></canvas> */}
             </div>
         )
     }

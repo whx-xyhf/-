@@ -1,10 +1,14 @@
 import * as React from 'react';
-import axios from 'axios'
+import axios from 'axios';
+import { Input, Space } from 'antd';
+import { AudioOutlined } from '@ant-design/icons';
 
 interface Props{
     url:string;
     parent:any,
     dimensions:number,
+    strWeight:number,
+    attrWeight:number,
 }
 
 class NodeList extends React.Component<Props,any>{
@@ -29,7 +33,8 @@ class NodeList extends React.Component<Props,any>{
         })
     }
     searchGraph(e:any):void{//根据名字搜索包含该节点的网络
-        axios.post(this.props.url+'/searchGraphByPersonId',{wd:e.target.dataset['num'],dimensions:this.props.dimensions})
+        const {url,dimensions,attrWeight,strWeight} = this.props;
+        axios.post(url+'/searchGraphByPersonId',{wd:e.target.dataset['num'],dimensions:dimensions,strWeight:strWeight,attrWeight:attrWeight})
         .then(res=>{
             // console.log(res.data.data);
             this.props.parent(res.data.data);
@@ -39,6 +44,16 @@ class NodeList extends React.Component<Props,any>{
         this.search();
     }
     render():React.ReactElement{
+        const { Search } = Input;
+        const suffix = (
+            <AudioOutlined
+              style={{
+                fontSize: 16,
+                color: '#1890ff',
+              }}
+            />
+          );
+
         let liList:Array<React.ReactElement>=[];
         for(let wd in this.state.searchValue){
             liList.push(
@@ -46,10 +61,18 @@ class NodeList extends React.Component<Props,any>{
             )
         }
         return (
-            <div className="nodeList">
-                <input type="text" value={this.state.wd} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>this.change(e)}></input>
-                <input type="button" value="search" onClick={this.search}></input>
-                {liList}
+            <div className="searchView">
+                {/* <input type="text" value={this.state.wd} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>this.change(e)}></input>
+                <input type="button" value="search" onClick={this.search}></input> */}
+                <div className="search">
+                    <Space direction="vertical">
+                        <Search value={this.state.wd} placeholder="input search author" onSearch={this.search} style={{ width: 200 }} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>this.change(e)}/>
+                    </Space>
+                </div>
+                
+
+                <div className="nodeList">{liList}</div>
+               
             </div>
         )
     }

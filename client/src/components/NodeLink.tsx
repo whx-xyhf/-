@@ -54,14 +54,19 @@ class NodeLink extends React.Component<Props,any>{
             let y_max:number=d3.max(nodesid,(d:d3.SimulationNodeDatum):number=>d.y || 0) || 0;
             let y_min:number=d3.min(nodesid,(d:d3.SimulationNodeDatum):number=>d.y || 0) || 0;
             
-            if(x_max>=this.svgWidth || x_min<=0 || y_min<=0 || y_max>=this.svgHeight){
+            
                 
                 new Promise((resolve:any,reject:any)=>{
                     //获取纵横比
                     let height_force=y_max-y_min;
                     let width_force=x_max-x_min;
-                    let scaleWidth=this.svgWidth;
-                    let scaleHeight=this.svgHeight;
+                    let scaleWidth=this.svgWidth/4*3;
+                    let scaleHeight=this.svgHeight/4*3;
+                    if(x_max>=this.svgWidth || x_min<=0 || y_min<=0 || y_max>=this.svgHeight){
+                        scaleWidth=this.svgWidth;
+                        scaleHeight=this.svgHeight;
+                    }
+                    
                     if(height_force>width_force){
                         scaleWidth=(scaleHeight*width_force)/height_force;
                         if(scaleWidth>this.svgWidth){
@@ -103,10 +108,11 @@ class NodeLink extends React.Component<Props,any>{
                     // console.log(res[0])
                     this.setState({layOutNodes:res[0],layOutLinks:res[1]});
                 })
-            }
-            else{
-                this.setState({layOutNodes:nodesid,layOutLinks:links});
-            }
+            
+            // else{
+                
+            //     this.setState({layOutNodes:nodesid,layOutLinks:links});
+            // }
             
             // this.setState({layOutNodes:nodesid,layOutLinks:links});
         })

@@ -1,5 +1,6 @@
 import json
 import csv
+import numpy as np
 
 def getJson(url): #读取json数据
     data = {}
@@ -120,18 +121,23 @@ def run(url1,url2,url3,url4,url5,url6,isExist=False):
             attr.append(weight)
             attrDic[graph['id']]=attr
             graph['attr']={'count_author':attr[0],'count_cite':attr[1],'rank':attr[2],'count_paper':attr[3],'count_weight':attr[4]}
-            attrArrayDic.append(graph['attr'])
+            attrArrayDic.append(attr)
             index+=1
         saveJson(url3,subGraphs)
         #归一化
-        max_min=[]
-        for i in attrArrayDic[0]:
-            max_value=max(attrArrayDic,key=lambda x:x[i])[i]
-            min_value=min(attrArrayDic,key=lambda x:x[i])[i]
-            max_min.append([max_value,min_value])
+        # max_min=[]
+        mean_std=[]
+        attrArrayDic=np.array(attrArrayDic)
+        # for i in range(len(attrArrayDic[0])):
+        mean=np.mean(attrArrayDic,axis=0)
+        std=np.std(attrArrayDic,axis=0)
+        print(mean,std)
+            # max_value=max(attrArrayDic,key=lambda x:x[i])[i]
+            # min_value=min(attrArrayDic,key=lambda x:x[i])[i]
+            # max_min.append([max_value,min_value])
         for i in attrDic:
             for j in range(len(attrDic[i])):
-                attrDic[i][j]=(attrDic[i][j]-max_min[j][1])/(max_min[j][0]-max_min[j][1])
+                attrDic[i][j]=(attrDic[i][j]-mean[j])/std[j]
         with open(url6,'w',encoding='utf-8') as fw:
             json.dump(attrDic,fw)
     vectors,head=vectorExtend(url5,attrDic,isExist)
@@ -141,15 +147,16 @@ def run(url1,url2,url3,url4,url5,url6,isExist=False):
         for i in attrDic:
             for j in range(len(attrDic[i])):
                 head.append('a_'+str(j))
+            break;
         csv_writer.writerow(head)
         for line in vectors:
             csv_writer.writerow(line)
 
 if __name__=='__main__':
     time_interval = 1
-    dimensions=64
+    dimensions=128
     dirPath = './data/paper/'
     run(dirPath+'data_weight.json',dirPath+'node2Num.json',
         dirPath+'subGraphs_'+str(time_interval)+'.json',dirPath+'orignNetNum.csv',
         dirPath+'vectors_'+str(time_interval)+'_'+str(dimensions)+'.csv',
-        dirPath+'attrVectors_'+str(time_interval)+'.json',True)
+        dirPath+'attrVectors_'+str(time_interval)+'.json',False)

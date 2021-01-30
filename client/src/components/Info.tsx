@@ -17,6 +17,8 @@ interface Props{
     num:number,//匹配数量
     parent:any,
     dimensions:number,
+    strWeight:number,
+    attrWeight:number,
 }
 
 class Info extends React.Component<Props,any>{
@@ -25,11 +27,17 @@ class Info extends React.Component<Props,any>{
         this.match=this.match.bind(this);
     }
     match(graph:graph):void{//匹配相似图
-        axios.post(this.props.url,{wd:graph,num:this.props.num,dimensions:this.props.dimensions})
+        const {url,dimensions,strWeight,attrWeight}=this.props;
+        axios.post(url+'/matchGraph',{wd:graph,num:this.props.num,dimensions:dimensions,strWeight:strWeight,attrWeight:attrWeight})
         .then(res=>{
             this.props.parent.setChoosePoints(res.data.data);
         })
-        this.props.parent.setCenterPoint(graph);
+        axios.post(url+'/searchGraphByGraphId',{wd:graph.id,dimensions:dimensions,attrWeight:attrWeight,strWeight:strWeight})
+        .then(res=>{
+            console.log(res.data.data[0]);
+            this.props.parent.setCenterPoint(res.data.data[0]);
+        })
+        
     }
     render():React.ReactElement{
         let elements=this.props.graphs.map((graph:graph,index:number)=>{

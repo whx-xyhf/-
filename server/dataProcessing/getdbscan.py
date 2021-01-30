@@ -33,7 +33,7 @@ if __name__ == '__main__':
     print("正在进行dbscan聚类！！！")
     dirPath = './data/paper/'
     time_interval = 1
-    dimensions = 128
+    dimensions = 4
     points,ids=loadDataSet(dirPath+'vectors2d_'+str(time_interval)+'_'+str(dimensions)+'.json')
     # clustering = DBSCAN(eps=3, min_samples=0).fit(points)
     # labels = set(clustering.labels_)
