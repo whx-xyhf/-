@@ -10,6 +10,8 @@ interface Props{
     dimensions:number,
     strWeight:number,
     attrWeight:number,
+    attrChecked:attr,
+    attrValue:attr,
 }
 //定义边数组
 type edges=Array<number>;
@@ -20,7 +22,7 @@ interface PointData {
     edges:Array<edges>,
     x:number,
     y:number,
-    cluster:number,
+    [propName: string]: any,
 }
 type ChoosePointData ={
     id: number,
@@ -36,6 +38,9 @@ interface PathData{
     isFill:string,
     drawFlag:boolean,
 }
+type attr={
+    [propName: string]: any,
+  }
 
 class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:Array<ChoosePointData>,centerPoint:any}>{
     private svgRef:React.RefObject<SVGSVGElement>;
@@ -71,18 +76,21 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
 
     }
     //请求散点数据并做比例尺映射
-    getPointsData(url:string,width:number,height:number,dimensions:number,strWeight:number,attrWeight:number):void{
-        axios.post(url,{dimensions:dimensions,strWeight:strWeight,attrWeight:attrWeight}).then(res=>{
+    getPointsData(url:string,width:number,height:number,dimensions:number,strWeight:number,attrWeight:number,attrChecked:Array<any>):void{
+        axios.post(url,{dimensions:dimensions,strWeight:strWeight,attrWeight:attrWeight,attrChecked:attrChecked}).then(res=>{
             let x_max:number=d3.max(res.data.data,(d:PointData):number=>d.x) || 0;
             let x_min:number=d3.min(res.data.data,(d:PointData):number=>d.x) || 0;
             let y_max:number=d3.max(res.data.data,(d:PointData):number=>d.y) || 0;
             let y_min:number=d3.min(res.data.data,(d:PointData):number=>d.y) || 0;
-            let xScale: d3.ScaleLinear<number, number>=d3.scaleLinear().domain([x_min,x_max]).range([this.padding.left,this.svgWidth-this.padding.right]);
-            let yScale: d3.ScaleLinear<number, number>=d3.scaleLinear().domain([y_min,y_max]).range([this.padding.top,this.svgHeight-this.padding.bottom]);
+            let xScale: d3.ScaleLinear<number, number>=d3.scaleLinear().domain([x_min,x_max]).range([this.padding.left,width-this.padding.right]);
+            let yScale: d3.ScaleLinear<number, number>=d3.scaleLinear().domain([y_min,y_max]).range([this.padding.top,height-this.padding.bottom]);
+            
             res.data.data.forEach((value:PointData)=>{
                 value.x=xScale(value.x);
                 value.y=yScale(value.y);
+                value.opacity=1;
             })
+            
             this.setState({data:res.data.data});
         })
     }
@@ -156,7 +164,7 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
     componentDidMount():void{
         this.svgWidth=this.svgRef.current?.clientWidth || 0;
         this.svgHeight=this.svgRef.current?.clientHeight || 0;
-        this.getPointsData(this.props.url,this.svgWidth,this.svgHeight,this.props.dimensions,this.props.strWeight,this.props.attrWeight);
+        // this.getPointsData(this.props.url,this.svgWidth,this.svgHeight,this.props.dimensions,this.props.strWeight,this.props.attrWeight);
         let canvas = this.canvasRef.current;
         if(canvas){
             canvas.width=this.svgWidth;
@@ -209,8 +217,12 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
         }
     }
     searchGraph(pointData:ChoosePointData):void{//根据名字搜索包含该节点的网络
-        const {url,dimensions,attrWeight,strWeight}=this.props;
-        axios.post(url+'/searchGraphByGraphId',{wd:pointData.id,dimensions:dimensions,attrWeight:attrWeight,strWeight:strWeight})
+        const {url,dimensions,attrWeight,strWeight,attrChecked}=this.props;
+        let checkedArr:any=[];
+        for(let key in attrChecked){
+            checkedArr.push({name:key,value:attrChecked[key]})
+        }
+        axios.post(url+'/searchGraphByGraphId',{wd:pointData.id,dimensions:dimensions,attrWeight:attrWeight,strWeight:strWeight,attrChecked:checkedArr})
         .then(res=>{
             // console.log(res.data.data);
             this.props.parent.setPersonGraphs(res.data.data);
@@ -238,12 +250,37 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
                 }
             }
         }
-        if(!nextProps.centerPoint.id){
-            this.setState({centerPoint:null});
+        
+        if(nextProps.dimensions!==this.props.dimensions || nextProps.attrWeight!==this.props.attrWeight
+             || nextProps.strWeight!==this.props.strWeight || nextProps.attrChecked!==this.props.attrChecked){
+            console.log(111)
+            let checkedArr:any=[];
+            for(let key in nextProps.attrChecked){
+                checkedArr.push({name:key,value:nextProps.attrChecked[key]})
+            }
+            if(checkedArr.length>0)
+                this.getPointsData(this.props.url,this.svgWidth,this.svgHeight,nextProps.dimensions,nextProps.strWeight,nextProps.attrWeight,checkedArr);
         }
-        if(nextProps.dimensions!==this.props.dimensions || nextProps.attrWeight!==this.props.attrWeight || nextProps.strWeight!==this.props.strWeight){
-            
-            this.getPointsData(this.props.url,this.svgWidth,this.svgHeight,nextProps.dimensions,nextProps.strWeight,nextProps.attrWeight);
+        
+        if(nextProps.attrValue!==this.props.attrValue && nextProps.attrWeight!==0){
+            let checkedArr:any=[];
+            for(let key in nextProps.attrChecked){
+                if(nextProps.attrChecked[key]===true)
+                    checkedArr.push({name:key,value:true})
+            }
+            const data=JSON.parse(JSON.stringify(this.state.data));
+            const {attrValue}=nextProps;
+            data.forEach((value:PointData)=>{
+                for(let i in checkedArr){
+                    let attr=value.attr[checkedArr[i].name];
+                    if(attr<attrValue[checkedArr[i].name][0] || attr>attrValue[checkedArr[i].name][1]){
+                        value.opacity=0;
+                        return ;
+                    }
+                }
+                value.opacity=1
+            })
+            this.setState({data:data});
         }
         
     }
@@ -254,7 +291,7 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
         for(let i=0;i<data.length;i++){
             points.push(
                 <circle r="2px" cx={data[i].x} cy={data[i].y} key={data[i].id} fill='none' 
-                strokeWidth='1px' stroke='#666' onClick={this.searchGraph.bind(this,data[i])}></circle>
+                strokeWidth='1px' stroke='#666' onClick={this.searchGraph.bind(this,data[i])} opacity={data[i].opacity}></circle>
             )
         }
         //圈选的点，匹配到的点

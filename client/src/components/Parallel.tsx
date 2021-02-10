@@ -7,13 +7,20 @@ interface Props{
     url:string,
     centerPoint:any,
     choosePoints:any,
+    attrWeight:number,
+    parent:any,
+    attrValue:attr,
+    attrChecked:attr,
 }
+type attr={
+    [propName: string]: any,
+  }
 
 class Parallel extends React.Component<Props,any>{
     private svgRef:React.RefObject<SVGSVGElement>;
     public svgWidth:number=0;
     public svgHeight:number=0;
-    public padding={top:10,bottom:30,left:30,right:30};
+    public padding={top:10,bottom:30,left:30,right:50};
     public pathStroke:string='#99CCFF';
     public pathStrokeChoose:string='orange';
     public pathStrokeCenter:string='red';
@@ -33,7 +40,16 @@ class Parallel extends React.Component<Props,any>{
             //x方向比例尺
             let xscale=d3.scalePoint(attr_name,[this.padding.left,this.svgWidth-this.padding.right]);
             //y方向比例尺
-            let yscale:any = new Map(Array.from(attr_name, key => [key, d3.scaleLinear(d3.extent(res.data.data, (d:any) => d.attr[key]), [this.svgHeight-this.padding.bottom, this.padding.top])]));
+            let min_max:any=new Map(Array.from(attr_name, key => [key,d3.extent(res.data.data, (d:any) => d.attr[key])]));
+            let attr:attr={};
+            let checked:attr={};
+            attr_name.forEach((value:string,index:number)=>{
+                checked[value]=true;
+                attr[value]=min_max.get(value);
+            })
+            this.props.parent.setAttr(attr);
+            this.props.parent.initAttrChecked(checked);
+            let yscale:any = new Map(Array.from(attr_name, key => [key, d3.scaleLinear(min_max.get(key), [this.svgHeight-this.padding.bottom, this.padding.top])]));
             for(let i in res.data.data){
                 let pathData=[];
                 for(let j in res.data.data[i].attr){
@@ -78,11 +94,33 @@ class Parallel extends React.Component<Props,any>{
         }
         return d;
     }
+    componentWillReceiveProps(nextProps:Props){
+        if(nextProps.attrValue!==this.props.attrValue && nextProps.attrWeight!==0){
+            let checkedArr:any=[];
+            for(let key in nextProps.attrChecked){
+                if(nextProps.attrChecked[key]===true)
+                    checkedArr.push({name:key,value:true})
+            }
+            const data=JSON.parse(JSON.stringify(this.state.data));
+            const {attrValue}=nextProps;
+            data.forEach((value:any)=>{
+                for(let i in checkedArr){
+                    let attr=value.attr[checkedArr[i].name];
+                    if(attr<attrValue[checkedArr[i].name][0] || attr>attrValue[checkedArr[i].name][1]){
+                        value.opacity=0;
+                        return ;
+                    }
+                }
+                value.opacity=0.1
+            })
+            this.setState({data:data});
+        }
+    }
     render(){
         //所有线
         let path=this.state.data.map((value:any,index:number)=>
             {
-                return (<path d={this.line(value.pathData)} key={index} strokeWidth={1.5} strokeOpacity={0.1} stroke={this.pathStroke} fill='none'></path>)
+                return (<path d={this.line(value.pathData)} key={index} strokeWidth={1.5} strokeOpacity={'opacity' in value?value.opacity:0.1} stroke={this.pathStroke} fill='none' ></path>)
             }
         )
         //圈选的点，匹配到的点
@@ -106,8 +144,6 @@ class Parallel extends React.Component<Props,any>{
         return (
             <div className='parallel'>
                 <svg style={{width:'100%',height:'100%'}} ref={this.svgRef} id='svg_parallel'>
-                
-
                     {path}
                     {pathChoose}
                     {pathCenter}

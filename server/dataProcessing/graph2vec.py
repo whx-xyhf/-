@@ -7,7 +7,7 @@ import pandas as pd
 import networkx as nx
 from tqdm import tqdm
 from joblib import Parallel, delayed
-from config import parser
+from dataProcessing.config import parser
 import numpy.distutils.system_info as sysinfo
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 
@@ -124,7 +124,7 @@ def main(args):
                     alpha = args.learning_rate,
                     window = 0)
 
-    model.save('./data/paper/Graph2vec.model')
+    model.save('./data/paper/Graph2vec_'+str(args.dimensions)+'.model')
 
     save_embedding(args.output_path, model, graphs, args.dimensions)
 

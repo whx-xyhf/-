@@ -10,8 +10,14 @@
 # from ged4py.algorithm import graph_edit_dist
 # print(graph_edit_dist.compare(g,g2))
 # print(nx.graph_edit_distance(g,g2))
-
-import json
-with open('/Pitt_Quantum_Repository_Data.json/Pitt_Quantum_Repository_Data.json','r') as fr:
-    data=json.load(fr)
-    print(len(data))
+import numpy as np
+a=[[1,2,3],[4,5,6],[7,8,9]]
+b=[[1,2,3],[4,5,3],[7,8,3]]
+# a=np.mat(a)
+# b=np.mat(b)
+# a=a/2
+# c=a+b
+# print(c)
+a='123'
+for i in range(len(a)):
+    print(i)

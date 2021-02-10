@@ -38,19 +38,19 @@ def getNet(data,dir_path,fileName1,fileName2,fileName3):
             papers=data[year][person]['paper']
             for paper in papers:
                 authors=paper['author']
-                for i in range(len(authors)):
-                    for j in range(i+1,len(authors)):
-                        if edges.count([authors[i],authors[j]])>0:
-                            index=edges.index([authors[i],authors[j]])
-                            edges_weight[index][2]+=1
-                        elif edges.count([authors[j],authors[i]])>0:
-                            index=edges.index([authors[j],authors[i]])
-                            edges_weight[index][2]+=1
-                        else:
-                            edges.append([authors[i],authors[j]])
-                            edges_weight.append([authors[i],authors[j],1])
-                            # print(count)
-                            count+=1
+                for i in range(1,len(authors)):
+                    # for j in range(i+1,len(authors)):
+                    if edges.count([authors[0],authors[i]])>0:
+                        index=edges.index([authors[0],authors[i]])
+                        edges_weight[index][2]+=1
+                    elif edges.count([authors[i],authors[0]])>0:
+                        index=edges.index([authors[i],authors[0]])
+                        edges_weight[index][2]+=1
+                    else:
+                        edges.append([authors[0],authors[i]])
+                        edges_weight.append([authors[0],authors[i],1])
+                        # print(count)
+                        count+=1
     print('原始网络：' + str(len(edges)) + "条")
     with open(dir_path+'/'+fileName1,'w',encoding='utf-8',newline='') as fw:
         csv_writer = csv.writer(fw)
@@ -94,19 +94,19 @@ def getNetWithTimeTnterval(data,node2num,time_interval,dir_path,fileName1,fileNa
                 papers=data[year][person]['paper']
                 for paper in papers:
                     authors=paper['author']
-                    for i in range(len(authors)):
-                        for j in range(i+1,len(authors)):
-                            if edges.count([authors[i],authors[j]])>0:
-                                index=edges.index([authors[i],authors[j]])
-                                edges_weight[index][2]+=1
-                            elif edges.count([authors[j],authors[i]])>0:
-                                index=edges.index([authors[j],authors[i]])
-                                edges_weight[index][2]+=1
-                            else:
-                                edges.append([authors[i],authors[j]])
-                                edges_weight.append([authors[i],authors[j],1])
-                                # print(count)
-                                count+=1
+                    for i in range(1, len(authors)):
+                        # for j in range(i+1,len(authors)):
+                        if edges.count([authors[0], authors[i]]) > 0:
+                            index = edges.index([authors[0], authors[i]])
+                            edges_weight[index][2] += 1
+                        elif edges.count([authors[i], authors[0]]) > 0:
+                            index = edges.index([authors[i], authors[0]])
+                            edges_weight[index][2] += 1
+                        else:
+                            edges.append([authors[0], authors[i]])
+                            edges_weight.append([authors[0], authors[i], 1])
+                            # print(count)
+                            count += 1
 
             number=0
             yearPath=''

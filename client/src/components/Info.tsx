@@ -19,7 +19,12 @@ interface Props{
     dimensions:number,
     strWeight:number,
     attrWeight:number,
+    attrChecked:attr,
+    attrValue:attr,
 }
+type attr={
+    [propName: string]: any,
+  }
 
 class Info extends React.Component<Props,any>{
     constructor(props:Props){
@@ -27,12 +32,16 @@ class Info extends React.Component<Props,any>{
         this.match=this.match.bind(this);
     }
     match(graph:graph):void{//匹配相似图
-        const {url,dimensions,strWeight,attrWeight}=this.props;
-        axios.post(url+'/matchGraph',{wd:graph,num:this.props.num,dimensions:dimensions,strWeight:strWeight,attrWeight:attrWeight})
+        const {url,dimensions,strWeight,attrWeight,attrChecked,attrValue}=this.props;
+        let checkedArr:any=[];
+        for(let key in attrChecked){
+            checkedArr.push({name:key,value:attrChecked[key]})
+        }
+        axios.post(url+'/matchGraph',{wd:graph,num:this.props.num,dimensions:dimensions,strWeight:strWeight,attrWeight:attrWeight,attrChecked:checkedArr,attrValue:attrValue})
         .then(res=>{
             this.props.parent.setChoosePoints(res.data.data);
         })
-        axios.post(url+'/searchGraphByGraphId',{wd:graph.id,dimensions:dimensions,attrWeight:attrWeight,strWeight:strWeight})
+        axios.post(url+'/searchGraphByGraphId',{wd:graph.id,dimensions:dimensions,attrWeight:attrWeight,strWeight:strWeight,attrChecked:checkedArr})
         .then(res=>{
             console.log(res.data.data[0]);
             this.props.parent.setCenterPoint(res.data.data[0]);

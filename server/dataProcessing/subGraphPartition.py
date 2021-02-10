@@ -133,7 +133,7 @@ if __name__=="__main__":
     community_fileName='communities.json'
     subGraphs_fileName='subGraphs'+'_'+str(time_interval)+'.json'
     subGraphs_dirName='subGraphs'+'_'+str(time_interval)
-    value=30#子图最大点数
+    value=25#子图最大点数
     number = 0
     index=1
     out=[]

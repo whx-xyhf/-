@@ -98,7 +98,7 @@ def vectorExtend(url,extendData,isExist):#向量拼接
             index += 1
     return vectors,head
 
-def run(url1,url2,url3,url4,url5,url6,isExist=False):
+def run(url1,url2,url3,url4,url5,url6,url7,isExist=False):
     originData=getJson(url1)
     node2Num=getJson(url2)
     subGraphs=getJson(url3)
@@ -113,31 +113,34 @@ def run(url1,url2,url3,url4,url5,url6,isExist=False):
         for i in node2Num:
             num2Node[node2Num[i]]=i
         index=0
+        attrName=['count_author','count_cite','rank','count_paper','count_weight','year']
         for graph in subGraphs:
             print(index)
             relateData=getRelatedData(originData,num2Node,graph)
             attr=getAttr(relateData)
             weight=getWeight(edges,graph)
             attr.append(weight)
+            attr.append(int(graph['year']))
             attrDic[graph['id']]=attr
-            graph['attr']={'count_author':attr[0],'count_cite':attr[1],'rank':attr[2],'count_paper':attr[3],'count_weight':attr[4]}
+            graph['attr']={'count_author':attr[0],'count_cite':attr[1],'rank':attr[2],'count_paper':attr[3],'count_weight':attr[4],'year':attr[5]}
             attrArrayDic.append(attr)
             index+=1
         saveJson(url3,subGraphs)
         #归一化
-        # max_min=[]
-        mean_std=[]
         attrArrayDic=np.array(attrArrayDic)
-        # for i in range(len(attrArrayDic[0])):
         mean=np.mean(attrArrayDic,axis=0)
         std=np.std(attrArrayDic,axis=0)
         print(mean,std)
-            # max_value=max(attrArrayDic,key=lambda x:x[i])[i]
-            # min_value=min(attrArrayDic,key=lambda x:x[i])[i]
-            # max_min.append([max_value,min_value])
         for i in attrDic:
             for j in range(len(attrDic[i])):
                 attrDic[i][j]=(attrDic[i][j]-mean[j])/std[j]
+        with open(url7,'w',encoding='utf-8') as fw:
+            mean_std={'mean':{},'std':{}}
+            for i in range(len(attrName)):
+                mean_std['mean'][attrName[i]]=mean[i]
+                mean_std['std'][attrName[i]] = std[i]
+            json.dump(mean_std,fw)
+
         with open(url6,'w',encoding='utf-8') as fw:
             json.dump(attrDic,fw)
     vectors,head=vectorExtend(url5,attrDic,isExist)
@@ -159,4 +162,5 @@ if __name__=='__main__':
     run(dirPath+'data_weight.json',dirPath+'node2Num.json',
         dirPath+'subGraphs_'+str(time_interval)+'.json',dirPath+'orignNetNum.csv',
         dirPath+'vectors_'+str(time_interval)+'_'+str(dimensions)+'.csv',
-        dirPath+'attrVectors_'+str(time_interval)+'.json',False)
+        dirPath+'attrVectors_'+str(time_interval)+'.json',
+        dirPath+'attrMeanStd_'+str(time_interval)+'.json',False)

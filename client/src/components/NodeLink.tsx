@@ -11,6 +11,7 @@ interface Props{
         edges:Array<edges>,
         [propName:string]:any,
     },
+    [propName: string]: any;
 }
 interface Link{
     source:any,
@@ -142,7 +143,7 @@ class NodeLink extends React.Component<Props,any>{
             y2={value.target.y} fill="none" strokeWidth="1px" stroke="#ccc" key={value.index}></line>
         })
         return (
-            <svg ref={this.svgRef} style={{width:'100%',height:'100%'}}>
+            <svg ref={this.svgRef} style={{width:'100%',height:'100%'}} onClick={this.props.onClick?this.props.onClick.bind(this.props.parent,this.state.layOutNodes,this.state.layOutLinks):null}>
                 <text x="0"y='20'>{this.props.graph.year}</text>
                 <g>{links}</g>
                 <g>{nodes}</g>

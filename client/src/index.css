@@ -55,7 +55,7 @@ body {
     position: relative;
     background-color: rgb(244, 244, 244);
     box-sizing: border-box;
-    border-bottom: 1px solid #ccc;
+    border: 1px solid #ccc;
 }
 .title input{
     height:20px;
@@ -67,18 +67,46 @@ body {
 .content{
     height:calc(100% - 30px);
     width:100%;
+    padding:3px 5px;
+    border: 1px solid #ccc;
+    overflow-y: auto;
 }
 
 .controlView{
-    width:20%;
-    height:50%;
+    width:23%;
+    height:100%;
     float:left;
-    border: 3px solid #ccc;
-    box-sizing: border-box;
+    /* border: 3px solid #ccc;
+    box-sizing: border-box; */
 }
-.control{
-    height:auto;
+.right{
+    width:77%;
+    height:100%;
+    float:left;
+}
+.controlPanel{
     width:100%;
+    height:30%;
+    /* border: 3px solid #ccc; */
+    box-sizing: border-box;
+    padding: 5px 5px;
+    /* margin-bottom: 5px; */
+}
+.filter{
+    width:100%;
+    height:30%;
+    /* border: 3px solid #ccc; */
+    box-sizing: border-box;
+    padding: 5px 5px;
+    /* margin-bottom: 5px; */
+    
+}
+.drawPanel{
+    width:100%;
+    height:40%;
+    /* border: 3px solid #ccc; */
+    padding: 5px 5px;
+    box-sizing: border-box;
 }
 .nodelistView{
     width:100%;
@@ -118,11 +146,12 @@ body {
 }
 
 .infoView{
-    width:30%;
+    width:50%;
     height:50%;
     float:left;
-    border: 3px solid #ccc;
+    /* border: 3px solid #ccc; */
     box-sizing: border-box;
+    padding: 5px 5px;
 }
 .info{
     width:100%;
@@ -134,7 +163,7 @@ body {
     float:left;
     width: 100%;
     height:100%;
-    border: 1px solid #ccc;
+    /* border: 1px solid #ccc; */
     box-sizing: border-box;
     position: relative;
 }
@@ -150,8 +179,9 @@ body {
     width:50%;
     height:50%;
     float:left;
-    border: 3px solid #ccc;
+    /* border: 3px solid #ccc; */
     box-sizing: border-box;
+    padding: 5px 5px;
 }
 .scatter{
     width:100%;
@@ -162,8 +192,9 @@ body {
     width:50%;
     height:50%;
     float:left;
-    border: 3px solid #ccc;
+    /* border: 3px solid #ccc; */
     box-sizing: border-box;
+    padding: 5px 5px;
 }
 .parallel{
     width:100%;
@@ -174,8 +205,9 @@ body {
     height:50%;
     width:50%;
     float: left;
-    border: 3px solid #ccc;
+    /* border: 3px solid #ccc; */
     box-sizing: border-box;
+    padding: 5px 5px;
 }
 .forceCompute{
     height:100%;
@@ -199,4 +231,77 @@ body {
 table,table th, table tr td {
     font-size: 0.7rem; 
     border:1px solid #0094ff; 
+}
+
+.tools{
+    height:36px;
+    width:100%;
+    border:1px solid #ccc;
+    padding:2px 2px;
+    box-sizing: border-box;
+}
+.btnGroup{
+    width:auto;
+    height:100%;
+    border:1px solid #3072ad;
+    background-color: white;
+    padding:2px 5px;
+    border-radius:4px;
+    margin-right:5px;
+    cursor: pointer;
+}
+.btnNode{
+    width:45px;
+    background-image: url('./assets/node.png');
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: 60%;
+}
+.btnLine{
+    width:45px;
+    background-image: url('./assets/line.png');
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+.btnRedo{
+    width:45px;
+    background-image: url('./assets/redo.png');
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+.btnUndo{
+    width:45px;
+    background-image: url('./assets/undo.png');
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+.btnSearch{
+    width:45px;
+    background-image: url('./assets/search.png');
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+.model{
+    height:80px;
+    width: auto;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    border:1px solid #ccc;
+    padding:2px 2px;
+    overflow-x: auto;
+}
+.model .modelGraph{
+    height:100%;
+    width:32%;
+    float:left;
+    cursor: pointer;
+    box-sizing: border-box;
+    border:1px solid #3072ad;
+    margin-right: 2px;
+}
+.panel{
+    height:calc(100% - 116px);
+    box-sizing: border-box;
+    position: relative;
+    /* border:1px solid #ccc; */
 }
