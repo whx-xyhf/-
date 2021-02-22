@@ -80,13 +80,14 @@ def getAttr(data):
     return [count_author,count_cite,rank,count_paper]
     #return {'count_author':count_author,'count_cite':count_cite,'rank':rank,'count_paper':count_paper,'count_weight':count_weight}
 
-def vectorExtend(url,extendData,isExist):#向量拼接
+def vectorExtend(url,extendData,isExist,dimensions):#向量拼接
     vectors=[]
     head=[]
     with open(url,'r',encoding='utf-8') as fr:
         data = csv.reader(fr)
         index = 0
         for i in data:
+            i=i[:dimensions+1]
             if index != 0:
                 if isExist==False:
                     i.extend(extendData[int(i[0])])
@@ -98,7 +99,7 @@ def vectorExtend(url,extendData,isExist):#向量拼接
             index += 1
     return vectors,head
 
-def run(url1,url2,url3,url4,url5,url6,url7,isExist=False):
+def run(url1,url2,url3,url4,url5,url6,url7,dimensions,isExist=False):
     originData=getJson(url1)
     node2Num=getJson(url2)
     subGraphs=getJson(url3)
@@ -113,7 +114,7 @@ def run(url1,url2,url3,url4,url5,url6,url7,isExist=False):
         for i in node2Num:
             num2Node[node2Num[i]]=i
         index=0
-        attrName=['count_author','count_cite','rank','count_paper','count_weight','year']
+        attrName=['author','cite','rank','paper','weight','year']
         for graph in subGraphs:
             print(index)
             relateData=getRelatedData(originData,num2Node,graph)
@@ -122,7 +123,7 @@ def run(url1,url2,url3,url4,url5,url6,url7,isExist=False):
             attr.append(weight)
             attr.append(int(graph['year']))
             attrDic[graph['id']]=attr
-            graph['attr']={'count_author':attr[0],'count_cite':attr[1],'rank':attr[2],'count_paper':attr[3],'count_weight':attr[4],'year':attr[5]}
+            graph['attr']={'author':attr[0],'cite':attr[1],'rank':attr[2],'paper':attr[3],'weight':attr[4],'year':attr[5]}
             attrArrayDic.append(attr)
             index+=1
         saveJson(url3,subGraphs)
@@ -143,7 +144,7 @@ def run(url1,url2,url3,url4,url5,url6,url7,isExist=False):
 
         with open(url6,'w',encoding='utf-8') as fw:
             json.dump(attrDic,fw)
-    vectors,head=vectorExtend(url5,attrDic,isExist)
+    vectors,head=vectorExtend(url5,attrDic,isExist,dimensions)
     with open(url5, 'w', encoding='utf-8', newline='') as fw:
         csv_writer = csv.writer(fw)
         # 构建列表头
@@ -163,4 +164,4 @@ if __name__=='__main__':
         dirPath+'subGraphs_'+str(time_interval)+'.json',dirPath+'orignNetNum.csv',
         dirPath+'vectors_'+str(time_interval)+'_'+str(dimensions)+'.csv',
         dirPath+'attrVectors_'+str(time_interval)+'.json',
-        dirPath+'attrMeanStd_'+str(time_interval)+'.json',False)
+        dirPath+'attrMeanStd_'+str(time_interval)+'.json',dimensions,False)

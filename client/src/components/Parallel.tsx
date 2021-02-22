@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 
 
 interface Props{
+    reTsneData:any,
     url:string,
     centerPoint:any,
     choosePoints:any,
@@ -29,54 +30,66 @@ class Parallel extends React.Component<Props,any>{
         this.svgRef=React.createRef();
         this.state={data:[]};
         this.getAttrData=this.getAttrData.bind(this);
+        this.compute=this.compute.bind(this);
+    }
+    compute(data:any):void{
+        let attr_name:Array<string>=[];
+        for(let key in data[0].attr){
+            attr_name.push(key);
+        }
+        //x方向比例尺
+        let xscale=d3.scalePoint(attr_name,[this.padding.left,this.svgWidth-this.padding.right]);
+        //y方向比例尺
+        let min_max:any=new Map(Array.from(attr_name, key => [key,d3.extent(data, (d:any) => d.attr[key])]));
+        let attr:attr={};
+        let checked:attr={};
+        attr_name.forEach((value:string,index:number)=>{
+            checked[value]=true;
+            attr[value]=min_max.get(value);
+        })
+        this.props.parent.setAttr(attr);
+        this.props.parent.initAttrChecked(checked);
+        let yscale:any = new Map(Array.from(attr_name, key => [key, d3.scaleLinear(min_max.get(key), [this.svgHeight-this.padding.bottom, this.padding.top])]));
+        for(let i in data){
+            let pathData=[];
+            for(let j in data[i].attr){
+                pathData.push([xscale(j),yscale.get(j)(data[i].attr[j])])
+            }
+            data[i].pathData=pathData;
+        }
+        d3.select("#svg_parallel")
+            .select(".axis")
+            .selectAll("g")
+            .remove()
+        d3.select("#svg_parallel")
+            .select(".text")
+            .selectAll("g")
+            .remove()
+        for(let i=0;i<attr_name.length;i++){
+            d3.select("#svg_parallel")
+            .select(".axis")
+            .append("g")
+            .attr("transform", `translate(${xscale(attr_name[i])},0)`)
+            .call(d3.axisRight(yscale.get(attr_name[i])).ticks(5))
+            d3.select("#svg_parallel")
+            .select(".text")
+            .append("g")
+            .append('text')
+            .attr("x", -6)
+            .attr("y", -6)
+            .attr("text-anchor", "start")
+            .attr("fill", "black")
+            .text(attr_name[i])
+            .attr('font-size',12)
+            .attr("transform", `translate(${xscale(attr_name[i])},${this.svgHeight})`)
+        }
+       
+        this.setState({data:data});
     }
     getAttrData():void{
         axios.post(this.props.url)
         .then(res=>{
-            let attr_name:Array<string>=[];
-            for(let key in res.data.data[0].attr){
-                attr_name.push(key);
-            }
-            //x方向比例尺
-            let xscale=d3.scalePoint(attr_name,[this.padding.left,this.svgWidth-this.padding.right]);
-            //y方向比例尺
-            let min_max:any=new Map(Array.from(attr_name, key => [key,d3.extent(res.data.data, (d:any) => d.attr[key])]));
-            let attr:attr={};
-            let checked:attr={};
-            attr_name.forEach((value:string,index:number)=>{
-                checked[value]=true;
-                attr[value]=min_max.get(value);
-            })
-            this.props.parent.setAttr(attr);
-            this.props.parent.initAttrChecked(checked);
-            let yscale:any = new Map(Array.from(attr_name, key => [key, d3.scaleLinear(min_max.get(key), [this.svgHeight-this.padding.bottom, this.padding.top])]));
-            for(let i in res.data.data){
-                let pathData=[];
-                for(let j in res.data.data[i].attr){
-                    pathData.push([xscale(j),yscale.get(j)(res.data.data[i].attr[j])])
-                }
-                res.data.data[i].pathData=pathData;
-            }
-            for(let i=0;i<attr_name.length;i++){
-                d3.select("#svg_parallel")
-                .select(".axis")
-                .append("g")
-                .attr("transform", `translate(${xscale(attr_name[i])},0)`)
-                .call(d3.axisRight(yscale.get(attr_name[i])).ticks(5))
-                d3.select("#svg_parallel")
-                .select(".text")
-                .append("g")
-                .append('text')
-                .attr("x", -6)
-                .attr("y", -6)
-                .attr("text-anchor", "start")
-                .attr("fill", "black")
-                .text(attr_name[i])
-                .attr('font-size',12)
-                .attr("transform", `translate(${xscale(attr_name[i])},${this.svgHeight})`)
-            }
-           
-            this.setState({data:res.data.data});
+            this.compute(res.data.data);
         })
     }
     componentDidMount():void{
@@ -115,6 +128,10 @@ class Parallel extends React.Component<Props,any>{
             })
             this.setState({data:data});
         }
+        if(nextProps.reTsneData!==this.props.reTsneData){
+            // this.compute(nextProps.reTsneData);
+            // this.setState({data:nextProps.reTsneData});
+        }
     }
     render(){
         //所有线
@@ -136,6 +153,7 @@ class Parallel extends React.Component<Props,any>{
         let pathCenter=null;
         for(let i in this.state.data){
             if(this.state.data[i].id===this.props.centerPoint.id){
+                console.log("true")
                 pathCenter=<path d={this.line(this.state.data[i].pathData)} strokeWidth={1.5} strokeOpacity={0.5} stroke={this.pathStrokeCenter} fill='none'></path>
                 break;
             }

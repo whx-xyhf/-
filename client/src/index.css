@@ -56,6 +56,13 @@ body {
     background-color: rgb(244, 244, 244);
     box-sizing: border-box;
     border: 1px solid #ccc;
+    font-weight: bold;
+    box-sizing: border-box;
+    text-indent:10px;
+    color:#000;
+    font-size: 0.8rem;
+    line-height: 30px;
+    text-align: left;
 }
 .title input{
     height:20px;
@@ -89,7 +96,7 @@ body {
     height:30%;
     /* border: 3px solid #ccc; */
     box-sizing: border-box;
-    padding: 5px 5px;
+    padding: 3px 3px;
     /* margin-bottom: 5px; */
 }
 .filter{
@@ -97,7 +104,7 @@ body {
     height:30%;
     /* border: 3px solid #ccc; */
     box-sizing: border-box;
-    padding: 5px 5px;
+    padding: 3px 3px;
     /* margin-bottom: 5px; */
     
 }
@@ -105,7 +112,7 @@ body {
     width:100%;
     height:40%;
     /* border: 3px solid #ccc; */
-    padding: 5px 5px;
+    padding: 3px 3px;
     box-sizing: border-box;
 }
 .nodelistView{
@@ -151,7 +158,7 @@ body {
     float:left;
     /* border: 3px solid #ccc; */
     box-sizing: border-box;
-    padding: 5px 5px;
+    padding: 3px 3px;
 }
 .info{
     width:100%;
@@ -181,7 +188,7 @@ body {
     float:left;
     /* border: 3px solid #ccc; */
     box-sizing: border-box;
-    padding: 5px 5px;
+    padding: 3px 3px;
 }
 .scatter{
     width:100%;
@@ -194,7 +201,7 @@ body {
     float:left;
     /* border: 3px solid #ccc; */
     box-sizing: border-box;
-    padding: 5px 5px;
+    padding: 3px 3px;
 }
 .parallel{
     width:100%;
@@ -207,7 +214,7 @@ body {
     float: left;
     /* border: 3px solid #ccc; */
     box-sizing: border-box;
-    padding: 5px 5px;
+    padding: 3px 3px;
 }
 .forceCompute{
     height:100%;
@@ -304,4 +311,13 @@ table,table th, table tr td {
     box-sizing: border-box;
     position: relative;
     /* border:1px solid #ccc; */
+}
+.distributeAttr{
+    width:100%;
+    height:100%;
+    position: relative;
+}
+.attrSliderBox{
+    height:100%;
+    width:100%;
 }

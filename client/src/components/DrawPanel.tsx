@@ -40,13 +40,13 @@ class DrawPanel extends React.Component<Props, any>{
     public svgHeight: number = 0;
     public padding={top:10,bottom:10,left:10,right:10};
     private modelGraohs = [
-        { id: 0, nodes: [1, 2, 3], edges: [[1, 2], [2, 3]] },
-        { id: 1, nodes: [1, 2, 3, 4, 5, 6], edges: [[1, 2], [1, 3], [1, 4], [1, 5], [1, 6]] },
-        { id: 2, nodes: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], edges: [[1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [6, 7], [6, 8], [6, 9], [6, 10]] },
+        { id: -1, nodes: [1, 2, 3], edges: [[1, 2], [2, 3]] },
+        { id: -2, nodes: [1, 2, 3, 4, 5, 6], edges: [[1, 2], [1, 3], [1, 4], [1, 5], [1, 6]] },
+        { id: -3, nodes: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], edges: [[1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [6, 7], [6, 8], [6, 9], [6, 10]] },
     ];
     constructor(props: Props) {
         super(props);
-        this.state = { nodes: [], links: [] };
+        this.state = { nodes: [], links: [] ,id:-4};
         this.svgRef = React.createRef();
         this.beginDrawNode = this.beginDrawNode.bind(this);
         this.beginDrawLine = this.beginDrawLine.bind(this);
@@ -87,26 +87,37 @@ class DrawPanel extends React.Component<Props, any>{
     }
     //匹配与定制图相似的图
     matchModel(): void {
-        const { links, nodes } = this.state;
+        let { links, nodes ,id} = this.state;
         const { url, dimensions, strWeight, attrWeight, attrChecked, attrValue } = this.props;
+        if(this.record.indexOf('model')<0){
+            id=-4;
+        }
         let edges = links.map((value: link) => [value.source.id, value.target.id]);
-        let features: feature = {}
+        let features: feature = {};
+        let nodesId:Array<number>=[];
         nodes.forEach((value: node) => {
             features[value.id] = 1;
+            nodesId.push(value.id);
         })
         let checkedArr: any = [];
         for (let key in attrChecked) {
             checkedArr.push({ name: key, value: attrChecked[key] })
         }
         axios.post(url, {
-            edges: edges, features: features, num: this.props.num, dimensions: dimensions, strWeight: strWeight,
+            name:String(id),nodes:nodesId,edges: edges, features: features, num: this.props.num, dimensions: dimensions, strWeight: strWeight,
             attrWeight: attrWeight, attrChecked: checkedArr, attrValue: attrValue
-        }).then(res => {
-            this.props.parent.setChoosePoints(res.data.data);
+        },{timeout:600000}).then(res => {
+            console.log(res.data)
+            this.props.parent.setReTsneData(res.data.all);
+            setTimeout(()=>{
+                this.props.parent.setChoosePoints(res.data.match);
+                this.props.parent.setCenterPoint(res.data.center);
+            },1500);
+            
         })
     }
     //选择系统自带的模板
-    chooseModel(nodesid: any, links: any): void {
+    chooseModel(nodesid: any, links: any,id:number): void {
         this.pen = "model";
         this.record.push("model");
         let x_max: number = d3.max(nodesid, (d: d3.SimulationNodeDatum): number => d.x || 0) || 0;
@@ -165,7 +176,7 @@ class DrawPanel extends React.Component<Props, any>{
             resolve([newNodes, newLinks]);
         }).then((res: any) => {
             // console.log(res[0])
-            this.setState({ nodes: res[0], links: res[1] });
+            this.setState({ nodes: res[0], links: res[1] ,id:id});
         })
     }
     drawNode(e: React.MouseEvent<SVGSVGElement, MouseEvent>): void {

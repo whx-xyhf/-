@@ -3,11 +3,11 @@ import json
 import math
 import numpy as np
 from dataProcessing.Ged import getGed
-from dataProcessing.getTsne import getTSNE
+from dataProcessing.getTsne import reTsne
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from dataProcessing.graph2vec import WeisfeilerLehmanMachine
 import networkx as nx
-import csv
+import os
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
@@ -199,12 +199,13 @@ def getAttr():
 @app.route("/matchModel",methods = ['POST', 'GET'])
 def matchModel():
     if request.method == 'POST':
-        name='0'
         features= request.get_json()['features']
         features_={}
         for i in features:
             features_[int(i)]=features[i]
         edges = request.get_json()['edges']
+        nodes = request.get_json()['nodes']
+        name=request.get_json()['name']
         strWeight = request.get_json()['strWeight']
         attrWeight = request.get_json()['attrWeight']
         dimensions = str(request.get_json()['dimensions'])
@@ -213,7 +214,7 @@ def matchModel():
         attrRange=request.get_json()['attrValue']
         attrValue={}
         for key in attrRange:
-            attrValue[key]=int((attrRange[key][0]+attrRange[key][1])/2)
+            attrValue[key]=int((int(attrRange[key][0])+int(attrRange[key][1]))/2)
         graph=nx.from_edgelist(edges)
         machine = WeisfeilerLehmanMachine(graph, features_, 2)
         doc = TaggedDocument(words=machine.extracted_features, tags=["g_" + name])
@@ -245,40 +246,110 @@ def matchModel():
         dimensionsAttr=len(attrStr)
         dimensionsStr=int(dimensions)
 
-        with open('./dataProcessing/data/paper/vectors_' + str(
-                time_interval) + '_' + dimensions + '.csv', 'r') as fr:
-            csvdata = csv.reader(fr)
-            index1 = 0
-            vectors={}
-            for i in csvdata:
-                if index1 != 0:
-                    vectors[i[0]]=i[1:]
-                index1 += 1
+        file='./dataProcessing/data/paper/'+ 'vectors2d_' + str(time_interval) + '_' + str(dimensionsStr) + '_' + str(
+                    strWeight) + '_' + str(attrWeight) + '_' + attrStr +'model'+name+ '.json'
+        if os.path.exists(file):
+            with open(file,'r') as fr:
+                tsneData=json.load(fr)
+        else:
+            tsneData=reTsne(name,docVectors,dirPath = './dataProcessing/data/paper/',dimensionsStr=dimensionsStr,dimensionsAttrChecked=attrStr
+                       ,strWeight=strWeight,attrWeight=attrWeight,saveFile=True,readDir='./dataProcessing/data/paper/')
 
-            for i in range(len(data)):
-                flag=True
-                if attrWeight!=0:
-                    for key in useAttr:
-                        if data[i]['attr'][key]<attrRange[key][0] or data[i]['attr'][key]>attrRange[key][1]:
-                            flag=False
-                            break
-                if flag:
-                    vector2=vectors[str(data[i]['id'])]
-                    distanceStr = 0
-                    distanceAttr = 0
-                    for index in range(len(docVectors)):
-                        if index < dimensionsStr:
-                            distanceStr += math.pow(float(docVectors[index]) - float(vector2[index]), 2)
-                        elif index >= dimensionsStr and attrStr[index - dimensionsStr] == '1':
-                            distanceAttr += math.pow(float(docVectors[index]) - float(vector2[index]), 2)
-
-                    distance=math.sqrt(distanceStr / dimensionsStr) * strWeight + math.sqrt(distanceAttr / dimensionsAttr) * attrWeight
-                    data[i]['distance']=distance
-                else:
-                    data[i]['distance'] = float('inf')
-            resData = sorted(data, key=lambda x: x['distance'])
-        res = make_response(jsonify({'code': 200, "data": resData[:num]}))
+        newData=[]
+        for i in range(len(data)):
+            data[i]['x']=float(tsneData[str(data[i]['id'])]['x'])
+            data[i]['y']=float(tsneData[str(data[i]['id'])]['y'])
+            data[i]['distance']=math.pow(data[i]['x']-float(tsneData[name]['x']),2)+math.pow(data[i]['y']-float(tsneData[name]['y']),2)
+            newData.append(data[i])
+        centerPoint={'id':int(name),'nodes':nodes,'edges':edges,'attr':attrValue,'x':float(tsneData[name]['x']),'y':float(tsneData[name]['y']),'distance':100000}
+        newData.append(centerPoint)
+        newData=sorted(newData,key=lambda x:x['distance'])
+        res = make_response(jsonify({'code': 200, "all": newData,'match':newData[:num],'center':centerPoint}))
     return res
+
+# @app.route("/matchModel",methods = ['POST', 'GET'])
+# def matchModel():
+#     if request.method == 'POST':
+#         name='0'
+#         features= request.get_json()['features']
+#         features_={}
+#         for i in features:
+#             features_[int(i)]=features[i]
+#         edges = request.get_json()['edges']
+#         strWeight = request.get_json()['strWeight']
+#         attrWeight = request.get_json()['attrWeight']
+#         dimensions = str(request.get_json()['dimensions'])
+#         attrChecked = request.get_json()['attrChecked']
+#         num = request.get_json()['num']
+#         attrRange=request.get_json()['attrValue']
+#         attrValue={}
+#         for key in attrRange:
+#             attrValue[key]=int((attrRange[key][0]+attrRange[key][1])/2)
+#         graph=nx.from_edgelist(edges)
+#         machine = WeisfeilerLehmanMachine(graph, features_, 2)
+#         doc = TaggedDocument(words=machine.extracted_features, tags=["g_" + name])
+#         doc = machine.extracted_features
+#         model = Doc2Vec.load('./dataProcessing/data/paper/Graph2vec_'+dimensions+'.model')
+#         docVectors = model.infer_vector(doc, epochs=100)
+#         docVectors=docVectors.tolist()
+#
+#         with open('./dataProcessing/data/paper/attrMeanStd_'+str(time_interval)+'.json','r') as fr:
+#             mean_std=json.load(fr)
+#             for key in attrValue:
+#                 attrValue[key]=(attrValue[key]-mean_std['mean'][key])/mean_std['std'][key]
+#
+#         with open('./dataProcessing/data/paper/subGraphs_'+str(time_interval)+'.json','r') as fr:
+#             data=json.load(fr)
+#         attrStr = ''
+#         attrVector = []
+#         useAttr=[]
+#         for i in data[0]['attr']:
+#             if {'name': i, 'value': True} in attrChecked:
+#                 attrVector.append(attrValue[i])
+#                 attrStr += '1'
+#                 useAttr.append(i)
+#             else:
+#                 attrStr += '0'
+#                 attrVector.append(0)
+#         docVectors.extend(attrVector)
+#
+#         dimensionsAttr=len(attrStr)
+#         dimensionsStr=int(dimensions)
+#
+#         with open('./dataProcessing/data/paper/vectors_' + str(
+#                 time_interval) + '_' + dimensions + '.csv', 'r') as fr:
+#             csvdata = csv.reader(fr)
+#             index1 = 0
+#             vectors={}
+#             for i in csvdata:
+#                 if index1 != 0:
+#                     vectors[i[0]]=i[1:]
+#                 index1 += 1
+#
+#             for i in range(len(data)):
+#                 flag=True
+#                 if attrWeight!=0:
+#                     for key in useAttr:
+#                         if data[i]['attr'][key]<attrRange[key][0] or data[i]['attr'][key]>attrRange[key][1]:
+#                             flag=False
+#                             break
+#                 if flag:
+#                     vector2=vectors[str(data[i]['id'])]
+#                     distanceStr = 0
+#                     distanceAttr = 0
+#                     for index in range(len(docVectors)):
+#                         if index < dimensionsStr:
+#                             distanceStr += math.pow(float(docVectors[index]) - float(vector2[index]), 2)
+#                         elif index >= dimensionsStr and attrStr[index - dimensionsStr] == '1':
+#                             distanceAttr += math.pow(float(docVectors[index]) - float(vector2[index]), 2)
+#
+#                     distance=math.sqrt(distanceStr / dimensionsStr) * strWeight + math.sqrt(distanceAttr / dimensionsAttr) * attrWeight
+#                     data[i]['distance']=distance
+#                 else:
+#                     data[i]['distance'] = float('inf')
+#             resData = sorted(data, key=lambda x: x['distance'])
+#         res = make_response(jsonify({'code': 200, "data": resData[:num]}))
+#     return res
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0",

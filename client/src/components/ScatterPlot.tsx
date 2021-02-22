@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 import axios from 'axios';
 
 interface Props{
+    reTsneData:Array<PointData>,
     url:string,
     choosePoints:Array<ChoosePointData>,//匹配的数据
     centerPoint:ChoosePointData,
@@ -67,6 +68,7 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
         this.onMouseDown=this.onMouseDown.bind(this);
         this.onMouseMove=this.onMouseMove.bind(this);
         this.onMouseUp=this.onMouseUp.bind(this);
+        this.compute=this.compute.bind(this);
         this.state={
             data:[],
             choosePoints:[],
@@ -76,22 +78,38 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
 
     }
     //请求散点数据并做比例尺映射
+    compute(data:any,width:number,height:number){
+        let x_max:number=d3.max(data,(d:PointData):number=>d.x) || 0;
+        let x_min:number=d3.min(data,(d:PointData):number=>d.x) || 0;
+        let y_max:number=d3.max(data,(d:PointData):number=>d.y) || 0;
+        let y_min:number=d3.min(data,(d:PointData):number=>d.y) || 0;
+        let xScale: d3.ScaleLinear<number, number>=d3.scaleLinear().domain([x_min,x_max]).range([this.padding.left,width-this.padding.right]);
+        let yScale: d3.ScaleLinear<number, number>=d3.scaleLinear().domain([y_min,y_max]).range([this.padding.top,height-this.padding.bottom]);
+        
+        data.forEach((value:PointData)=>{
+            value.x=xScale(value.x);
+            value.y=yScale(value.y);
+            value.opacity=1;
+        })
+        this.setState({data:data});
+    }
     getPointsData(url:string,width:number,height:number,dimensions:number,strWeight:number,attrWeight:number,attrChecked:Array<any>):void{
         axios.post(url,{dimensions:dimensions,strWeight:strWeight,attrWeight:attrWeight,attrChecked:attrChecked}).then(res=>{
-            let x_max:number=d3.max(res.data.data,(d:PointData):number=>d.x) || 0;
-            let x_min:number=d3.min(res.data.data,(d:PointData):number=>d.x) || 0;
-            let y_max:number=d3.max(res.data.data,(d:PointData):number=>d.y) || 0;
-            let y_min:number=d3.min(res.data.data,(d:PointData):number=>d.y) || 0;
-            let xScale: d3.ScaleLinear<number, number>=d3.scaleLinear().domain([x_min,x_max]).range([this.padding.left,width-this.padding.right]);
-            let yScale: d3.ScaleLinear<number, number>=d3.scaleLinear().domain([y_min,y_max]).range([this.padding.top,height-this.padding.bottom]);
+            this.compute(res.data.data,width,height);
+            // let x_max:number=d3.max(res.data.data,(d:PointData):number=>d.x) || 0;
+            // let x_min:number=d3.min(res.data.data,(d:PointData):number=>d.x) || 0;
+            // let y_max:number=d3.max(res.data.data,(d:PointData):number=>d.y) || 0;
+            // let y_min:number=d3.min(res.data.data,(d:PointData):number=>d.y) || 0;
+            // let xScale: d3.ScaleLinear<number, number>=d3.scaleLinear().domain([x_min,x_max]).range([this.padding.left,width-this.padding.right]);
+            // let yScale: d3.ScaleLinear<number, number>=d3.scaleLinear().domain([y_min,y_max]).range([this.padding.top,height-this.padding.bottom]);
             
-            res.data.data.forEach((value:PointData)=>{
-                value.x=xScale(value.x);
-                value.y=yScale(value.y);
-                value.opacity=1;
-            })
+            // res.data.data.forEach((value:PointData)=>{
+            //     value.x=xScale(value.x);
+            //     value.y=yScale(value.y);
+            //     value.opacity=1;
+            // })
             
-            this.setState({data:res.data.data});
+            // this.setState({data:res.data.data});
         })
     }
     onMouseDown(event:React.MouseEvent<HTMLCanvasElement, MouseEvent>):void{
@@ -281,6 +299,10 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
                 value.opacity=1
             })
             this.setState({data:data});
+        }
+        if(nextProps.reTsneData!==this.props.reTsneData){
+            console.log('yes');
+            this.compute(nextProps.reTsneData,this.svgWidth,this.svgHeight)
         }
         
     }
