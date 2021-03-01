@@ -290,17 +290,17 @@ table,table th, table tr td {
 }
 .model{
     height:80px;
-    width: auto;
+    width: 100%;
     overflow-x: hidden;
     box-sizing: border-box;
     border:1px solid #ccc;
     padding:2px 2px;
     overflow-x: auto;
+    position: relative;
 }
 .model .modelGraph{
-    height:100%;
-    width:32%;
-    float:left;
+    height:74px;
+    position: absolute;
     cursor: pointer;
     box-sizing: border-box;
     border:1px solid #3072ad;

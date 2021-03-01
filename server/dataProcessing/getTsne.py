@@ -43,10 +43,15 @@ def getDistance(vectors,dimensionsStr,dimensionsAttrChecked,strWeight,attrWeight
         distanceMatrix=distanceMatrixStr+distanceMatrixAttr
         return distanceMatrix
     else:
+        index1=0
         for vector1 in vectors:
+            index1+=1
             distanceArr=[]
             distanceStrArr=[]
+            index2=0
             for vector2 in vectors:
+                index2+=1
+                print(index1,index2)
                 distanceStr=0
                 distanceAttr=0
                 for index in range(len(vector1)):
@@ -213,16 +218,18 @@ def reTsne(modelId,modelVector,dirPath,dimensionsStr=128,dimensionsAttrChecked='
 
 
 if __name__=='__main__':
-    data=[[1,0],[0.8,0.2],[0.6,0.4],[0.5,0.5],[0.4,0.6],[0.2,0.8],[0,1]]
-    data2=['101000']
+    data=[[0.8,0.2],[0.2,0.8],[0,1]]
+    data2=['11111','10000','11000']
+    dataType='Family'
+    dirPath='./data/'+dataType+'/'
     for j in data2:
         for i in data:
             print(i)
             saveStrDistance=False
-            readStrDistance=True
-            # if i==[0.8,0.2]:
-            #     saveStrDistance=True
-            # if i!=[1,0] and i!=[0.8,0.2] and i!=[0,1]:
-            #     readStrDistance=True
-            getTSNE(dirPath = './data/paper/',dimensionsStr=128,dimensionsAttrChecked=j,strWeight=i[0],attrWeight=i[1],
-                    saveFile=True,saveStrDistance=saveStrDistance,readStrDistance=readStrDistance,saveDir='./data/paper/',readDir='./data/paper/')
+            readStrDistance=False
+            if i==[0.8,0.2]:
+                saveStrDistance=True
+            if i!=[1,0] and i!=[0.8,0.2] and i!=[0,1]:
+                readStrDistance=True
+            getTSNE(dirPath =dirPath ,dimensionsStr=128,dimensionsAttrChecked=j,strWeight=i[0],attrWeight=i[1],
+                    saveFile=True,saveStrDistance=saveStrDistance,readStrDistance=readStrDistance,saveDir=dirPath,readDir=dirPath)

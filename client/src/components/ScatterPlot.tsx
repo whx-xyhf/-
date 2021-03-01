@@ -13,22 +13,23 @@ interface Props{
     attrWeight:number,
     attrChecked:attr,
     attrValue:attr,
+    dataType:string,
 }
 //定义边数组
 type edges=Array<number>;
 //定义散点数据接口
 interface PointData {
     id: number,
-    nodes: Array<number>,
-    edges:Array<edges>,
+    // nodes: Array<number>,
+    // edges:Array<edges>,
     x:number,
     y:number,
     [propName: string]: any,
 }
 type ChoosePointData ={
     id: number,
-    nodes: Array<number>,
-    edges:Array<edges>,
+    // nodes: Array<number>,
+    // edges:Array<edges>,
     [propName:string]:any,
 }
 //圈选数据接口
@@ -93,8 +94,8 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
         })
         this.setState({data:data});
     }
-    getPointsData(url:string,width:number,height:number,dimensions:number,strWeight:number,attrWeight:number,attrChecked:Array<any>):void{
-        axios.post(url,{dimensions:dimensions,strWeight:strWeight,attrWeight:attrWeight,attrChecked:attrChecked}).then(res=>{
+    getPointsData(url:string,dataType:string,width:number,height:number,dimensions:number,strWeight:number,attrWeight:number,attrChecked:Array<any>):void{
+        axios.post(url,{dataType:dataType,dimensions:dimensions,strWeight:strWeight,attrWeight:attrWeight,attrChecked:attrChecked}).then(res=>{
             this.compute(res.data.data,width,height);
             // let x_max:number=d3.max(res.data.data,(d:PointData):number=>d.x) || 0;
             // let x_min:number=d3.min(res.data.data,(d:PointData):number=>d.x) || 0;
@@ -235,12 +236,12 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
         }
     }
     searchGraph(pointData:ChoosePointData):void{//根据名字搜索包含该节点的网络
-        const {url,dimensions,attrWeight,strWeight,attrChecked}=this.props;
+        const {url,dimensions,attrWeight,strWeight,attrChecked,dataType}=this.props;
         let checkedArr:any=[];
         for(let key in attrChecked){
             checkedArr.push({name:key,value:attrChecked[key]})
         }
-        axios.post(url+'/searchGraphByGraphId',{wd:pointData.id,dimensions:dimensions,attrWeight:attrWeight,strWeight:strWeight,attrChecked:checkedArr})
+        axios.post(url+'/searchGraphByGraphId',{wd:pointData.id,dataType:dataType,dimensions:dimensions,attrWeight:attrWeight,strWeight:strWeight,attrChecked:checkedArr})
         .then(res=>{
             // console.log(res.data.data);
             this.props.parent.setPersonGraphs(res.data.data);
@@ -277,7 +278,7 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
                 checkedArr.push({name:key,value:nextProps.attrChecked[key]})
             }
             if(checkedArr.length>0)
-                this.getPointsData(this.props.url,this.svgWidth,this.svgHeight,nextProps.dimensions,nextProps.strWeight,nextProps.attrWeight,checkedArr);
+                this.getPointsData(nextProps.url,nextProps.dataType,this.svgWidth,this.svgHeight,nextProps.dimensions,nextProps.strWeight,nextProps.attrWeight,checkedArr);
         }
         
         if(nextProps.attrValue!==this.props.attrValue && nextProps.attrWeight!==0){

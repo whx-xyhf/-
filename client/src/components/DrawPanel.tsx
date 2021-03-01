@@ -2,6 +2,7 @@ import * as React from 'react';
 import axios from 'axios';
 import NodeLink from './NodeLink'
 import * as d3 from 'd3';
+import TargetTree from './TargetTree';
 
 interface Props {
     url: string,
@@ -12,9 +13,9 @@ interface Props {
     attrWeight: number,
     attrChecked: attr,
     attrValue: attr,
+    dataType: string,
 }
 type node = {
-    id: number;
     x: number;
     y: number;
     [propName: string]: any,
@@ -36,17 +37,30 @@ class DrawPanel extends React.Component<Props, any>{
     private pen = "";//画笔类型
     private record: Array<string> = [];//画笔类型记录
     private svgRef: React.RefObject<SVGSVGElement>;
-    public svgWidth: number = 0;
-    public svgHeight: number = 0;
-    public padding={top:10,bottom:10,left:10,right:10};
+    private svgWidth: number = 0;
+    private svgHeight: number = 0;
+    private circleR:number=3.5;
+    private padding = { top: 10, bottom: 10, left: 20, right: 10 };
     private modelGraohs = [
         { id: -1, nodes: [1, 2, 3], edges: [[1, 2], [2, 3]] },
         { id: -2, nodes: [1, 2, 3, 4, 5, 6], edges: [[1, 2], [1, 3], [1, 4], [1, 5], [1, 6]] },
         { id: -3, nodes: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], edges: [[1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [6, 7], [6, 8], [6, 9], [6, 10]] },
     ];
+    private modelTrees = [
+        { id: -4, children: [{ id: 1, children: [{ id: 2 }] }] },
+
+
+        { id: -5, children: [{ id: 1, children: [{ id: 2 }, { id: 3 }, { id: 4 }] }] },
+
+
+        { id: -6, children: [{ id: 1, children: [{ id: 2, children: [{ id: 3 }, { id: 4 }] }, { id: 5, children: [{ id: 6 }, { id: 7 }] }] }] },
+
+
+        { id: -7, children: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }] },
+    ];
     constructor(props: Props) {
         super(props);
-        this.state = { nodes: [], links: [] ,id:-4};
+        this.state = { nodes: [], links: [], id: -10 };
         this.svgRef = React.createRef();
         this.beginDrawNode = this.beginDrawNode.bind(this);
         this.beginDrawLine = this.beginDrawLine.bind(this);
@@ -56,7 +70,8 @@ class DrawPanel extends React.Component<Props, any>{
         this.drawNode = this.drawNode.bind(this);
         this.drawLine = this.drawLine.bind(this);
         this.drawDashLine = this.drawDashLine.bind(this);
-        this.chooseModel = this.chooseModel.bind(this);
+        this.chooseModelGraph = this.chooseModelGraph.bind(this);
+        this.chooseModelTree = this.chooseModelTree.bind(this);
     }
     beginDrawNode(): void {
         this.pen = "node";
@@ -87,37 +102,40 @@ class DrawPanel extends React.Component<Props, any>{
     }
     //匹配与定制图相似的图
     matchModel(): void {
-        let { links, nodes ,id} = this.state;
-        const { url, dimensions, strWeight, attrWeight, attrChecked, attrValue } = this.props;
-        if(this.record.indexOf('model')<0){
-            id=-4;
+        let { links, nodes, id } = this.state;
+        const { url, dimensions, strWeight, attrWeight, attrChecked, attrValue, dataType } = this.props;
+        if (this.record.indexOf('model') < 0) {
+            id = -10;
         }
-        let edges = links.map((value: link) => [value.source.id, value.target.id]);
+        let edges = links.map((value: link) => 
+        ['id' in value.source?value.source.id:value.source.data.id, 'id' in value.target?value.target.id:value.target.data.id]);
         let features: feature = {};
-        let nodesId:Array<number>=[];
+        let nodesId: Array<number> = [];
         nodes.forEach((value: node) => {
-            features[value.id] = 1;
-            nodesId.push(value.id);
+            let id='id' in value?value.id:value.data.id;
+            features[id] = 1;
+            nodesId.push(id);
         })
+        
         let checkedArr: any = [];
         for (let key in attrChecked) {
             checkedArr.push({ name: key, value: attrChecked[key] })
         }
         axios.post(url, {
-            name:String(id),nodes:nodesId,edges: edges, features: features, num: this.props.num, dimensions: dimensions, strWeight: strWeight,
-            attrWeight: attrWeight, attrChecked: checkedArr, attrValue: attrValue
-        },{timeout:600000}).then(res => {
-            console.log(res.data)
+            name: String(id), nodes: nodesId, edges: edges, features: features, num: this.props.num, dimensions: dimensions, strWeight: strWeight,
+            attrWeight: attrWeight, attrChecked: checkedArr, attrValue: attrValue, dataType: dataType
+        }, { timeout: 1200000 }).then(res => {
+            // console.log(res.data)
             this.props.parent.setReTsneData(res.data.all);
-            setTimeout(()=>{
+            setTimeout(() => {
                 this.props.parent.setChoosePoints(res.data.match);
                 this.props.parent.setCenterPoint(res.data.center);
-            },1500);
-            
+            }, 1500);
+
         })
     }
-    //选择系统自带的模板
-    chooseModel(nodesid: any, links: any,id:number): void {
+    //选择系统自带的模板图
+    chooseModelGraph(nodesid: any, links: any, id: number): void {
         this.pen = "model";
         this.record.push("model");
         let x_max: number = d3.max(nodesid, (d: d3.SimulationNodeDatum): number => d.x || 0) || 0;
@@ -169,15 +187,36 @@ class DrawPanel extends React.Component<Props, any>{
                     index: links[i].index,
                     source: { id: links[i].source.id, x: xScale(links[i].source.x), y: yScale(links[i].source.y) },
                     target: { id: links[i].target.id, x: xScale(links[i].target.x), y: yScale(links[i].target.y) },
-                    end:true,
+                    end: true,
                 })
             }
 
             resolve([newNodes, newLinks]);
         }).then((res: any) => {
             // console.log(res[0])
-            this.setState({ nodes: res[0], links: res[1] ,id:id});
+            this.setState({ nodes: res[0], links: res[1], id: id });
         })
+    }
+    //选择系统自带的模板树
+    chooseModelTree(data: any): void {
+        this.pen = "model";
+        this.record.push("model");
+        let treeData = d3.tree().size([this.svgHeight - this.padding.top, this.svgWidth - this.padding.left])(d3.hierarchy(data));
+        let treeDataLinks = treeData.links();
+        treeDataLinks.forEach((value: any) => {
+            value.d = d3.linkHorizontal()  //d3.linkVertical()  d3.linkHorizontal().x(d => d.y).y(d => d.x)
+                .x((d: any) => d.y)
+                .y((d: any) => d.x)(value)
+            value.end=true;
+        })
+        let treeDataNodes = treeData.descendants();
+        treeDataNodes.forEach((value:any)=>{
+            let x=value.x;
+            value.x=value.y+this.circleR;
+            value.y=x;
+        })
+
+        this.setState({ nodes: treeDataNodes, links: treeDataLinks, id: data.id });
     }
     drawNode(e: React.MouseEvent<SVGSVGElement, MouseEvent>): void {
         const { nodes } = this.state;
@@ -201,6 +240,12 @@ class DrawPanel extends React.Component<Props, any>{
                 else {
                     link.target = node;
                     link.end = true;
+                    if (this.props.dataType === 'Family') {
+                        let createLink = d3.linkHorizontal()  //d3.linkVertical()  d3.linkHorizontal().x(d => d.y).y(d => d.x)
+                            .x((d: any) => d.x)
+                            .y((d: any) => d.y)
+                        link.d = createLink(link);
+                    }
                     links[links.length - 1] = link;
                     this.record.push("line");
                 }
@@ -221,6 +266,12 @@ class DrawPanel extends React.Component<Props, any>{
                     let x = e.nativeEvent.offsetX;
                     let y = e.nativeEvent.offsetY;
                     link.target = { x: x, y: y }
+                    if (this.props.dataType === 'Family') {
+                        let createLink = d3.linkHorizontal()  //d3.linkVertical()  d3.linkHorizontal().x(d => d.y).y(d => d.x)
+                            .x((d: any) => d.x)
+                            .y((d: any) => d.y)
+                        link.d = createLink(link);
+                    }
                     links[links.length - 1] = link;
                     this.setState({ links: links });
                 }
@@ -232,18 +283,33 @@ class DrawPanel extends React.Component<Props, any>{
         this.svgWidth = this.svgRef.current?.clientWidth || 0;
         this.svgHeight = this.svgRef.current?.clientHeight || 0;
     }
+    componentWillReceiveProps(nextProps:Props){
+        if(this.props.dataType!==nextProps.dataType){
+            this.pen='';
+            this.record=[];
+            this.setState({nodes:[],links:[],id:-10});
+        }
+    }
     render() {
         const { nodes, links } = this.state;
+        const { dataType } = this.props;
         const nodeEl = nodes.map((value: node, index: number) =>
-            <circle r="3.5px" cx={value.x} cy={value.y} key={index} fill="white" strokeWidth="1px" stroke="#3072ad" onClick={this.drawLine.bind(this, value)}></circle>
+            <circle r={this.circleR} cx={value.x} cy={value.y} key={index} fill="white" strokeWidth="1px" stroke="#3072ad" onClick={this.drawLine.bind(this, value)}></circle>
         )
-        const linkEl = links.map((value: link, index: number) =>
+        const linkEl = dataType === 'Author' ? links.map((value: link, index: number) =>
             <line x1={value.source.x} y1={value.source.y} x2={value.target.x}
                 y2={value.target.y} fill="none" strokeWidth="1px" stroke="#ccc" key={index} strokeDasharray={value.end ? '0' : '5 5'}></line>
+        ) : links.map((value: link, index: number) =>
+            <path d={value.d}
+                 fill="none" strokeWidth="1px" stroke="#ccc" key={index} strokeDasharray={value.end ? '0' : '5 5'}></path>
         )
-        const nodeLinkEl = this.modelGraohs.map((value: any, index: number) =>
+        const model = dataType === 'Author' ? this.modelGraohs.map((value: any, index: number) =>
             <div className='modelGraph' key={index} >
-                <NodeLink key={index} graph={value} parent={this} onClick={this.chooseModel} />
+                <NodeLink key={index} graph={value} parent={this} onClick={this.chooseModelGraph} />
+            </div>
+        ) : this.modelTrees.map((value: any, index: number) =>
+            <div className='modelGraph' key={index} style={{ width: '100px', left: `${103 * index+3}px`}}>
+                <TargetTree key={index} graph={value} parent={this} onClick={this.chooseModelTree} />
             </div>
         )
 
@@ -263,7 +329,7 @@ class DrawPanel extends React.Component<Props, any>{
                     </svg>
                 </div>
                 <div className="model">
-                    {nodeLinkEl}
+                    {model}
                 </div>
             </div>
         )

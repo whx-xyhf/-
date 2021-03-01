@@ -7,8 +7,8 @@ type edges=Array<number>;
 interface Props{
     graph:{
         id:number,
-        nodes:Array<number>,
-        edges:Array<edges>,
+        // nodes:Array<number>,
+        // edges:Array<edges>,
         [propName:string]:any,
     },
     [propName: string]: any;
@@ -30,6 +30,7 @@ class NodeLink extends React.Component<Props,any>{
         this.state={layOutNodes:[],layOutLinks:[],focusNode:{}};
         this.showInfo=this.showInfo.bind(this);
         this.hideInfo=this.hideInfo.bind(this);
+        this.forceLayout=this.forceLayout.bind(this);
     }
     forceLayout(nodes:Array<number>,edges:Array<edges>,width:number,height:number):void{
         let nodesid=nodes.map((value:number)=>{

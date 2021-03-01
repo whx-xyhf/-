@@ -16,14 +16,15 @@ interface Props {
     choosePoints:Array<ChoosePointData>,//匹配的数据
     centerPoint:ChoosePointData,
     display:string,
+    dataType:string,
 }
 //定义边数组
 type edges=Array<number>;
 //定义散点数据接口
 type ChoosePointData ={
     id: number,
-    nodes: Array<number>,
-    edges:Array<edges>,
+    // nodes: Array<number>,
+    // edges:Array<edges>,
     [propName:string]:any,
 }
 class DistributeAttr extends React.Component<Props, any>{
@@ -93,12 +94,12 @@ class DistributeAttr extends React.Component<Props, any>{
         this.setState({yAttr:yAttr});
     }
     searchGraph(pointData:ChoosePointData):void{//根据名字搜索包含该节点的网络
-        const {url,dimensions,attrWeight,strWeight,attrChecked}=this.props;
+        const {url,dimensions,attrWeight,strWeight,attrChecked,dataType}=this.props;
         let checkedArr:any=[];
         for(let key in attrChecked){
             checkedArr.push({name:key,value:attrChecked[key]})
         }
-        axios.post(url+'/searchGraphByGraphId',{wd:pointData.id,dimensions:dimensions,attrWeight:attrWeight,strWeight:strWeight,attrChecked:checkedArr})
+        axios.post(url+'/searchGraphByGraphId',{wd:pointData.id,dataType:dataType,dimensions:dimensions,attrWeight:attrWeight,strWeight:strWeight,attrChecked:checkedArr})
         .then(res=>{
             // console.log(res.data.data);
             this.props.parent.setPersonGraphs(res.data.data);
@@ -133,12 +134,12 @@ class DistributeAttr extends React.Component<Props, any>{
             }
         }
         if(nextProps.attrChecked!==this.props.attrChecked){
-            const {url,dimensions,attrWeight,strWeight,attrChecked}=nextProps;
+            const {url,dimensions,attrWeight,strWeight,attrChecked,dataType}=nextProps;
             let checkedArr:any=[];
             for(let key in attrChecked){
                 checkedArr.push({name:key,value:attrChecked[key]})
             }
-            axios.post(url,{dimensions:dimensions,attrWeight:attrWeight,strWeight:strWeight,attrChecked:checkedArr})
+            axios.post(url,{dataType:dataType,dimensions:dimensions,attrWeight:attrWeight,strWeight:strWeight,attrChecked:checkedArr})
             .then(res=>{
                 const data=res.data.data;
                 let {xAttr,yAttr,attrList} = this.state;

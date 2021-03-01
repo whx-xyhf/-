@@ -1,13 +1,14 @@
 import * as React from 'react';
 import NodeLink from './NodeLink';
+import TargetTree from './TargetTree';
 import axios from 'axios';
 
 
 type edges=Array<number>;
 type graph={
     id:number,
-    nodes:Array<number>,
-    edges:Array<edges>,
+    // nodes:Array<number>,
+    // edges:Array<edges>,
     [propName:string]:any,
 }
 
@@ -21,6 +22,7 @@ interface Props{
     attrWeight:number,
     attrChecked:attr,
     attrValue:attr,
+    dataType:string,
 }
 type attr={
     [propName: string]: any,
@@ -32,18 +34,18 @@ class Info extends React.Component<Props,any>{
         this.match=this.match.bind(this);
     }
     match(graph:graph):void{//匹配相似图
-        const {url,dimensions,strWeight,attrWeight,attrChecked,attrValue}=this.props;
+        const {url,dimensions,strWeight,attrWeight,attrChecked,attrValue,dataType}=this.props;
         let checkedArr:any=[];
         for(let key in attrChecked){
             checkedArr.push({name:key,value:attrChecked[key]})
         }
-        axios.post(url+'/matchGraph',{wd:graph,num:this.props.num,dimensions:dimensions,strWeight:strWeight,attrWeight:attrWeight,attrChecked:checkedArr,attrValue:attrValue})
+        axios.post(url+'/matchGraph',{wd:graph,dataType:dataType,num:this.props.num,dimensions:dimensions,strWeight:strWeight,attrWeight:attrWeight,attrChecked:checkedArr,attrValue:attrValue})
         .then(res=>{
             this.props.parent.setChoosePoints(res.data.data);
         })
-        axios.post(url+'/searchGraphByGraphId',{wd:graph.id,dimensions:dimensions,attrWeight:attrWeight,strWeight:strWeight,attrChecked:checkedArr})
+        axios.post(url+'/searchGraphByGraphId',{wd:graph.id,dataType:dataType,dimensions:dimensions,attrWeight:attrWeight,strWeight:strWeight,attrChecked:checkedArr})
         .then(res=>{
-            console.log(res.data.data[0]);
+            // console.log(res.data.data[0]);
             this.props.parent.setCenterPoint(res.data.data[0]);
         })
         
@@ -52,21 +54,28 @@ class Info extends React.Component<Props,any>{
         let elements=this.props.graphs.map((graph:graph,index:number)=>{
 
         // console.log(graph)
-        let names:Array<React.ReactElement>=[];
-            for(let i in graph.names){
-                names.push(
-                    <p key={i}>{graph.names[i]}</p>
-                )
+        // let names:Array<React.ReactElement>=[];
+        //     for(let i in graph.names){
+        //         names.push(
+        //             <p key={i}>{graph.names[i]}</p>
+        //         )
+        //     }
+            let el=null;
+            if(this.props.dataType==="Author"){
+                el=<NodeLink graph={graph} key={index}/>;
+            }
+            else if(this.props.dataType==="Family"){
+                el=<TargetTree graph={graph} key={index}/>
             }
             return(
                 <div className='infoBox' key={index}>
                     <input type="button" value="match" onClick={this.match.bind(this,graph)}></input>
-                    <div style={{height:'100%',width:'calc(100% - 100px)',float:'left'}}>
-                        <NodeLink graph={graph} key={index}/>
+                    <div style={{height:'100%',width:'100%',float:'left'}}>
+                        {el}
                     </div>
-                    <div className="infoName" style={{height:'100%',width:'100px',fontSize:'0.5rem',float:'left',overflowX:'hidden',overflowY:'auto'}}>
+                    {/* <div className="infoName" style={{height:'100%',width:'100px',fontSize:'0.5rem',float:'left',overflowX:'hidden',overflowY:'auto'}}>
                         {names}
-                    </div>
+                    </div> */}
                 </div>
             )
         })

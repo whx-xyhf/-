@@ -2,7 +2,6 @@ import React, { ChangeEvent } from 'react';
 import './App.css';
 import ScatterPlot from './components/ScatterPlot';
 import ForceCompute from './components/ForceCompute';
-import NodeList from './components/NodeList';
 import Info from './components/Info';
 import Parallel from './components/Parallel';
 import DrawPanel from './components/DrawPanel';
@@ -11,13 +10,10 @@ import { Slider, InputNumber, Row, Col, Button, Checkbox } from 'antd';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
 
 
-// import * as axios from 'axios'
-// import  * as d3 from 'd3';
-
 type ChoosePointData = {
   id: number,
-  nodes: Array<number>,
-  edges: Array<edges>,
+  // nodes: Array<number>,
+  // edges: Array<edges>,
   [propName: string]: any,
 }
 type edges = Array<number>;
@@ -29,18 +25,17 @@ class App extends React.Component<any, any> {
   constructor(props: any) {
     super(props)
     this.state = {
+      dataType:'Family',//数据集名称
       reTsneData:[],//重新降维的数据
       choosePoints: [],//圈选的点
       personGraphs: [],//选中的人所在的子图
       centerPoint: {},//点击的点
-      nodeLinkDisplay: 'block',
-      tableDisplay: 'none',
       dimensions: 128,//向量维度
       num: 10,//匹配的限制数量
-      strWeight: 0,//拓扑权重
-      attrWeight: 1,//属性权重
-      strWeight_slider: 0,//拓扑权重(保存滑块的值)
-      attrWeight_slider: 1,//属性权重(保存滑块的值)
+      strWeight: 1,//拓扑权重
+      attrWeight: 0,//属性权重
+      strWeight_slider: 1,//拓扑权重(保存滑块的值)
+      attrWeight_slider: 0,//属性权重(保存滑块的值)
       attr: {},//属性及对应的最大范围
       attrSliderValue: {},//属性slider选择的范围
       attrValue: {},//确认时属性的范围
@@ -48,12 +43,11 @@ class App extends React.Component<any, any> {
       attrCheckedBox: {},//临时保存checkbox的值
       displaySlider: '0',//显示属性调节滑块
     }
+    this.setDataType=this.setDataType.bind(this);
     this.setReTsneData=this.setReTsneData.bind(this);
     this.setChoosePoints = this.setChoosePoints.bind(this);
     this.setPersonGraphs = this.setPersonGraphs.bind(this);
     this.setCenterPoint = this.setCenterPoint.bind(this);
-    this.showNodeLink = this.showNodeLink.bind(this);
-    this.showTable = this.showTable.bind(this);
     this.changeStrWeight = this.changeStrWeight.bind(this);
     this.changeAttrWeight = this.changeAttrWeight.bind(this);
     this.changeWeight = this.changeWeight.bind(this);
@@ -64,25 +58,22 @@ class App extends React.Component<any, any> {
     this.initAttrChecked = this.initAttrChecked.bind(this);
     this.setDisplaySlider = this.setDisplaySlider.bind(this);
   }
-  setReTsneData(data:ChoosePointData){
+  setDataType(e: ChangeEvent<HTMLSelectElement>):void{
+    let value = e.target.value;
+    
+    this.setState({dataType:value});
+  }
+  setReTsneData(data:ChoosePointData):void{
     this.setState({reTsneData:JSON.parse(JSON.stringify(data))});
   }
-  setChoosePoints(data: ChoosePointData) {
+  setChoosePoints(data: ChoosePointData) :void{
     this.setState({ choosePoints: data });
   }
-  setPersonGraphs(data: ChoosePointData) {
+  setPersonGraphs(data: ChoosePointData) :void{
     this.setState({ personGraphs: data });
   }
-  setCenterPoint(data: ChoosePointData) {
+  setCenterPoint(data: ChoosePointData) :void{
     this.setState({ centerPoint: data });
-  }
-  //展示力导图
-  showNodeLink() {
-    this.setState({ nodeLinkDisplay: 'block', tableDisplay: 'none' });
-  }
-  //展示比较表格
-  showTable() {
-    this.setState({ nodeLinkDisplay: 'none', tableDisplay: 'block' });
   }
   //设置匹配数量
   setNum(e: React.ChangeEvent<HTMLInputElement>): void {
@@ -115,13 +106,13 @@ class App extends React.Component<any, any> {
     let value3 = JSON.parse(JSON.stringify(value));
     this.setState({ attr: value, attrSliderValue: value2, attrValue: value3 });
   }
-  setOneAttrSliderValue(key: string, value: any) {
+  setOneAttrSliderValue(key: string, value: any) :void{
     let attrSliderValue = this.state.attrSliderValue;
     attrSliderValue[key] = value;
     this.setState({ attrSliderValue: attrSliderValue });
   }
   //设置属性范围
-  setAttrValue(key: string, value: any) {
+  setAttrValue(key: string, value: any) :void{
     let attrValue = this.state.attrValue;
     attrValue[key] = value;
     this.setState({ attrValue: JSON.parse(JSON.stringify(attrValue)) });
@@ -152,7 +143,7 @@ class App extends React.Component<any, any> {
     }
   }
   render(): React.ReactElement {
-    const { strWeight_slider, attrWeight_slider, dimensions, strWeight, attrWeight, num, choosePoints,reTsneData,
+    const {dataType, strWeight_slider, attrWeight_slider, dimensions, strWeight, attrWeight, num, choosePoints,reTsneData,
       centerPoint, personGraphs, attr, attrSliderValue, attrValue, attrChecked, attrCheckedBox ,displaySlider} = this.state;
     let attrEl: Array<React.ReactElement> = [];
     for (let key in attr) {
@@ -169,8 +160,6 @@ class App extends React.Component<any, any> {
               tipFormatter={null}
               step={1}
               range
-              // marks={{0:String(Math.floor(value[0])),100:String(Math.floor(value[1]))}}
-              // defaultValue={[Math.floor(value[0]),Math.floor(value[1])]}
               value={[Math.floor(attrSliderValue[key][0]), Math.floor(attrSliderValue[key][1])]}
               style={{ position: 'relative', top: '-4px' }}
               onChange={this.setOneAttrSliderValue.bind(this, key)}
@@ -200,7 +189,7 @@ class App extends React.Component<any, any> {
                 DataSet:
               </Col>
                 <Col span={15}>
-                <select style={{width:'100%',border:'1px solid #ccc'}}>
+                <select style={{width:'100%',border:'1px solid #ccc'}} onChange={this.setDataType} value={dataType}> 
                   <option value="Author">Author</option>
                   <option value="Family">Family</option>
                 </select>
@@ -307,16 +296,16 @@ class App extends React.Component<any, any> {
           </div>
           <div className="filter">
             <div className="title">
-              Attribution
+              Attribute Panel
               <select style={{ float: "right", height: '100%' }} onChange={this.setDisplaySlider}>
                 <option value="Slider" selected={true}>Slider</option>
                 <option value="Graph">Graph</option>
               </select>
             </div>
             <div className="content" style={{position:'relative',padding:0,overflowX:'hidden'}}>
-              {/* <DisTributeAttr dimensions={dimensions} attrWeight={attrWeight} strWeight={strWeight} attrChecked={attrChecked}
-                choosePoints={choosePoints} centerPoint={centerPoint} display={displaySlider}
-                parent={{ setPersonGraphs: this.setPersonGraphs, setCenterPoint: this.setCenterPoint, setChoosePoints: this.setChoosePoints }} url='http://localhost:8080' /> */}
+              <DisTributeAttr url='http://localhost:8080' dimensions={dimensions} attrWeight={attrWeight} strWeight={strWeight} attrChecked={attrChecked}
+                choosePoints={choosePoints} centerPoint={centerPoint} display={displaySlider} dataType={dataType}
+                parent={{ setPersonGraphs: this.setPersonGraphs, setCenterPoint: this.setCenterPoint, setChoosePoints: this.setChoosePoints }}  />
               <div className="attrSliderBox" style={{position:'absolute',left:displaySlider}}>
                 {attrEl}
                 <Row>
@@ -326,9 +315,10 @@ class App extends React.Component<any, any> {
             </div>
           </div>
           <div className="drawPanel">
-            <div className="title">Structure</div>
+            <div className="title">Structure Panel</div>
             <DrawPanel url='http://localhost:8080/matchModel' num={num} dimensions={dimensions} strWeight={strWeight} attrWeight={attrWeight}
-              attrChecked={attrChecked} attrValue={attrValue} parent={{ setChoosePoints: this.setChoosePoints,setCenterPoint:this.setCenterPoint,
+              attrChecked={attrChecked} attrValue={attrValue} dataType={dataType}
+              parent={{ setChoosePoints: this.setChoosePoints,setCenterPoint:this.setCenterPoint,
                setReTsneData:this.setReTsneData}} />
           </div>
 
@@ -340,10 +330,11 @@ class App extends React.Component<any, any> {
 
         <div className="right">
           <div className="infoView">
-            <div className="title">Target Graph</div>
+            <div className="title">Target View</div>
             <div className="content">
               <Info graphs={personGraphs} url='http://localhost:8080' num={num} dimensions={dimensions} strWeight={strWeight} attrWeight={attrWeight}
-                attrChecked={attrChecked} attrValue={attrValue} parent={{ setChoosePoints: this.setChoosePoints.bind(this), setCenterPoint: this.setCenterPoint.bind(this) }} />
+                attrChecked={attrChecked} attrValue={attrValue} dataType={dataType}
+                parent={{ setChoosePoints: this.setChoosePoints.bind(this), setCenterPoint: this.setCenterPoint.bind(this) }} />
             </div>
           </div>
 
@@ -352,22 +343,23 @@ class App extends React.Component<any, any> {
             <div className="content">
               <ScatterPlot url="http://localhost:8080" choosePoints={choosePoints} centerPoint={centerPoint} reTsneData={reTsneData}
                 dimensions={dimensions} strWeight={strWeight} attrWeight={attrWeight} attrChecked={attrChecked} attrValue={attrValue}
+                dataType={dataType}
                 parent={{ setChoosePoints: this.setChoosePoints.bind(this), setPersonGraphs: this.setPersonGraphs.bind(this) }} />
             </div>
           </div>
 
           <div className="forceComputeView">
-            <div className='title'>Similar Graph</div>
+            <div className='title'>Candinate View</div>
             <div className='content'>
-              <ForceCompute graphs={choosePoints} display={this.state.nodeLinkDisplay} />
+              <ForceCompute graphs={choosePoints} dataType={dataType} />
             </div>
           </div>
 
           <div className="parallelView">
-            <div className='title'>Parallel</div>
+            <div className='title'>Parallel Coordinate</div>
             <div className='content'>
               <Parallel url="http://localhost:8080/getAttr" choosePoints={choosePoints} centerPoint={centerPoint}
-                attrWeight={attrWeight} attrChecked={attrChecked} attrValue={attrValue} reTsneData={reTsneData}
+                attrWeight={attrWeight} attrChecked={attrChecked} attrValue={attrValue} reTsneData={reTsneData} dataType={dataType}
                 parent={{ setAttr: this.setAttr, initAttrChecked: this.initAttrChecked }} />
             </div>
           </div>

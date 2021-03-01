@@ -1,18 +1,19 @@
 import * as React from 'react';
 import NodeLink from './NodeLink';
+import TargetTree from './TargetTree';
 
 //定义边数组
 type edges=Array<number>;
 type graph={
     id:number,
-    nodes:Array<number>,
-    edges:Array<edges>,
+    // nodes:Array<number>,
+    // edges:Array<edges>,
     [propName:string]:any,
 }
 
 interface Props{
     graphs:Array<graph>,
-    display:string,
+    dataType:string,
 }
 
 class ForceCompute extends React.Component<Props,any>{
@@ -20,15 +21,24 @@ class ForceCompute extends React.Component<Props,any>{
     render():React.ReactElement{
         
         let graphElements=null;
-        if(this.props.display==='block'){
+        const {dataType}=this.props;
+        if(dataType==='Author'){
             graphElements=this.props.graphs.map((value:graph,index:number)=>
                 <div className="forceBox" key={index}>
                         <NodeLink graph={value}/>
                 </div>
             )
         }
+        else if(dataType==='Family'){
+            graphElements=this.props.graphs.map((value:graph,index:number)=>
+                <div className="forceBox" key={index}>
+                        <TargetTree graph={value}/>
+                </div>
+            )
+        }
+            
         return (
-            <div className="forceCompute" style={{display:this.props.display}}>
+            <div className="forceCompute">
                 {graphElements}
             </div>
 

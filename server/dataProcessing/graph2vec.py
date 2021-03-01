@@ -104,7 +104,7 @@ def save_embedding(output_path, model, files, dimensions):
     out = out.sort_values(["type"])
     out.to_csv(output_path, index = None)
 
-def main(args):
+def main(args,dirPath):
     """
     Main function to read the graph list, extract features, learn the embedding and save it.
     :param args: Object with the arguments.
@@ -124,7 +124,7 @@ def main(args):
                     alpha = args.learning_rate,
                     window = 0)
 
-    model.save('./data/paper/Graph2vec_'+str(args.dimensions)+'.model')
+    model.save(dirPath+'Graph2vec_'+str(args.dimensions)+'.model')
 
     save_embedding(args.output_path, model, graphs, args.dimensions)
 
@@ -132,10 +132,10 @@ if __name__ == "__main__":
     args = parser()
     time_interval = 1
     dimensions=128
-    dirPath = './data/paper/'
+    dirPath = './data/Family/'
     subGraphs_dirName = 'subGraphs' + '_' + str(time_interval)+'/'
     args.input_path=dirPath+subGraphs_dirName
     args.output_path=dirPath+'vectors_'+str(time_interval)+'_'+str(dimensions)+'.csv'
     args.dimensions=dimensions
-    main(args)
+    main(args,dirPath)
     print("ok")

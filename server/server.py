@@ -27,8 +27,9 @@ def index():
         strWeight=str(request.get_json()['strWeight'])
         attrWeight = str(request.get_json()['attrWeight'])
         attrChecked=request.get_json()['attrChecked']
+        dataType=request.get_json()['dataType']
 
-        with open('./dataProcessing/data/paper/subGraphs_'+str(time_interval)+'.json','r') as fr:
+        with open('./dataProcessing/data/'+dataType+'/subGraphs_'+str(time_interval)+'.json','r') as fr:
             data=json.load(fr)
         attrStr = ''
         for i in data[0]['attr']:
@@ -37,7 +38,7 @@ def index():
             else:
                 attrStr+='0'
         print(attrStr)
-        with open('./dataProcessing/data/paper/vectors2d_'+str(time_interval)+'_'+dimensions+'_'+strWeight+'_'+attrWeight+'_'+attrStr+'.json','r') as fr:
+        with open('./dataProcessing/data/'+dataType+'/vectors2d_'+str(time_interval)+'_'+dimensions+'_'+strWeight+'_'+attrWeight+'_'+attrStr+'.json','r') as fr:
             vectors=json.load(fr)
         for i in range(len(data)):
             data[i]['x']=float(vectors[str(data[i]['id'])]['x'])
@@ -49,7 +50,8 @@ def index():
 def search():#根据关键字匹配人名
     if request.method == 'POST':
         resData={}
-        with open('./dataProcessing/data/paper/node2Num.json','r') as fr:
+        dataType = request.get_json()['dataType']
+        with open('./dataProcessing/data/'+dataType+'/node2Num.json','r') as fr:
             data=json.load(fr)
             wd=request.get_json()['wd']
             if wd=="":
@@ -71,11 +73,13 @@ def searchGraphByPersonId():#根据人id搜索包含该人的网络
         wd = int(request.get_json()['wd'])  # 该人的id
         dimensions = str(request.get_json()['dimensions'])
         attrChecked = request.get_json()['attrChecked']
-        with open('./dataProcessing/data/paper/node2Num.json','r') as fr:
-            node2Num=json.load(fr)#{www:1}
-            for key in node2Num:
-                num2node[node2Num[key]]=key#{1:www}
-        with open('./dataProcessing/data/paper/subGraphs_'+str(time_interval)+'.json','r') as fr:
+        dataType = request.get_json()['dataType']
+        if dataType=='Author':
+            with open('./dataProcessing/data/'+dataType+'/node2Num.json','r') as fr:
+                node2Num=json.load(fr)#{www:1}
+                for key in node2Num:
+                    num2node[node2Num[key]]=key#{1:www}
+        with open('./dataProcessing/data/'+dataType+'/subGraphs_'+str(time_interval)+'.json','r') as fr:
             data=json.load(fr)
         attrStr = ''
         for i in data[0]['attr']:
@@ -83,19 +87,26 @@ def searchGraphByPersonId():#根据人id搜索包含该人的网络
                 attrStr += '1'
             else:
                 attrStr += '0'
-        with open('./dataProcessing/data/paper/vectors2d_' + str(
+        with open('./dataProcessing/data/'+dataType+'/vectors2d_' + str(
                 time_interval) + '_' + dimensions + '_' + strWeight + '_' + attrWeight + '_' +attrStr+'.json', 'r') as fr:
             vectors = json.load(fr)
             #遍历所有子图，如果子图点集中包含搜索的点则加入返回数据中
-            for graph in data:
-                if graph['nodes'].count(wd)>0:
-                    nodeName={}
-                    for i in graph['nodes']:
-                        nodeName[i]=num2node[i]
-                    graph['names']=nodeName
-                    graph['x']=float(vectors[str(graph['id'])]['x'])
-                    graph['y']=float(vectors[str(graph['id'])]['y'])
-                    resData.append(graph)
+            if dataType == 'Author':
+                for graph in data:
+                    if graph['nodes'].count(wd)>0:
+                        nodeName={}
+                        for i in graph['nodes']:
+                            nodeName[i]=num2node[i]
+                        graph['names']=nodeName
+                        graph['x']=float(vectors[str(graph['id'])]['x'])
+                        graph['y']=float(vectors[str(graph['id'])]['y'])
+                        resData.append(graph)
+            elif dataType=='Family':
+                for graph in data:
+                    if graph['nodes'].count(wd)>0:
+                        graph['x']=float(vectors[str(graph['id'])]['x'])
+                        graph['y']=float(vectors[str(graph['id'])]['y'])
+                        resData.append(graph)
             res = make_response(jsonify({'code': 200, "data": resData}))
     return res
 
@@ -109,11 +120,13 @@ def searchGraphByGraphId():#根据图id搜索该图
         wd = int(request.get_json()['wd'])  # 该图的id
         dimensions = str(request.get_json()['dimensions'])
         attrChecked = request.get_json()['attrChecked']
-        with open('./dataProcessing/data/paper/node2Num.json','r') as fr:
-            node2Num=json.load(fr)#{www:1}
-            for key in node2Num:
-                num2node[node2Num[key]]=key#{1:www}
-        with open('./dataProcessing/data/paper/subGraphs_'+str(time_interval)+'.json','r') as fr:
+        dataType = request.get_json()['dataType']
+        if dataType == 'Author':
+            with open('./dataProcessing/data/'+dataType+'/node2Num.json','r') as fr:
+                node2Num=json.load(fr)#{www:1}
+                for key in node2Num:
+                    num2node[node2Num[key]]=key#{1:www}
+        with open('./dataProcessing/data/'+dataType+'/subGraphs_'+str(time_interval)+'.json','r') as fr:
             data=json.load(fr)
         attrStr = ''
         for i in data[0]['attr']:
@@ -121,15 +134,16 @@ def searchGraphByGraphId():#根据图id搜索该图
                 attrStr += '1'
             else:
                 attrStr += '0'
-        with open('./dataProcessing/data/paper/vectors2d_' + str(
+        with open('./dataProcessing/data/'+dataType+'/vectors2d_' + str(
                 time_interval) + '_' + dimensions + '_' + strWeight + '_' + attrWeight + '_'+attrStr +'.json', 'r') as fr:
             vectors = json.load(fr)
             for graph in data:
                 if graph['id']==wd:
-                    nodeName = {}
-                    for i in graph['nodes']:
-                        nodeName[i] = num2node[i]
-                    graph['names'] = nodeName
+                    if dataType == 'Author':
+                        nodeName = {}
+                        for i in graph['nodes']:
+                            nodeName[i] = num2node[i]
+                        graph['names'] = nodeName
                     graph['x'] = float(vectors[str(graph['id'])]['x'])
                     graph['y'] = float(vectors[str(graph['id'])]['y'])
                     resData.append(graph)
@@ -147,12 +161,13 @@ def match():#匹配相似图
         attrWeight = str(request.get_json()['attrWeight'])
         attrChecked = request.get_json()['attrChecked']
         attrRange = request.get_json()['attrValue']
+        dataType = request.get_json()['dataType']
         attrValue = {}
         for key in attrRange:
             attrValue[key] = int((attrRange[key][0] + attrRange[key][1]) / 2)
         resData=[]
 
-        with open('./dataProcessing/data/paper/subGraphs_'+str(time_interval)+'.json','r') as fr:
+        with open('./dataProcessing/data/'+dataType+'/subGraphs_'+str(time_interval)+'.json','r') as fr:
             data=json.load(fr)
         attrStr = ''
         useAttr = []
@@ -162,7 +177,7 @@ def match():#匹配相似图
                 useAttr.append(i)
             else:
                 attrStr += '0'
-        with open('./dataProcessing/data/paper/vectors2d_' + str(
+        with open('./dataProcessing/data/'+dataType+'/vectors2d_' + str(
                 time_interval) + '_' + dimensions + '_' + strWeight + '_' + attrWeight + '_' +attrStr+ '.json', 'r') as fr:
             vectors = json.load(fr)
             for i in range(len(data)):
@@ -188,7 +203,8 @@ def match():#匹配相似图
 @app.route("/getAttr",methods = ['POST', 'GET'])
 def getAttr():
     if request.method == 'POST':
-        with open('./dataProcessing/data/paper/subGraphs_'+str(time_interval)+'.json','r') as fr:
+        dataType = request.get_json()['dataType']
+        with open('./dataProcessing/data/'+dataType+'/subGraphs_'+str(time_interval)+'.json','r') as fr:
             data=json.load(fr)
             attr=[]
             for i in data:
@@ -212,23 +228,26 @@ def matchModel():
         attrChecked = request.get_json()['attrChecked']
         num = request.get_json()['num']
         attrRange=request.get_json()['attrValue']
+        dataType = request.get_json()['dataType']
         attrValue={}
+        attrValue_={}
         for key in attrRange:
             attrValue[key]=int((int(attrRange[key][0])+int(attrRange[key][1]))/2)
+            attrValue_[key] = int((int(attrRange[key][0]) + int(attrRange[key][1])) / 2)
         graph=nx.from_edgelist(edges)
         machine = WeisfeilerLehmanMachine(graph, features_, 2)
         doc = TaggedDocument(words=machine.extracted_features, tags=["g_" + name])
         doc = machine.extracted_features
-        model = Doc2Vec.load('./dataProcessing/data/paper/Graph2vec_'+dimensions+'.model')
+        model = Doc2Vec.load('./dataProcessing/data/'+dataType+'/Graph2vec_'+dimensions+'.model')
         docVectors = model.infer_vector(doc, epochs=100)
         docVectors=docVectors.tolist()
 
-        with open('./dataProcessing/data/paper/attrMeanStd_'+str(time_interval)+'.json','r') as fr:
+        with open('./dataProcessing/data/'+dataType+'/attrMeanStd_'+str(time_interval)+'.json','r') as fr:
             mean_std=json.load(fr)
             for key in attrValue:
                 attrValue[key]=(attrValue[key]-mean_std['mean'][key])/mean_std['std'][key]
 
-        with open('./dataProcessing/data/paper/subGraphs_'+str(time_interval)+'.json','r') as fr:
+        with open('./dataProcessing/data/'+dataType+'/subGraphs_'+str(time_interval)+'.json','r') as fr:
             data=json.load(fr)
         attrStr = ''
         attrVector = []
@@ -246,14 +265,14 @@ def matchModel():
         dimensionsAttr=len(attrStr)
         dimensionsStr=int(dimensions)
 
-        file='./dataProcessing/data/paper/'+ 'vectors2d_' + str(time_interval) + '_' + str(dimensionsStr) + '_' + str(
+        file='./dataProcessing/data/'+dataType+'/'+ 'vectors2d_' + str(time_interval) + '_' + str(dimensionsStr) + '_' + str(
                     strWeight) + '_' + str(attrWeight) + '_' + attrStr +'model'+name+ '.json'
         if os.path.exists(file):
             with open(file,'r') as fr:
                 tsneData=json.load(fr)
         else:
-            tsneData=reTsne(name,docVectors,dirPath = './dataProcessing/data/paper/',dimensionsStr=dimensionsStr,dimensionsAttrChecked=attrStr
-                       ,strWeight=strWeight,attrWeight=attrWeight,saveFile=True,readDir='./dataProcessing/data/paper/')
+            tsneData=reTsne(name,docVectors,dirPath = './dataProcessing/data/'+dataType+'/',dimensionsStr=dimensionsStr,dimensionsAttrChecked=attrStr
+                       ,strWeight=strWeight,attrWeight=attrWeight,saveFile=True,readDir='./dataProcessing/data/'+dataType+'/')
 
         newData=[]
         for i in range(len(data)):
@@ -261,7 +280,7 @@ def matchModel():
             data[i]['y']=float(tsneData[str(data[i]['id'])]['y'])
             data[i]['distance']=math.pow(data[i]['x']-float(tsneData[name]['x']),2)+math.pow(data[i]['y']-float(tsneData[name]['y']),2)
             newData.append(data[i])
-        centerPoint={'id':int(name),'nodes':nodes,'edges':edges,'attr':attrValue,'x':float(tsneData[name]['x']),'y':float(tsneData[name]['y']),'distance':100000}
+        centerPoint={'id':int(name),'nodes':nodes,'edges':edges,'attr':attrValue_,'x':float(tsneData[name]['x']),'y':float(tsneData[name]['y']),'distance':100000}
         newData.append(centerPoint)
         newData=sorted(newData,key=lambda x:x['distance'])
         res = make_response(jsonify({'code': 200, "all": newData,'match':newData[:num],'center':centerPoint}))

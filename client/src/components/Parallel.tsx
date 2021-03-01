@@ -12,6 +12,7 @@ interface Props{
     parent:any,
     attrValue:attr,
     attrChecked:attr,
+    dataType:string,
 }
 type attr={
     [propName: string]: any,
@@ -32,7 +33,7 @@ class Parallel extends React.Component<Props,any>{
         this.getAttrData=this.getAttrData.bind(this);
         this.compute=this.compute.bind(this);
     }
-    compute(data:any):void{
+    compute(data:any,updateAttr:boolean):void{
         let attr_name:Array<string>=[];
         for(let key in data[0].attr){
             attr_name.push(key);
@@ -47,8 +48,11 @@ class Parallel extends React.Component<Props,any>{
             checked[value]=true;
             attr[value]=min_max.get(value);
         })
-        this.props.parent.setAttr(attr);
-        this.props.parent.initAttrChecked(checked);
+        if(updateAttr){
+            this.props.parent.setAttr(attr);
+            this.props.parent.initAttrChecked(checked);
+        }
+
         let yscale:any = new Map(Array.from(attr_name, key => [key, d3.scaleLinear(min_max.get(key), [this.svgHeight-this.padding.bottom, this.padding.top])]));
         for(let i in data){
             let pathData=[];
@@ -87,9 +91,9 @@ class Parallel extends React.Component<Props,any>{
         this.setState({data:data});
     }
     getAttrData():void{
-        axios.post(this.props.url)
+        axios.post(this.props.url,{dataType:this.props.dataType})
         .then(res=>{
-            this.compute(res.data.data);
+            this.compute(res.data.data,true);
         })
     }
     componentDidMount():void{
@@ -108,7 +112,7 @@ class Parallel extends React.Component<Props,any>{
         return d;
     }
     componentWillReceiveProps(nextProps:Props){
-        if(nextProps.attrValue!==this.props.attrValue && nextProps.attrWeight!==0){
+        if(nextProps.attrValue!==this.props.attrValue && nextProps.attrWeight!==0 && nextProps.dataType===this.props.dataType){
             let checkedArr:any=[];
             for(let key in nextProps.attrChecked){
                 if(nextProps.attrChecked[key]===true)
@@ -129,8 +133,27 @@ class Parallel extends React.Component<Props,any>{
             this.setState({data:data});
         }
         if(nextProps.reTsneData!==this.props.reTsneData){
-            // this.compute(nextProps.reTsneData);
-            // this.setState({data:nextProps.reTsneData});
+            const {attrValue,attrChecked}=nextProps;
+            let reTsneData=JSON.parse(JSON.stringify(nextProps.reTsneData));
+            let checkedArr:any=[];
+            for(let key in attrChecked){
+                if(attrChecked[key]===true)
+                    checkedArr.push({name:key,value:true})
+            }
+            reTsneData.forEach((value:any)=>{
+                for(let i in checkedArr){
+                    let attr=value.attr[checkedArr[i].name];
+                    if(attr<attrValue[checkedArr[i].name][0] || attr>attrValue[checkedArr[i].name][1]){
+                        value.opacity=0;
+                        return ;
+                    }
+                }
+                value.opacity=0.1
+            })
+            this.compute(reTsneData,false);
+        }
+        if(nextProps.dataType!==this.props.dataType){
+            this.getAttrData();
         }
     }
     render(){
