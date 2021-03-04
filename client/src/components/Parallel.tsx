@@ -35,8 +35,12 @@ class Parallel extends React.Component<Props,any>{
     }
     compute(data:any,updateAttr:boolean):void{
         let attr_name:Array<string>=[];
+        let str_name:Array<string>=[];
         for(let key in data[0].attr){
             attr_name.push(key);
+        }
+        for(let key in data[0].str){
+            str_name.push(key);
         }
         //x方向比例尺
         let xscale=d3.scalePoint(attr_name,[this.padding.left,this.svgWidth-this.padding.right]);
@@ -44,13 +48,15 @@ class Parallel extends React.Component<Props,any>{
         let min_max:any=new Map(Array.from(attr_name, key => [key,d3.extent(data, (d:any) => d.attr[key])]));
         let attr:attr={};
         let checked:attr={};
-        attr_name.forEach((value:string,index:number)=>{
+        attr_name.forEach((value:string)=>{
             checked[value]=true;
             attr[value]=min_max.get(value);
         })
         if(updateAttr){
             this.props.parent.setAttr(attr);
             this.props.parent.initAttrChecked(checked);
+            this.props.parent.setAttrList(attr_name);
+            this.props.parent.setStrList(str_name);
         }
 
         let yscale:any = new Map(Array.from(attr_name, key => [key, d3.scaleLinear(min_max.get(key), [this.svgHeight-this.padding.bottom, this.padding.top])]));
@@ -90,8 +96,8 @@ class Parallel extends React.Component<Props,any>{
        
         this.setState({data:data});
     }
-    getAttrData():void{
-        axios.post(this.props.url,{dataType:this.props.dataType})
+    getAttrData(dataType:string):void{
+        axios.post(this.props.url,{dataType:dataType})
         .then(res=>{
             this.compute(res.data.data,true);
         })
@@ -99,7 +105,7 @@ class Parallel extends React.Component<Props,any>{
     componentDidMount():void{
         this.svgWidth=this.svgRef.current?.clientWidth || 0;
         this.svgHeight=this.svgRef.current?.clientHeight || 0;
-        this.getAttrData();
+        this.getAttrData(this.props.dataType);
     }
     line(data:[[number,number]]):string{//生成路径
         let d='';
@@ -112,7 +118,7 @@ class Parallel extends React.Component<Props,any>{
         return d;
     }
     componentWillReceiveProps(nextProps:Props){
-        if(nextProps.attrValue!==this.props.attrValue && nextProps.attrWeight!==0 && nextProps.dataType===this.props.dataType){
+        if(nextProps.attrValue!==this.props.attrValue && nextProps.attrWeight!==0){
             let checkedArr:any=[];
             for(let key in nextProps.attrChecked){
                 if(nextProps.attrChecked[key]===true)
@@ -153,7 +159,7 @@ class Parallel extends React.Component<Props,any>{
             this.compute(reTsneData,false);
         }
         if(nextProps.dataType!==this.props.dataType){
-            this.getAttrData();
+            this.getAttrData(nextProps.dataType);
         }
     }
     render(){

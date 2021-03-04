@@ -25,7 +25,7 @@ class App extends React.Component<any, any> {
   constructor(props: any) {
     super(props)
     this.state = {
-      dataType:'Family',//数据集名称
+      dataType:'Author',//数据集名称
       reTsneData:[],//重新降维的数据
       choosePoints: [],//圈选的点
       personGraphs: [],//选中的人所在的子图
@@ -41,7 +41,16 @@ class App extends React.Component<any, any> {
       attrValue: {},//确认时属性的范围
       attrChecked: {},//属性checkbox状态
       attrCheckedBox: {},//临时保存checkbox的值
+      attrList:[],//所有属性字段
+      strList:[],//所有结构字段
+      
       displaySlider: '0',//显示属性调节滑块
+      displayDrawPanel:'0',//显示画板
+
+      attr_x:'',
+      attr_y:'',
+      str_x:'',
+      str_y:'',
     }
     this.setDataType=this.setDataType.bind(this);
     this.setReTsneData=this.setReTsneData.bind(this);
@@ -56,7 +65,14 @@ class App extends React.Component<any, any> {
     this.setAttrChecked = this.setAttrChecked.bind(this);
     this.setAttrCheckedBox = this.setAttrCheckedBox.bind(this);
     this.initAttrChecked = this.initAttrChecked.bind(this);
-    this.setDisplaySlider = this.setDisplaySlider.bind(this);
+    this.setAttrDisplaySlider = this.setAttrDisplaySlider.bind(this);
+    this.setStrDisplaySlider = this.setStrDisplaySlider.bind(this);
+    this.setAttrList=this.setAttrList.bind(this);
+    this.setStrList=this.setStrList.bind(this);
+    this.setStrX=this.setStrX.bind(this);
+    this.setStrY=this.setStrY.bind(this);
+    this.setAttrX=this.setAttrX.bind(this);
+    this.setAttrY=this.setAttrY.bind(this);
   }
   setDataType(e: ChangeEvent<HTMLSelectElement>):void{
     let value = e.target.value;
@@ -133,7 +149,7 @@ class App extends React.Component<any, any> {
     attrCheckedBox[key] = e.target.checked;
     this.setState({ attrCheckedBox: attrCheckedBox });
   }
-  setDisplaySlider(e: ChangeEvent<HTMLSelectElement>): void {
+  setAttrDisplaySlider(e: ChangeEvent<HTMLSelectElement>): void {
     let value = e.target.value;
     if (value === 'Slider') {
       this.setState({ displaySlider: '0' });
@@ -142,9 +158,39 @@ class App extends React.Component<any, any> {
       this.setState({ displaySlider: '-100%' });
     }
   }
+  setStrDisplaySlider(e: ChangeEvent<HTMLSelectElement>): void {
+    let value = e.target.value;
+    if (value === 'Slider') {
+      this.setState({ displayDrawPanel: '0' });
+    }
+    else {
+      this.setState({ displayDrawPanel: '-100%' });
+    }
+  }
+
+  setAttrList(data:Array<string>):void{
+    this.setState({attrList:data,attr_x:data[0],attr_y:data[1]});
+  }
+  setStrList(data:Array<string>):void{
+    this.setState({strList:data,str_x:data[0],str_y:data[1]});
+  }
+  setAttrX(e:React.ChangeEvent<HTMLSelectElement>){
+    this.setState({attr_x:e.target.value});
+  }
+  setAttrY(e:React.ChangeEvent<HTMLSelectElement>){
+    this.setState({attr_y:e.target.value});
+  }
+  setStrX(e:React.ChangeEvent<HTMLSelectElement>){
+    this.setState({str_x:e.target.value});
+  }
+  setStrY(e:React.ChangeEvent<HTMLSelectElement>){
+    this.setState({str_y:e.target.value});
+  }
+
   render(): React.ReactElement {
     const {dataType, strWeight_slider, attrWeight_slider, dimensions, strWeight, attrWeight, num, choosePoints,reTsneData,
-      centerPoint, personGraphs, attr, attrSliderValue, attrValue, attrChecked, attrCheckedBox ,displaySlider} = this.state;
+      centerPoint, personGraphs, attr, attrSliderValue, attrValue, attrChecked, attrCheckedBox ,displaySlider,displayDrawPanel,
+    attrList,strList,attr_x,attr_y,str_x,str_y} = this.state;
     let attrEl: Array<React.ReactElement> = [];
     for (let key in attr) {
       attrEl.push(
@@ -153,6 +199,7 @@ class App extends React.Component<any, any> {
             <Checkbox checked={key in attrCheckedBox ? attrCheckedBox[key] : false} onChange={this.setAttrCheckedBox.bind(this, key)}></Checkbox>
           </Col>
           <Col span={4}>{key}:</Col>
+          {/* <Col span={1}>{Math.floor(attr[key][0])}</Col> */}
           <Col span={10}>
             <Slider
               min={Math.floor(attr[key][0])}
@@ -165,9 +212,11 @@ class App extends React.Component<any, any> {
               onChange={this.setOneAttrSliderValue.bind(this, key)}
               onAfterChange={this.setAttrValue.bind(this, key)}
             />
-            <span style={{ position: 'absolute', bottom: '-4px', left: 0, fontSize: '0.3rem' }}>{Math.floor(attr[key][0])}</span>
-            <span style={{ position: 'absolute', bottom: '-4px', right: 0, fontSize: '0.3rem' }}>{Math.floor(attr[key][1])}</span>
+            {/* <span style={{ position: 'absolute', bottom: '-4px', left: 0, fontSize: '0.3rem' }}>{Math.floor(attr[key][0])}</span>
+            <span style={{ position: 'absolute', bottom: '-4px', right: 0, fontSize: '0.3rem' }}>{Math.floor(attr[key][1])}</span> */}
           </Col>
+          {/* <Col span={1}>{Math.floor(attr[key][1])}</Col> */}
+          <Col span={2}></Col>
           <Col span={6}>
             <span>{Math.floor(attrSliderValue[key][0])}</span>
             <span>-</span>
@@ -177,13 +226,19 @@ class App extends React.Component<any, any> {
         </Row>
       )
     }
+    let attrSelect=attrList.map((value:string,index:number)=>
+            <option value={value} key={index}>{value}</option>
+        )
+    let strSelect=strList.map((value:string,index:number)=>
+        <option value={value} key={index}>{value}</option>
+    )
     return (
       <div className="App">
 
         <div className="controlView">
           <div className="controlPanel">
             <div className="title">Control Panel</div>
-            <div className="content">
+            <div className="content" style={{textAlign:'left'}}>
               <Row style={{ height: '27px' }}>
               <Col span={7}>
                 DataSet:
@@ -297,16 +352,23 @@ class App extends React.Component<any, any> {
           <div className="filter">
             <div className="title">
               Attribute Panel
-              <select style={{ float: "right", height: '100%' }} onChange={this.setDisplaySlider}>
-                <option value="Slider" selected={true}>Slider</option>
-                <option value="Graph">Graph</option>
+              <select style={{ float: "right", height: '100%' }} onChange={this.setAttrDisplaySlider} defaultValue="Slider">
+                <option value="Slider">Slider</option>
+                <option value="Graph">Scatter</option>
               </select>
+              <select style={{float: "right", height: '100%'}} onChange={this.setAttrX} value={attr_x}>
+                    {attrSelect}
+                </select>
+                <select style={{float: "right", height: '100%'}} onChange={this.setAttrY} value={attr_y}>
+                    {attrSelect}
+                </select>
+              
             </div>
-            <div className="content" style={{position:'relative',padding:0,overflowX:'hidden'}}>
-              <DisTributeAttr url='http://localhost:8080' dimensions={dimensions} attrWeight={attrWeight} strWeight={strWeight} attrChecked={attrChecked}
-                choosePoints={choosePoints} centerPoint={centerPoint} display={displaySlider} dataType={dataType}
+            <div className="content" style={{position:'relative' ,overflow:'hidden',textAlign:'left'}}>
+              <DisTributeAttr key={'attrDisTributeAttr'} url='http://localhost:8080' dimensions={dimensions} attrWeight={attrWeight} strWeight={strWeight} attrChecked={attrChecked}
+                choosePoints={choosePoints} centerPoint={centerPoint} display={displaySlider} dataType={dataType} graphType='attr' x={attr_x} y={attr_y}
                 parent={{ setPersonGraphs: this.setPersonGraphs, setCenterPoint: this.setCenterPoint, setChoosePoints: this.setChoosePoints }}  />
-              <div className="attrSliderBox" style={{position:'absolute',left:displaySlider}}>
+              <div className="attrSliderBox" style={{position:'absolute',left:displaySlider,paddingLeft:'4px'}}>
                 {attrEl}
                 <Row>
                   <Col><Button onClick={this.setAttrChecked} style={{ margin: '0 5px' }} size='small'>search</Button></Col>
@@ -315,11 +377,32 @@ class App extends React.Component<any, any> {
             </div>
           </div>
           <div className="drawPanel">
-            <div className="title">Structure Panel</div>
-            <DrawPanel url='http://localhost:8080/matchModel' num={num} dimensions={dimensions} strWeight={strWeight} attrWeight={attrWeight}
-              attrChecked={attrChecked} attrValue={attrValue} dataType={dataType}
-              parent={{ setChoosePoints: this.setChoosePoints,setCenterPoint:this.setCenterPoint,
-               setReTsneData:this.setReTsneData}} />
+            <div className="title">Structure Panel
+            <select style={{ float: "right", height: '100%' }} onChange={this.setStrDisplaySlider} defaultValue='Slider'>
+                <option value="Slider">Paint</option>
+                <option value="Graph">Scatter</option>
+              </select>
+            <select style={{float: "right", height: '100%'}} onChange={this.setStrX} value={str_x}>
+                    {strSelect}
+                </select>
+                <select style={{float: "right", height: '100%'}} onChange={this.setStrY} value={str_y}>
+                    {strSelect}
+                </select>
+            
+            </div>
+            <div className='content' style={{position:'relative' ,overflow:'hidden',textAlign:'left',padding:0}}>
+            <DisTributeAttr key={'strDisTributeAttr'} url='http://localhost:8080' dimensions={dimensions} attrWeight={attrWeight} strWeight={strWeight} attrChecked={attrChecked}
+                choosePoints={choosePoints} centerPoint={centerPoint} display={displayDrawPanel} dataType={dataType} graphType='str' x={str_x} y={str_y}
+                parent={{ setPersonGraphs: this.setPersonGraphs, setCenterPoint: this.setCenterPoint, setChoosePoints: this.setChoosePoints }}  />
+
+              <div style={{position:'absolute',left:displayDrawPanel,width:'100%',height:'100%'}}>
+                <DrawPanel url='http://localhost:8080/matchModel' num={num} dimensions={dimensions} strWeight={strWeight} attrWeight={attrWeight}
+                attrChecked={attrChecked} attrValue={attrValue} dataType={dataType}
+                parent={{ setChoosePoints: this.setChoosePoints,setCenterPoint:this.setCenterPoint,
+                setReTsneData:this.setReTsneData}} />
+              </div>
+            
+            </div>
           </div>
 
           {/* <div className='nodelistView'>
@@ -349,7 +432,7 @@ class App extends React.Component<any, any> {
           </div>
 
           <div className="forceComputeView">
-            <div className='title'>Candinate View</div>
+            <div className='title'>Candidate View</div>
             <div className='content'>
               <ForceCompute graphs={choosePoints} dataType={dataType} />
             </div>
@@ -360,7 +443,7 @@ class App extends React.Component<any, any> {
             <div className='content'>
               <Parallel url="http://localhost:8080/getAttr" choosePoints={choosePoints} centerPoint={centerPoint}
                 attrWeight={attrWeight} attrChecked={attrChecked} attrValue={attrValue} reTsneData={reTsneData} dataType={dataType}
-                parent={{ setAttr: this.setAttr, initAttrChecked: this.initAttrChecked }} />
+                parent={{ setAttr: this.setAttr, initAttrChecked: this.initAttrChecked,setAttrList:this.setAttrList,setStrList:this.setStrList }} />
             </div>
           </div>
         </div>

@@ -248,7 +248,7 @@ table,table th, table tr td {
     box-sizing: border-box;
 }
 .btnGroup{
-    width:auto;
+    width:calc(20% - 5px);
     height:100%;
     border:1px solid #3072ad;
     background-color: white;
@@ -258,32 +258,32 @@ table,table th, table tr td {
     cursor: pointer;
 }
 .btnNode{
-    width:45px;
+    /* width:45px; */
     background-image: url('./assets/node.png');
     background-position: center center;
     background-repeat: no-repeat;
-    background-size: 60%;
+    background-size: 40%;
 }
 .btnLine{
-    width:45px;
+    /* width:45px; */
     background-image: url('./assets/line.png');
     background-position: center center;
     background-repeat: no-repeat;
 }
 .btnRedo{
-    width:45px;
+    /* width:45px; */
     background-image: url('./assets/redo.png');
     background-position: center center;
     background-repeat: no-repeat;
 }
 .btnUndo{
-    width:45px;
+    /* width:45px; */
     background-image: url('./assets/undo.png');
     background-position: center center;
     background-repeat: no-repeat;
 }
 .btnSearch{
-    width:45px;
+    /* width:45px; */
     background-image: url('./assets/search.png');
     background-position: center center;
     background-repeat: no-repeat;

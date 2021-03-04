@@ -5,8 +5,17 @@ from datetime import datetime
 from sklearn.manifold import TSNE
 import math
 import numpy as np
+import re
 from dataProcessing.tongji import run
+from sklearn.metrics.pairwise import euclidean_distances
 
+def divideVectorsToStrAndAttr(vectors,dimensionsStr,dimensionsAttrChecked):
+    vectors=np.mat(vectors)
+    selectAttrIndexList=list(i.start()+dimensionsStr for i in re.finditer('1', dimensionsAttrChecked))
+    vectorsStr = vectors[:,:dimensionsStr]
+    vectorsAttr = vectors[:,selectAttrIndexList]
+
+    return vectorsStr,vectorsAttr
 
 
 def getDistance(vectors,dimensionsStr,dimensionsAttrChecked,strWeight,attrWeight,saveStrDistance,readStrDistance,saveDir,readDir):
@@ -29,45 +38,57 @@ def getDistance(vectors,dimensionsStr,dimensionsAttrChecked,strWeight,attrWeight
     if readStrDistance:
         with open(readDir+'distanceStrMatrix' + '_' + str(dimensionsStr)+'.json','r',encoding='utf-8') as fr:
             distanceMatrixStr=json.load(fr)
-        for vector1 in vectors:
-            distanceAttrArr = []
-            for vector2 in vectors:
-                distanceAttr=0
-                for index in range(len(vector1)):
-                    if index>=dimensionsStr and dimensionsAttrChecked[index-dimensionsStr]=='1':
-                        distanceAttr += math.pow(float(vector1[index])-float(vector2[index]),2)
-                distanceAttrArr.append(math.sqrt(distanceAttr / dimensionsAttr) * attrWeight)
-            distanceMatrixAttr.append(distanceAttrArr)
-        distanceMatrixStr=np.mat(distanceMatrixStr)*strWeight
-        distanceMatrixAttr=np.mat(distanceMatrixAttr)
+        # for vector1 in vectors:
+        #     distanceAttrArr = []
+        #     for vector2 in vectors:
+        #         distanceAttr=0
+        #         for index in range(len(vector1)):
+        #             if index>=dimensionsStr and dimensionsAttrChecked[index-dimensionsStr]=='1':
+        #                 distanceAttr += math.pow(float(vector1[index])-float(vector2[index]),2)
+        #         distanceAttrArr.append((distanceAttr / dimensionsAttr) * attrWeight)
+        #     distanceMatrixAttr.append(distanceAttrArr)
+        vectors = np.mat(vectors)
+        selectAttrIndexList = list(i.start() + dimensionsStr for i in re.finditer('1', dimensionsAttrChecked))
+        vectorsAttr = vectors[:, selectAttrIndexList]
+        distanceMatrixAttr=euclidean_distances(vectorsAttr,vectorsAttr)
+        distanceMatrixStr=np.mat(distanceMatrixStr)*strWeight/dimensionsStr
+        distanceMatrixAttr=np.mat(distanceMatrixAttr)*attrWeight/dimensionsAttr
         distanceMatrix=distanceMatrixStr+distanceMatrixAttr
         return distanceMatrix
     else:
-        index1=0
-        for vector1 in vectors:
-            index1+=1
-            distanceArr=[]
-            distanceStrArr=[]
-            index2=0
-            for vector2 in vectors:
-                index2+=1
-                print(index1,index2)
-                distanceStr=0
-                distanceAttr=0
-                for index in range(len(vector1)):
-                    if index<dimensionsStr:
-                        distanceStr += math.pow(float(vector1[index])-float(vector2[index]),2)
-                    elif index>=dimensionsStr and dimensionsAttrChecked[index-dimensionsStr]=='1':
-                        distanceAttr += math.pow(float(vector1[index])-float(vector2[index]),2)
-                distanceArr.append(math.sqrt(distanceStr/dimensionsStr)*strWeight+math.sqrt(distanceAttr/dimensionsAttr)*attrWeight)
-                if saveStrDistance:
-                    distanceStrArr.append(math.sqrt(distanceStr/dimensionsStr))
-            distanceMatrix.append(distanceArr)
-            distanceMatrixStr.append(distanceStrArr)
+        # index1=0
+        # for vector1 in vectors:
+        #     index1+=1
+        #     distanceArr=[]
+        #     distanceStrArr=[]
+        #     index2=0
+        #     for vector2 in vectors:
+        #         index2+=1
+        #         print(index1,index2)
+        #         distanceStr=0
+        #         distanceAttr=0
+        #         for index in range(len(vector1)):
+        #             if index<dimensionsStr:
+        #                 distanceStr += math.pow(float(vector1[index])-float(vector2[index]),2)
+        #             elif index>=dimensionsStr and dimensionsAttrChecked[index-dimensionsStr]=='1':
+        #                 distanceAttr += math.pow(float(vector1[index])-float(vector2[index]),2)
+        #         distanceArr.append((distanceStr/dimensionsStr)*strWeight+(distanceAttr/dimensionsAttr)*attrWeight)
+        #         if saveStrDistance:
+        #             distanceStrArr.append(distanceStr/dimensionsStr)
+        #     distanceMatrix.append(distanceArr)
+        #     distanceMatrixStr.append(distanceStrArr)
+
+        #使用tsne自带的算距离矩阵的方法
+        vectorsStr,vectorsAttr=divideVectorsToStrAndAttr(vectors,dimensionsStr,dimensionsAttrChecked)
+        distanceMatrixStr=euclidean_distances(vectorsStr,vectorsStr)*strWeight/dimensionsStr
+        distanceMatrixAttr=euclidean_distances(vectorsAttr,vectorsAttr)*attrWeight/dimensionsAttr
+        distanceMatrix = distanceMatrixStr + distanceMatrixAttr
+
         if saveStrDistance:
             with open(saveDir+'distanceStrMatrix' + '_' + str(dimensionsStr)+'.json','w') as fw:
-                json.dump(distanceMatrixStr,fw)
-        return np.mat(distanceMatrix)
+                json.dump(distanceMatrixStr.tolist(),fw)
+        print('start tsne')
+        return distanceMatrix
 
 
 
@@ -110,6 +131,7 @@ def getTSNE(dirPath,dimensionsStr=128,dimensionsAttrChecked='111111',strWeight=0
             index += 1
 
     if attrWeight==0 or strWeight==0:
+        print('start tsne')
         tsne = TSNE(method='barnes_hut',angle=0.2, n_iter=1000)
         data_tsne = tsne.fit_transform(vectors)
     else:
@@ -128,10 +150,11 @@ def getTSNE(dirPath,dimensionsStr=128,dimensionsAttrChecked='111111',strWeight=0
     print((end - start).seconds)
     return outdata
 
-def reTsne(modelId,modelVector,dirPath,dimensionsStr=128,dimensionsAttrChecked='111111',strWeight=0.5,attrWeight=0.5,saveFile=False,readDir=''):
+def reTsne(modelId,modelVectorStr,modelVectorAttr,dirPath,dimensionsStr=128,dimensionsAttrChecked='111111',strWeight=0.5,attrWeight=0.5,saveFile=False,readDir=''):
     '''
     :param modelId:新加入的id
-    :param modelVector:新加入的向量
+    :param modelVectorStr:新加入的向量结构部分
+    :param modelVectorAttr:新加入的向量属性部分
     :param dirPath:数据存储目录
     :param dimensionsStr: 结构向量维度
     :param dimensionsAttrChecked:哪些属性用于降维
@@ -147,7 +170,6 @@ def reTsne(modelId,modelVector,dirPath,dimensionsStr=128,dimensionsAttrChecked='
     with open(dirPath + 'vectors_' + str(time_interval) + '_' + str(dimensionsStr) + '.csv', 'r') as fr:
         data = csv.reader(fr)
         index = 0
-
         for i in data:
             if index != 0:
                 id.append(str(i[0]))
@@ -164,10 +186,9 @@ def reTsne(modelId,modelVector,dirPath,dimensionsStr=128,dimensionsAttrChecked='
                     vectors.append(i)
             index += 1
         id.append(str(modelId))
-        index=0
     if attrWeight == 0 or strWeight == 0:
         tsne = TSNE(method='barnes_hut', angle=0.2, n_iter=1000)
-        vectors.append(modelVector[0:dimensionsStr])
+        vectors.append(modelVectorStr)
         data_tsne = tsne.fit_transform(vectors)
     else:
         distanceMatrix = []
@@ -175,32 +196,51 @@ def reTsne(modelId,modelVector,dirPath,dimensionsStr=128,dimensionsAttrChecked='
         distanceMatrixAttr = []
         dimensionsAttr = dimensionsAttrChecked.count('1')
 
-        with open(readDir + 'distanceStrMatrix' + '_' + str(dimensionsStr) + '.json', 'r', encoding='utf-8') as fr:
-            distanceMatrixStr = json.load(fr)
-        distanceStrAttr=[]
-        for i in range(len(vectors)):
-            distanceStr = 0
-            for index in range(len(vectors[i])):
-                if index < dimensionsStr:
-                    distanceStr += math.pow(float(vectors[i][index]) - float(modelVector[index]), 2)
-            distanceStrAttr.append(distanceStr)
-            distanceMatrixStr[i].append(distanceStr)
-        distanceStrAttr.append(0)
-        distanceMatrixStr.append(distanceStrAttr)
-        distanceMatrixStr = np.mat(distanceMatrixStr) * strWeight
-        vectors.append(modelVector)
-        for vector1 in vectors:
-            distanceAttrArr = []
-            for vector2 in vectors:
-                distanceAttr = 0
-                for index in range(len(vector1)):
-                    if index >= dimensionsStr and dimensionsAttrChecked[index - dimensionsStr] == '1':
-                        distanceAttr += math.pow(float(vector1[index]) - float(vector2[index]), 2)
-                distanceAttrArr.append(math.sqrt(distanceAttr / dimensionsAttr) * attrWeight)
-            distanceMatrixAttr.append(distanceAttrArr)
+        # with open(readDir + 'distanceStrMatrix' + '_' + str(dimensionsStr) + '.json', 'r', encoding='utf-8') as fr:
+        #     distanceMatrixStr = np.mat(json.load(fr))
+        vectorsStr,vectorsAttr=divideVectorsToStrAndAttr(vectors,dimensionsStr,dimensionsAttrChecked)
+        distanceMatrixStr=euclidean_distances(vectorsStr,vectorsStr)*strWeight/dimensionsStr
+        distanceMatrixAttr=euclidean_distances(vectorsAttr,vectorsAttr)*attrWeight/dimensionsAttr
+        distanceMatrix=distanceMatrixStr+distanceMatrixAttr
+        modelDistanceStr=euclidean_distances(vectorsStr,[modelVectorStr])*strWeight/dimensionsStr
+        modelDistanceAttr=euclidean_distances(vectorsAttr,[modelVectorAttr])*attrWeight/dimensionsAttr
+        modelDistance=modelDistanceStr+modelDistanceAttr
+        distanceMatrix=np.c_[distanceMatrix,modelDistance]
+        modelDistance=modelDistance.tolist()
+        modelDistance.append([0])
+        modelDistance=np.mat(modelDistance)
+        modelDistance = modelDistance.reshape(1, modelDistance.shape[0])
+        distanceMatrix=np.r_[distanceMatrix,modelDistance]
 
-        distanceMatrixAttr = np.mat(distanceMatrixAttr)
-        distanceMatrix = distanceMatrixStr + distanceMatrixAttr
+
+
+
+
+
+        # distanceStrAttr=[]
+        # for i in range(len(vectors)):
+        #     distanceStr = 0
+        #     for index in range(len(vectors[i])):
+        #         if index < dimensionsStr:
+        #             distanceStr += math.pow(float(vectors[i][index]) - float(modelVector[index]), 2)
+        #     distanceStrAttr.append(distanceStr)
+        #     distanceMatrixStr[i].append(distanceStr)
+        # distanceStrAttr.append(0)
+        # distanceMatrixStr.append(distanceStrAttr)
+        # distanceMatrixStr = np.mat(distanceMatrixStr) * strWeight
+        # vectors.append(modelVector)
+        # for vector1 in vectors:
+        #     distanceAttrArr = []
+        #     for vector2 in vectors:
+        #         distanceAttr = 0
+        #         for index in range(len(vector1)):
+        #             if index >= dimensionsStr and dimensionsAttrChecked[index - dimensionsStr] == '1':
+        #                 distanceAttr += math.pow(float(vector1[index]) - float(vector2[index]), 2)
+        #         distanceAttrArr.append(distanceAttr / dimensionsAttr) * attrWeight
+        #     distanceMatrixAttr.append(distanceAttrArr)
+        #
+        # distanceMatrixAttr = np.mat(distanceMatrixAttr)
+        # distanceMatrix = distanceMatrixStr + distanceMatrixAttr
 
         tsne = TSNE(metric='precomputed', method='barnes_hut', angle=0.2, n_iter=1000)
         data_tsne = tsne.fit_transform(distanceMatrix)
@@ -218,8 +258,8 @@ def reTsne(modelId,modelVector,dirPath,dimensionsStr=128,dimensionsAttrChecked='
 
 
 if __name__=='__main__':
-    data=[[0.8,0.2],[0.2,0.8],[0,1]]
-    data2=['11111','10000','11000']
+    data=[[0.8,0.2]]
+    data2=['11111']
     dataType='Family'
     dirPath='./data/'+dataType+'/'
     for j in data2:
@@ -227,9 +267,9 @@ if __name__=='__main__':
             print(i)
             saveStrDistance=False
             readStrDistance=False
-            if i==[0.8,0.2]:
-                saveStrDistance=True
-            if i!=[1,0] and i!=[0.8,0.2] and i!=[0,1]:
-                readStrDistance=True
+            # if i==[0.8,0.2]:
+            #     saveStrDistance=True
+            # if i!=[1,0] and i!=[0.8,0.2] and i!=[0,1]:
+            #     readStrDistance=True
             getTSNE(dirPath =dirPath ,dimensionsStr=128,dimensionsAttrChecked=j,strWeight=i[0],attrWeight=i[1],
                     saveFile=True,saveStrDistance=saveStrDistance,readStrDistance=readStrDistance,saveDir=dirPath,readDir=dirPath)

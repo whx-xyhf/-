@@ -124,6 +124,7 @@ def run(url1,url2,url3,url4,url5,url6,url7,dimensions,isExist=False):
             attr.append(int(graph['year']))
             attrDic[graph['id']]=attr
             graph['attr']={'author':attr[0],'cite':attr[1],'rank':attr[2],'paper':attr[3],'weight':attr[4],'year':attr[5]}
+            graph['str']={'nodes':len(graph['nodes']),'edges':len(graph['edges'])}
             attrArrayDic.append(attr)
             index+=1
         saveJson(url3,subGraphs)
@@ -159,7 +160,7 @@ def run(url1,url2,url3,url4,url5,url6,url7,dimensions,isExist=False):
 if __name__=='__main__':
     time_interval = 1
     dimensions=128
-    dirPath = './data/paper/'
+    dirPath = './data/Author/'
     run(dirPath+'data_weight.json',dirPath+'node2Num.json',
         dirPath+'subGraphs_'+str(time_interval)+'.json',dirPath+'orignNetNum.csv',
         dirPath+'vectors_'+str(time_interval)+'_'+str(dimensions)+'.csv',

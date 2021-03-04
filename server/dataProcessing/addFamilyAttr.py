@@ -22,11 +22,11 @@ def vectorExtend(url,extendData,isExist,dimensions):#向量拼接
     return vectors,head
 
 if __name__=='__main__':
-    # with open('./data/family/att5.json','r') as fr:
-    #     attrData=json.load(fr)
+    with open('./data/family/att5.json','r') as fr:
+        attrData=json.load(fr)
     time_interval = 1
     dimensions = 128
-    dirPath = './data/family/'
+    dirPath = './data/Family/'
     attrArrayDic=[]
     attrDic={}
     attrName=[]
@@ -68,13 +68,16 @@ if __name__=='__main__':
             csv_writer.writerow(head)
             for line in vectors:
                 csv_writer.writerow(line)
-        # for i in range(len(data)):
-        #     attr=attrData[str(data[i]['id'])]
-        #     data[i]['attr']={'position':attr['positionNum'],'avAge':attr['averageAge'],'village':attr['villageNum'],
-        #                      'timeSpan':attr['timeSpan'],'ageGap':attr['ageGap']}
-        #     data[i]['str']={'depth':data[i]['deepth'],'nodes':data[i]['count']}
-        #     # data[i]['id']=int(data[i]['name'])
-        #     # del data[i]['name']
-        #     print(i)
+
+
+
+    #     for i in range(len(data)):
+    #         attr=attrData[str(data[i]['id'])]
+    #         data[i]['attr']={'PN':attr['positionNum'],'AA':attr['averageAge'],'VN':attr['villageNum'],
+    #                          'TS':attr['timeSpan'],'AG':attr['ageGap']}
+    #         data[i]['str']={'depth':data[i]['deepth'],'nodes':data[i]['count']}
+    #         # data[i]['id']=int(data[i]['name'])
+    #         # del data[i]['name']
+    #         print(i)
     # with open('./data/family/subGraphs_1.json','w') as fw:
     #     json.dump(data,fw)

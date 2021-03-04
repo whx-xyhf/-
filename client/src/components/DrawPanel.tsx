@@ -40,7 +40,7 @@ class DrawPanel extends React.Component<Props, any>{
     private svgWidth: number = 0;
     private svgHeight: number = 0;
     private circleR:number=3.5;
-    private padding = { top: 10, bottom: 10, left: 20, right: 10 };
+    private padding = { top: 10, bottom: 10, left: 40, right: 10 };
     private modelGraohs = [
         { id: -1, nodes: [1, 2, 3], edges: [[1, 2], [2, 3]] },
         { id: -2, nodes: [1, 2, 3, 4, 5, 6], edges: [[1, 2], [1, 3], [1, 4], [1, 5], [1, 6]] },
@@ -113,7 +113,7 @@ class DrawPanel extends React.Component<Props, any>{
         let nodesId: Array<number> = [];
         nodes.forEach((value: node) => {
             let id='id' in value?value.id:value.data.id;
-            features[id] = 1;
+            features[id] = 'depth' in value?value.depth:1;
             nodesId.push(id);
         })
         
@@ -304,17 +304,17 @@ class DrawPanel extends React.Component<Props, any>{
                  fill="none" strokeWidth="1px" stroke="#ccc" key={index} strokeDasharray={value.end ? '0' : '5 5'}></path>
         )
         const model = dataType === 'Author' ? this.modelGraohs.map((value: any, index: number) =>
-            <div className='modelGraph' key={index} >
+            <div className='modelGraph' key={index} style={{ width: '109px', left: `${112 * index+3}px`}}>
                 <NodeLink key={index} graph={value} parent={this} onClick={this.chooseModelGraph} />
             </div>
         ) : this.modelTrees.map((value: any, index: number) =>
-            <div className='modelGraph' key={index} style={{ width: '100px', left: `${103 * index+3}px`}}>
+            <div className='modelGraph' key={index} style={{ width: '109px', left: `${112 * index+3}px`}}>
                 <TargetTree key={index} graph={value} parent={this} onClick={this.chooseModelTree} />
             </div>
         )
 
         return (
-            <div className="content">
+            <div style={{width:'100%',height:'100%'}}>
                 <div className="tools">
                     <input type="button" className="btnGroup btnNode" title="node" onClick={this.beginDrawNode}></input>
                     <input type="button" className="btnGroup btnLine" title="link" onClick={this.beginDrawLine}></input>
@@ -322,7 +322,7 @@ class DrawPanel extends React.Component<Props, any>{
                     <input type="button" className="btnGroup btnUndo" title="undo" onClick={this.undo}></input>
                     <input type="button" className="btnGroup btnSearch" title="search" onClick={this.matchModel}></input>
                 </div>
-                <div className="panel">
+                <div className="panel" style={{padding:'0 5px'}}>
                     <svg ref={this.svgRef} style={{ width: "100%", height: "100%", cursor: 'pointer' }} onClick={this.drawNode} onMouseMove={this.drawDashLine}>
                         {linkEl}
                         {nodeEl}

@@ -208,7 +208,7 @@ def getAttr():
             data=json.load(fr)
             attr=[]
             for i in data:
-                attr.append({'id':i['id'],'attr':i['attr']})
+                attr.append({'id':i['id'],'attr':i['attr'],'str':i['str']})
             res = make_response(jsonify({'code': 200, "data": attr}))
     return res
 
@@ -260,7 +260,6 @@ def matchModel():
             else:
                 attrStr += '0'
                 attrVector.append(0)
-        docVectors.extend(attrVector)
 
         dimensionsAttr=len(attrStr)
         dimensionsStr=int(dimensions)
@@ -271,7 +270,7 @@ def matchModel():
             with open(file,'r') as fr:
                 tsneData=json.load(fr)
         else:
-            tsneData=reTsne(name,docVectors,dirPath = './dataProcessing/data/'+dataType+'/',dimensionsStr=dimensionsStr,dimensionsAttrChecked=attrStr
+            tsneData=reTsne(name,docVectors,attrVector,dirPath = './dataProcessing/data/'+dataType+'/',dimensionsStr=dimensionsStr,dimensionsAttrChecked=attrStr
                        ,strWeight=strWeight,attrWeight=attrWeight,saveFile=True,readDir='./dataProcessing/data/'+dataType+'/')
 
         newData=[]
