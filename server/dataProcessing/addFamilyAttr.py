@@ -22,15 +22,15 @@ def vectorExtend(url,extendData,isExist,dimensions):#向量拼接
     return vectors,head
 
 if __name__=='__main__':
-    with open('./data/family/att5.json','r') as fr:
-        attrData=json.load(fr)
+    # with open('./data/Family/att5.json','r') as fr:
+    #     attrData=json.load(fr)
     time_interval = 1
     dimensions = 128
     dirPath = './data/Family/'
     attrArrayDic=[]
     attrDic={}
     attrName=[]
-    with open('./data/family/subGraphs_1.json','r') as fr:
+    with open('./data/Family/subGraphs_1.json','r') as fr:
         data=json.load(fr)
         for i in data[0]['attr']:
             attrName.append(i)
@@ -41,19 +41,18 @@ if __name__=='__main__':
             attrArrayDic.append(attr)
             attrDic[subgrapg['id']]=attr
         # 归一化
-        print(attrArrayDic)
         attrArrayDic = np.array(attrArrayDic)
-        mean = np.mean(attrArrayDic, axis=0)
-        std = np.std(attrArrayDic, axis=0)
-        print(mean, std)
+        max = np.max(attrArrayDic, axis=0)
+        min = np.min(attrArrayDic, axis=0)
+        print(max, min)
         for i in attrDic:
             for j in range(len(attrDic[i])):
-                attrDic[i][j] = (attrDic[i][j] - mean[j]) / std[j]
+                attrDic[i][j] = (attrDic[i][j] - min[j]) / (max[j]-min[j])
         with open(dirPath+'attrMeanStd_'+str(time_interval)+'.json', 'w', encoding='utf-8') as fw:
-            mean_std = {'mean': {}, 'std': {}}
+            mean_std = {'max': {}, 'min': {}}
             for i in range(len(attrName)):
-                mean_std['mean'][attrName[i]] = mean[i]
-                mean_std['std'][attrName[i]] = std[i]
+                mean_std['max'][attrName[i]] = float(max[i])
+                mean_std['min'][attrName[i]] = float(min[i])
             json.dump(mean_std, fw)
         with open(dirPath+'attrVectors_'+str(time_interval)+'.json', 'w', encoding='utf-8') as fw:
             json.dump(attrDic, fw)
@@ -72,12 +71,13 @@ if __name__=='__main__':
 
 
     #     for i in range(len(data)):
+    #         # data[i]['id']=int(data[i]['name'])
+    #         # del data[i]['name']
     #         attr=attrData[str(data[i]['id'])]
     #         data[i]['attr']={'PN':attr['positionNum'],'AA':attr['averageAge'],'VN':attr['villageNum'],
     #                          'TS':attr['timeSpan'],'AG':attr['ageGap']}
     #         data[i]['str']={'depth':data[i]['deepth'],'nodes':data[i]['count']}
-    #         # data[i]['id']=int(data[i]['name'])
-    #         # del data[i]['name']
+    #
     #         print(i)
-    # with open('./data/family/subGraphs_1.json','w') as fw:
+    # with open('./data/Family/subGraphs_1.json','w') as fw:
     #     json.dump(data,fw)

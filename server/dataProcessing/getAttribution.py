@@ -101,6 +101,11 @@ def vectorExtend(url,extendData,isExist,dimensions):#向量拼接
 
 def run(url1,url2,url3,url4,url5,url6,url7,dimensions,isExist=False):
     originData=getJson(url1)
+    originDataDic={}
+    for year in originData:
+        originDataDic[year]={}
+        for i in originData[year]:
+            originDataDic[year][i['name']]=i
     node2Num=getJson(url2)
     subGraphs=getJson(url3)
     edges=readGraph(url4)
@@ -126,21 +131,33 @@ def run(url1,url2,url3,url4,url5,url6,url7,dimensions,isExist=False):
             graph['attr']={'author':attr[0],'cite':attr[1],'rank':attr[2],'paper':attr[3],'weight':attr[4],'year':attr[5]}
             graph['str']={'nodes':len(graph['nodes']),'edges':len(graph['edges'])}
             attrArrayDic.append(attr)
+            graph['authorInfo']={}
+            nodes=graph['nodes']
+            for node in nodes:
+                authorInfo=originDataDic[graph['year']][num2Node[node]]
+                papers=authorInfo['paper']
+                papersLue=[]
+                rank=0
+                for paper in papers:
+                    papersLue.append({'title':paper['title'],'author':paper['author'],'cite':paper['cite']})
+                    rank+=paper['author'].index(num2Node[node]) + 1
+                graph['authorInfo'][node]={'name':num2Node[node],'cite':authorInfo['cite'],
+                                           'count':authorInfo['count'],'rank':rank/len(papersLue),'paper':papersLue,'yaer':authorInfo['year']}
             index+=1
         saveJson(url3,subGraphs)
         #归一化
         attrArrayDic=np.array(attrArrayDic)
-        mean=np.mean(attrArrayDic,axis=0)
-        std=np.std(attrArrayDic,axis=0)
-        print(mean,std)
+        max=np.max(attrArrayDic,axis=0)
+        min=np.min(attrArrayDic,axis=0)
+        print(max,min)
         for i in attrDic:
             for j in range(len(attrDic[i])):
-                attrDic[i][j]=(attrDic[i][j]-mean[j])/std[j]
+                attrDic[i][j]=(attrDic[i][j]-min[j])/(max[j]-min[j])
         with open(url7,'w',encoding='utf-8') as fw:
             mean_std={'mean':{},'std':{}}
             for i in range(len(attrName)):
-                mean_std['mean'][attrName[i]]=mean[i]
-                mean_std['std'][attrName[i]] = std[i]
+                mean_std['mean'][attrName[i]]=float(max[i])
+                mean_std['std'][attrName[i]] = float(min[i])
             json.dump(mean_std,fw)
 
         with open(url6,'w',encoding='utf-8') as fw:

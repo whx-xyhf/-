@@ -88,9 +88,14 @@ def saveSubGraph(G,subGraphNodes,features,url,index,yearPath):
     for key in subGraphNodes:
         if isinstance(subGraphNodes[key],list):
             subGraph = G.subgraph(subGraphNodes[key])
-            subEdges = list(subGraph.edges())
+            subEdges=[]
+            weight=[]
+            subEdgesWeight = subGraph.edges(data=True)
+            for i,j,k in subEdgesWeight:
+                subEdges.append([i,j])
+                weight.append(k['weight'])
             subNodes = list(subGraph.nodes())
-            subGraphArray.append({'id': index, 'nodes': subNodes, 'edges': subEdges,'year':yearPath})
+            subGraphArray.append({'id': index, 'nodes': subNodes, 'edges': subEdges,'weight':weight,'year':yearPath})
             with open(url + str(index) + ".json", 'w', encoding="utf-8") as fw:
                 output = {"edges": subEdges, "features": {}}
                 for node in subNodes:
@@ -128,7 +133,7 @@ if __name__=="__main__":
     start = datetime.now()
     yearPath = ''
     time_interval=1
-    dirPath='./data/paper/'
+    dirPath='./data/Author/'
     num_net_fileName='orignNetNum.csv'
     community_fileName='communities.json'
     subGraphs_fileName='subGraphs'+'_'+str(time_interval)+'.json'

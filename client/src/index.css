@@ -168,7 +168,6 @@ body {
 }
 .infoBox{
     float:left;
-    width: 100%;
     height:100%;
     /* border: 1px solid #ccc; */
     box-sizing: border-box;
@@ -224,20 +223,26 @@ body {
 }
 .forceBox{
     float:left;
-    width: 50%;
+    width: 25%;
     height:50%;
+    padding: 5px 5px;
+}
+.condidateBox{
+    height:100%;
+    width:100%;
     border: 1px solid #ccc;
     box-sizing: border-box;
 }
-.table{
-    height:100%;
-    width: 100%;
-    overflow-x: auto;
-    overflow-y: auto;
+.candidateTitle{
+    height:40px;
+    width:100%;
+    background-color: rgba(245, 245, 245, 1);
+    color: #000;
+    font-size: 0.1rem;
 }
-table,table th, table tr td {
-    font-size: 0.7rem; 
-    border:1px solid #0094ff; 
+.candidateContent{
+    height:calc(100% - 40px);
+    width:100%;
 }
 
 .tools{

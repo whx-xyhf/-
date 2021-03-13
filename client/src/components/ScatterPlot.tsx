@@ -199,6 +199,16 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
             }
             
         }
+        let svg=d3.select('#svg_scatter')
+        svg.call(d3.zoom()
+        .scaleExtent([0.1,7])
+        .on("zoom",zoomed));
+        
+        function zoomed(){
+            let transform = d3.zoomTransform(svg.node());
+            //svg_point.selectAll("circle").attr("r",1);
+            svg.selectAll("g").attr("transform", "translate(" + transform.x + "," + transform.y + ") scale(" + transform.k + ")");
+        }
     }
     isInPolygon(checkPoint:Array<number>, polygonPoints:Array<edges>) {//判断一个点是否在多边形内
         var counter = 0;
@@ -328,10 +338,10 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
         }
         return(
             <div className="scatter">
-                <svg style={{width:'100%',height:'100%'}} ref={this.svgRef} >
-                    {points}
-                    {pointsChoose}
-                    {centerPoint}
+                <svg style={{width:'100%',height:'100%'}} ref={this.svgRef} id="svg_scatter">
+                    <g>{points}</g>
+                    <g>{pointsChoose}</g>
+                    <g>{centerPoint}</g>
                 </svg>
                 {/* <canvas ref={this.canvasRef} style={{position:'absolute',top:'0',left:'0'}}
                 onMouseMove={this.onMouseMove} onMouseDown={this.onMouseDown} onMouseUp={this.onMouseUp}></canvas> */}

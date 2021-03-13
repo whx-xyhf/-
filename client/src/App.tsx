@@ -8,6 +8,7 @@ import DrawPanel from './components/DrawPanel';
 import DisTributeAttr from './components/DistributeAttr';
 import { Slider, InputNumber, Row, Col, Button, Checkbox } from 'antd';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
+import axios from 'axios'
 
 
 type ChoosePointData = {
@@ -25,13 +26,14 @@ class App extends React.Component<any, any> {
   constructor(props: any) {
     super(props)
     this.state = {
-      dataType:'Author',//数据集名称
+      // dataType:'Author',//数据集名称
+      dataType:'Family',//数据集名称
       reTsneData:[],//重新降维的数据
       choosePoints: [],//圈选的点
       personGraphs: [],//选中的人所在的子图
       centerPoint: {},//点击的点
       dimensions: 128,//向量维度
-      num: 10,//匹配的限制数量
+      num: 8,//匹配的限制数量
       strWeight: 1,//拓扑权重
       attrWeight: 0,//属性权重
       strWeight_slider: 1,//拓扑权重(保存滑块的值)
@@ -73,6 +75,7 @@ class App extends React.Component<any, any> {
     this.setStrY=this.setStrY.bind(this);
     this.setAttrX=this.setAttrX.bind(this);
     this.setAttrY=this.setAttrY.bind(this);
+    this.match=this.match.bind(this);
   }
   setDataType(e: ChangeEvent<HTMLSelectElement>):void{
     let value = e.target.value;
@@ -147,7 +150,8 @@ class App extends React.Component<any, any> {
   setAttrCheckedBox(key: string, e: CheckboxChangeEvent): void {
     let attrCheckedBox = JSON.parse(JSON.stringify(this.state.attrCheckedBox));
     attrCheckedBox[key] = e.target.checked;
-    this.setState({ attrCheckedBox: attrCheckedBox });
+    // this.setState({ attrCheckedBox: attrCheckedBox });
+    this.setState({ attrCheckedBox: attrCheckedBox,attrChecked: attrCheckedBox, choosePoints: [], centerPoint: {} });
   }
   setAttrDisplaySlider(e: ChangeEvent<HTMLSelectElement>): void {
     let value = e.target.value;
@@ -187,6 +191,26 @@ class App extends React.Component<any, any> {
     this.setState({str_y:e.target.value});
   }
 
+  match():void{//匹配相似图
+    const {dimensions,strWeight,attrWeight,attrChecked,attrValue,dataType,num}=this.state;
+    const graph =this.state.personGraphs[0];
+    const url='http://localhost:8080';
+    let checkedArr:any=[];
+    for(let key in attrChecked){
+        checkedArr.push({name:key,value:attrChecked[key]})
+    }
+    axios.post(url+'/matchGraph',{wd:graph,dataType:dataType,num:num,dimensions:dimensions,strWeight:strWeight,attrWeight:attrWeight,attrChecked:checkedArr,attrValue:attrValue})
+    .then(res=>{
+        this.setChoosePoints(res.data.data);
+    })
+    axios.post(url+'/searchGraphByGraphId',{wd:graph.id,dataType:dataType,dimensions:dimensions,attrWeight:attrWeight,strWeight:strWeight,attrChecked:checkedArr})
+    .then(res=>{
+        // console.log(res.data.data[0]);
+        this.setCenterPoint(res.data.data[0]);
+    })
+    
+}
+
   render(): React.ReactElement {
     const {dataType, strWeight_slider, attrWeight_slider, dimensions, strWeight, attrWeight, num, choosePoints,reTsneData,
       centerPoint, personGraphs, attr, attrSliderValue, attrValue, attrChecked, attrCheckedBox ,displaySlider,displayDrawPanel,
@@ -194,7 +218,7 @@ class App extends React.Component<any, any> {
     let attrEl: Array<React.ReactElement> = [];
     for (let key in attr) {
       attrEl.push(
-        <Row key={key} style={{ height: '27px' }}>
+        <Row key={key} style={{ height: `calc(100% / ${attrList.length})` }}>
           <Col span={2}>
             <Checkbox checked={key in attrCheckedBox ? attrCheckedBox[key] : false} onChange={this.setAttrCheckedBox.bind(this, key)}></Checkbox>
           </Col>
@@ -346,6 +370,7 @@ class App extends React.Component<any, any> {
               </Row>
               <Row style={{ height: '27px' }}>
                 <Col><Button onClick={this.changeWeight} style={{ margin: '0 5px' }} size='small'>search</Button></Col>
+                <Col><Button onClick={this.match} style={{ margin: '0 5px' }} size='small'>match</Button></Col>
               </Row>
             </div>
           </div>
@@ -370,9 +395,9 @@ class App extends React.Component<any, any> {
                 parent={{ setPersonGraphs: this.setPersonGraphs, setCenterPoint: this.setCenterPoint, setChoosePoints: this.setChoosePoints }}  />
               <div className="attrSliderBox" style={{position:'absolute',left:displaySlider,paddingLeft:'4px'}}>
                 {attrEl}
-                <Row>
+                {/* <Row>
                   <Col><Button onClick={this.setAttrChecked} style={{ margin: '0 5px' }} size='small'>search</Button></Col>
-                </Row>
+                </Row> */}
               </div>
             </div>
           </div>
@@ -414,7 +439,7 @@ class App extends React.Component<any, any> {
         <div className="right">
           <div className="infoView">
             <div className="title">Target View</div>
-            <div className="content">
+            <div className="content" style={{padding:0}}>
               <Info graphs={personGraphs} url='http://localhost:8080' num={num} dimensions={dimensions} strWeight={strWeight} attrWeight={attrWeight}
                 attrChecked={attrChecked} attrValue={attrValue} dataType={dataType}
                 parent={{ setChoosePoints: this.setChoosePoints.bind(this), setCenterPoint: this.setCenterPoint.bind(this) }} />

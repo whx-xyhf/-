@@ -94,10 +94,10 @@ def searchGraphByPersonId():#根据人id搜索包含该人的网络
             if dataType == 'Author':
                 for graph in data:
                     if graph['nodes'].count(wd)>0:
-                        nodeName={}
-                        for i in graph['nodes']:
-                            nodeName[i]=num2node[i]
-                        graph['names']=nodeName
+                        # nodeName={}
+                        # for i in graph['nodes']:
+                        #     nodeName[i]=num2node[i]
+                        # graph['names']=nodeName
                         graph['x']=float(vectors[str(graph['id'])]['x'])
                         graph['y']=float(vectors[str(graph['id'])]['y'])
                         resData.append(graph)
@@ -139,11 +139,11 @@ def searchGraphByGraphId():#根据图id搜索该图
             vectors = json.load(fr)
             for graph in data:
                 if graph['id']==wd:
-                    if dataType == 'Author':
-                        nodeName = {}
-                        for i in graph['nodes']:
-                            nodeName[i] = num2node[i]
-                        graph['names'] = nodeName
+                    # if dataType == 'Author':
+                    #     nodeName = {}
+                    #     for i in graph['nodes']:
+                    #         nodeName[i] = num2node[i]
+                    #     graph['names'] = nodeName
                     graph['x'] = float(vectors[str(graph['id'])]['x'])
                     graph['y'] = float(vectors[str(graph['id'])]['y'])
                     resData.append(graph)
@@ -245,7 +245,7 @@ def matchModel():
         with open('./dataProcessing/data/'+dataType+'/attrMeanStd_'+str(time_interval)+'.json','r') as fr:
             mean_std=json.load(fr)
             for key in attrValue:
-                attrValue[key]=(attrValue[key]-mean_std['mean'][key])/mean_std['std'][key]
+                attrValue[key]=(attrValue[key]-mean_std['min'][key])/(mean_std['max'][key]-mean_std['min'][key])
 
         with open('./dataProcessing/data/'+dataType+'/subGraphs_'+str(time_interval)+'.json','r') as fr:
             data=json.load(fr)

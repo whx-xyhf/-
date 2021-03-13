@@ -13,74 +13,13 @@ from sklearn.cross_decomposition import CCA
 #分割向量
 def divideVectorsToStrAndAttr(vectors,dimensionsStr,dimensionsAttrChecked):
     vectors=np.mat(vectors)
+    print(vectors.shape)
     selectAttrIndexList=list(i.start()+dimensionsStr for i in re.finditer('1', dimensionsAttrChecked))
     vectorsStr = vectors[:,:dimensionsStr]
     vectorsAttr = vectors[:,selectAttrIndexList]
-    vectorsStr=normalization(vectorsStr)
     return vectorsStr,vectorsAttr
 
-def normalizationMatrix(vectors,dimensionsStr,dimensionsAttrChecked,strWeight,attrWeight):
-    vectors = np.mat(vectors)
-    selectAttrIndexList = list(i.start() + dimensionsStr for i in re.finditer('1', dimensionsAttrChecked))
-    vectorsStr = vectors[:, :dimensionsStr]
-    vectorsStr=normalization(euclidean_distances(vectorsStr,vectorsStr))
-    vectorsAttr=np.zeros(vectorsStr.shape)
-    for i in range(len(selectAttrIndexList)):
-        vectorsAttr+=normalization(euclidean_distances(vectors[:,selectAttrIndexList[i]],vectors[:,selectAttrIndexList[i]]))
-    distanceMatrix=np.sqrt(vectorsAttr/len(selectAttrIndexList))*attrWeight+np.sqrt(vectorsStr/dimensionsStr)*strWeight
-    return distanceMatrix
-
-#归一化
-def normalization(matrix):
-    max=matrix.max()
-    min=matrix.min()
-    matrix=(matrix-min)/(max-min)
-    return matrix
-
-def getDistance(vectors,dimensionsStr,dimensionsAttrChecked,strWeight,attrWeight,saveStrDistance,readStrDistance,saveDir,readDir):
-    '''
-    :param vectors: 待计算的向量
-    :param dimensionsStr: 结构向量维度
-    :param dimensionsAttrChecked:哪些属性用于降维
-    :param strWeight: 拓扑向量的权重
-    :param attrWeight: 属性向量的权重
-    :param saveStrDistance:是否将结构距离矩阵保存成文件
-    :param readStrDistance:是否从文件中读取结构距离矩阵
-    :param saveDir:保存目录
-    :param readDir:读取目录
-    :return: 距离矩阵
-    '''
-    dimensionsAttr=dimensionsAttrChecked.count('1')
-    if readStrDistance:
-        with open(readDir+'distanceStrMatrix' + '_' + str(dimensionsStr)+'.json','r',encoding='utf-8') as fr:
-            distanceMatrixStr=json.load(fr)
-        vectors = np.mat(vectors)
-        selectAttrIndexList = list(i.start() + dimensionsStr for i in re.finditer('1', dimensionsAttrChecked))
-        vectorsAttr = vectors[:, selectAttrIndexList]
-        distanceMatrixAttr=euclidean_distances(vectorsAttr,vectorsAttr)
-        distanceMatrixStr=strWeight*np.sqrt(np.mat(distanceMatrixStr)/dimensionsStr)
-        distanceMatrixAttr=attrWeight*np.sqrt(np.mat(distanceMatrixAttr)/dimensionsAttr)
-        distanceMatrix=distanceMatrixStr+distanceMatrixAttr
-        return distanceMatrix
-    else:
-        #使用tsne自带的算距离矩阵的方法
-        # vectorsStr,vectorsAttr=divideVectorsToStrAndAttr(vectors,dimensionsStr,dimensionsAttrChecked)
-        # distanceMatrixStr=strWeight*np.sqrt(euclidean_distances(vectorsStr,vectorsStr)/dimensionsStr)
-        # distanceMatrixAttr=attrWeight*np.sqrt(euclidean_distances(vectorsAttr,vectorsAttr)/dimensionsAttr)
-        # distanceMatrix = distanceMatrixStr + distanceMatrixAttr
-
-        distanceMatrix=normalizationMatrix(vectors,dimensionsStr,dimensionsAttrChecked,strWeight,attrWeight)
-
-        # if saveStrDistance:
-        #     with open(saveDir+'distanceStrMatrix' + '_' + str(dimensionsStr)+'.json','w') as fw:
-        #         json.dump(distanceMatrixStr.tolist(),fw)
-        print('start tsne')
-        print(distanceMatrix.shape)
-        return distanceMatrix
-
-
-
-def getTSNE(dirPath,dimensionsStr=128,dimensionsAttrChecked='111111',strWeight=0.5,attrWeight=0.5,saveFile=False,saveStrDistance=False,readStrDistance=False,saveDir='',readDir=''):
+def getTSNE(dirPath,dimensionsStr=128,dimensionsAttrChecked='111111',strWeight=0.5,attrWeight=0.5,saveFile=False):
     '''
     :param dirPath:数据存储目录
     :param dimensionsStr: 结构向量维度
@@ -98,17 +37,15 @@ def getTSNE(dirPath,dimensionsStr=128,dimensionsAttrChecked='111111',strWeight=0
     vectors = []
     id = []
     time_interval = 1
+    dimensionsAttr=dimensionsAttrChecked.count("1")
     with open(dirPath + 'vectors_' + str(time_interval) + '_' + str(dimensionsStr) + '.csv', 'r') as fr:
         data = csv.reader(fr)
         index = 0
-
         for i in data:
             if index != 0:
                 id.append(str(i[0]))
                 del (i[0])
-                if attrWeight==0:
-                    vectors.append(i[0:dimensionsStr])
-                elif strWeight==0:
+                if dimensionsAttr==0:
                     vector=[]
                     for j in range(len(dimensionsAttrChecked)):
                         if dimensionsAttrChecked[j]=='1':
@@ -118,14 +55,21 @@ def getTSNE(dirPath,dimensionsStr=128,dimensionsAttrChecked='111111',strWeight=0
                     i=list(map(float,i))
                     vectors.append(i)
             index += 1
-
-    if attrWeight==0 or strWeight==0:
+    if dimensionsAttr!=0:
+        vectorStr,vectorAttr=divideVectorsToStrAndAttr(vectors,dimensionsStr,dimensionsAttrChecked)
+        cca = CCA(n_components=dimensionsAttr)
+        cca.fit(vectorStr, vectorAttr)
+        vectorStr_c, vectorAttr_c = cca.transform(vectorStr, vectorAttr)
+        vectorStr_c=np.mat(vectorStr_c)
+        vectorAttr_c=np.mat(vectorAttr_c)
         print('start tsne')
         tsne = TSNE(method='barnes_hut',angle=0.2, n_iter=1000)
-        data_tsne = tsne.fit_transform(vectors)
+        data_tsne = tsne.fit_transform(np.c_[vectorStr_c,vectorAttr_c])
     else:
-        tsne = TSNE(metric='precomputed', method='barnes_hut', angle=0.2, n_iter=1000)
-        data_tsne = tsne.fit_transform(getDistance(vectors, dimensionsStr,dimensionsAttrChecked, strWeight, attrWeight,saveStrDistance,readStrDistance,saveDir,readDir))
+        print('start tsne')
+        tsne = TSNE(method='barnes_hut', angle=0.2, n_iter=1000)
+        data_tsne = tsne.fit_transform(vectors)
+
 
     index = 0
     outdata = {}
@@ -231,11 +175,5 @@ if __name__=='__main__':
     for j in data2:
         for i in data:
             print(i)
-            saveStrDistance=False
-            readStrDistance=False
-            # if i==[0.8,0.2]:
-            #     saveStrDistance=True
-            # if i!=[1,0] and i!=[0.8,0.2] and i!=[0,1]:
-            #     readStrDistance=True
-            getTSNE(dirPath =dirPath ,dimensionsStr=128,dimensionsAttrChecked=j,strWeight=i[0],attrWeight=i[1],
-                    saveFile=True,saveStrDistance=saveStrDistance,readStrDistance=readStrDistance,saveDir=dirPath,readDir=dirPath)
+            getTSNE(dirPath=dirPath, dimensionsStr=128, dimensionsAttrChecked=j, strWeight=i[0], attrWeight=i[1],
+                    saveFile=True)

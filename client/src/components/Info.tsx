@@ -1,6 +1,7 @@
 import * as React from 'react';
-import NodeLink from './NodeLink';
-import TargetTree from './TargetTree';
+// import NodeLink from './NodeLink';
+import PNodeLink from './PNodeLink';
+import PTargetTree from './PTargetTree';
 import axios from 'axios';
 
 
@@ -62,25 +63,28 @@ class Info extends React.Component<Props,any>{
         //     }
             let el=null;
             if(this.props.dataType==="Author"){
-                el=<NodeLink graph={graph} key={index}/>;
+                el=<PNodeLink graph={graph} key={index}/>;
             }
             else if(this.props.dataType==="Family"){
-                el=<TargetTree graph={graph} key={index}/>
+                el=<PTargetTree graph={graph} key={index}/>
             }
             return(
-                <div className='infoBox' key={index}>
-                    <input type="button" value="match" onClick={this.match.bind(this,graph)}></input>
+                <div className='infoBox' key={index} style={{width:"calc(100% - 50px)"}}>
+                    
                     <div style={{height:'100%',width:'100%',float:'left'}}>
                         {el}
                     </div>
-                    {/* <div className="infoName" style={{height:'100%',width:'100px',fontSize:'0.5rem',float:'left',overflowX:'hidden',overflowY:'auto'}}>
-                        {names}
-                    </div> */}
+                    
                 </div>
             )
         })
         return (
             <div className='info'>
+                {/* <input type="button" value="match" onClick={this.match.bind(this,graph)}></input> */}
+                <div className="infoName" style={{height:'100%',width:'50px',fontSize:'0.5rem',float:'left',
+                    overflowX:'hidden',overflowY:'auto',backgroundColor:'rgb(254,254,254)',border:'1px solid #ccc',
+                    borderTop:'none',boxSizing:'border-box'}}>
+                    </div>
                     {elements}
             </div>
         )

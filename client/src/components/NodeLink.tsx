@@ -24,6 +24,7 @@ class NodeLink extends React.Component<Props,any>{
     public svgWidth:number=0;
     public svgHeight:number=0;
     public padding={top:10,bottom:10,left:10,right:10};
+    public circleR:string="3.5px";
     constructor(props:Props){
         super(props);
         this.svgRef=React.createRef();
@@ -135,21 +136,22 @@ class NodeLink extends React.Component<Props,any>{
     }
     render():React.ReactElement{
         // console.log(this.state.layOutNodes)
-        let nodes=this.state.layOutNodes.map((value:any,index:number)=>{
-            return <circle r="3.5px" cx={value.x} cy={value.y} key={index} fill="#ccc" strokeWidth="1px" stroke="white"
+        const {layOutNodes,layOutLinks,focusNode}=this.state;
+        let nodes=layOutNodes.map((value:any,index:number)=>{
+            return <circle r={this.circleR} cx={value.x} cy={value.y} key={index} fill="#ccc" strokeWidth="1px" stroke="white"
             onMouseOver={this.showInfo.bind(this,value)} onMouseOut={this.hideInfo} cursor='pointer'></circle>
         })
-        let links=this.state.layOutLinks.map((value:any)=>{
+        let links=layOutLinks.map((value:any)=>{
             return <line x1={value.source.x} y1={value.source.y} x2={value.target.x} 
             y2={value.target.y} fill="none" strokeWidth="1px" stroke="#ccc" key={value.index}></line>
         })
         return (
             <svg ref={this.svgRef} style={{width:'100%',height:'100%'}} onClick={this.props.onClick?this.props.onClick.bind(this.props.parent,this.state.layOutNodes,this.state.layOutLinks,this.props.graph.id):null}>
-                <text x="0"y='20'>{this.props.graph.year}</text>
+                {/* <text x="0"y='20'>{this.props.graph.year}</text> */}
                 <g>{links}</g>
                 <g>{nodes}</g>
-                <text x={this.state.focusNode.x?this.state.focusNode.x:null} y={this.state.focusNode.y?this.state.focusNode.y:null} fontSize='0.6rem'>
-                    {this.props.graph.names?this.props.graph.names[this.state.focusNode.id]:''}
+                <text x={focusNode.x?focusNode.x:null} y={focusNode.y?focusNode.y:null} fontSize='0.6rem'>
+                    {focusNode.id?this.props.graph['authorInfo'][focusNode.id]['name']:''}
                 </text>
             </svg>
         )
