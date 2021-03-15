@@ -135,7 +135,7 @@ class DrawPanel extends React.Component<Props, any>{
         })
     }
     //选择系统自带的模板图
-    chooseModelGraph(nodesid: any, links: any, id: number): void {
+    chooseModelGraph(graph:any,nodesid: any, links: any, id: number): void {
         this.pen = "model";
         this.record.push("model");
         let x_max: number = d3.max(nodesid, (d: d3.SimulationNodeDatum): number => d.x || 0) || 0;

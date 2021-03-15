@@ -128,7 +128,7 @@ def run(url1,url2,url3,url4,url5,url6,url7,dimensions,isExist=False):
             attr.append(weight)
             attr.append(int(graph['year']))
             attrDic[graph['id']]=attr
-            graph['attr']={'author':attr[0],'cite':attr[1],'rank':attr[2],'paper':attr[3],'weight':attr[4],'year':attr[5]}
+            graph['attr']={'AU':attr[0],'CI':attr[1],'RA':attr[2],'PA':attr[3],'WE':attr[4],'YE':attr[5]}
             graph['str']={'nodes':len(graph['nodes']),'edges':len(graph['edges'])}
             attrArrayDic.append(attr)
             graph['authorInfo']={}
@@ -154,10 +154,10 @@ def run(url1,url2,url3,url4,url5,url6,url7,dimensions,isExist=False):
             for j in range(len(attrDic[i])):
                 attrDic[i][j]=(attrDic[i][j]-min[j])/(max[j]-min[j])
         with open(url7,'w',encoding='utf-8') as fw:
-            mean_std={'mean':{},'std':{}}
+            mean_std={'max':{},'min':{}}
             for i in range(len(attrName)):
-                mean_std['mean'][attrName[i]]=float(max[i])
-                mean_std['std'][attrName[i]] = float(min[i])
+                mean_std['max'][attrName[i]]=float(max[i])
+                mean_std['min'][attrName[i]] = float(min[i])
             json.dump(mean_std,fw)
 
         with open(url6,'w',encoding='utf-8') as fw:

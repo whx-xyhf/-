@@ -3,6 +3,8 @@ import * as d3 from 'd3';
 import manURL from '../assets/man.png';
 import womanURL from '../assets/woman.png';
 import guanURL from '../assets/guan.png';
+import widthURL from '../assets/width.png';
+import radiusURL from '../assets/radius.png';
 
 type tree = {
     id: number,
@@ -20,7 +22,6 @@ class PTargetTree extends React.Component<Props, any>{
     private svgWidth: number = 0;
     private svgHeight: number = 0;
     private padding = { top: 10, bottom: 10, left: 20, right: 10 };
-    private circleR = 10;
     private circleR_min=10;
     private circleR_max=15;
     private lineWidthMin: number = 1;
@@ -104,7 +105,7 @@ class PTargetTree extends React.Component<Props, any>{
                             ty = YearScale(brotherMinBirthyear);
                     }
                     else {
-                        ty = YearScale(Number(d.parent.data.birthyear) + 15);
+                        ty = YearScale(Number(d.parent.data.birthyear)+15);
                     }
                 }
                 else if (d.parent && d.children) {//有父亲有孩子
@@ -114,10 +115,10 @@ class PTargetTree extends React.Component<Props, any>{
                         if (childMinBiryear === 10000 && brotherMinBiryear === 10000) {//孩子出生年都未知
                             ty = d.y;
                         }
-                        else if (childMinBiryear === 10000 && brotherMinBiryear != 10000) {
+                        else if (childMinBiryear === 10000 && brotherMinBiryear !== 10000) {
                             ty = YearScale(brotherMinBiryear)
                         }
-                        else if (childMinBiryear != 10000 && brotherMinBiryear === 10000) {
+                        else if (childMinBiryear !== 10000 && brotherMinBiryear === 10000) {
                             ty = YearScale(childMinBiryear - 20);
                         }
                         else {
@@ -174,10 +175,10 @@ class PTargetTree extends React.Component<Props, any>{
                             if (childMinBiryear === 10000 && brotherMinBiryear === 10000) {//孩子出生年都未知
                                 return d.y;
                             }
-                            else if (childMinBiryear === 10000 && brotherMinBiryear != 10000) {
+                            else if (childMinBiryear === 10000 && brotherMinBiryear !== 10000) {
                                 return YearScale(brotherMinBiryear)
                             }
-                            else if (childMinBiryear != 10000 && brotherMinBiryear === 10000) {
+                            else if (childMinBiryear !== 10000 && brotherMinBiryear === 10000) {
                                 return YearScale(childMinBiryear - 20);
                             }
                             else {
@@ -291,6 +292,16 @@ class PTargetTree extends React.Component<Props, any>{
         this.svgWidth = this.svgRef.current?.clientWidth || 0;
         this.svgHeight = this.svgRef.current?.clientHeight || 0;
         this.treeLayout(this.props.graph, this.svgHeight, this.svgWidth);
+        let svg=d3.select('#svg_pTargetTree')
+        svg.call(d3.zoom()
+        .scaleExtent([0.1,7])
+        .on("zoom",zoomed));
+        
+        function zoomed(){
+            let transform = d3.zoomTransform(svg.node());
+            //svg_point.selectAll("circle").attr("r",1);
+            svg.selectAll("g").attr("transform", "translate(" + transform.x + "," + transform.y + ") scale(" + transform.k + ")");
+        }
     }
     componentWillReceiveProps(nextProps: Props): void {
         this.treeLayout(nextProps.graph, this.svgHeight, this.svgWidth);
@@ -337,7 +348,19 @@ class PTargetTree extends React.Component<Props, any>{
                 <g transform='translate(0,0)'>{nodes}</g>
                 <g>{icons}</g>
                 <g>{villageFlag}</g>
-                <g><text x={this.svgWidth - 10 * 10 - 10 - 8 * 5} y={this.svgHeight - 7} fontSize="10px">Village:</text></g>
+                
+                    <text x={this.svgWidth - 10 * 10 - 10 - 8 * 5} y={this.svgHeight - 7} fontSize="10px">Village:</text>
+                    <text x={2} y={this.svgHeight - 7}  fontSize="10px">Male:</text>
+                    <image x={30} y={this.svgHeight - 15} width={10} height={10} xlinkHref={manURL}></image>
+                    <text x={50} y={this.svgHeight - 7} fontSize="10px">Female:</text>
+                    <image x={89} y={this.svgHeight - 15} width={10} height={10} xlinkHref={womanURL}></image>
+                    <text x={115} y={this.svgHeight - 7} fontSize="10px">Officer:</text>
+                    <image x={152} y={this.svgHeight - 15} width={10} height={10} xlinkHref={guanURL}></image>
+                    <text x={177} y={this.svgHeight - 7} fontSize="10px">Progeny Size:</text>
+                    <image x={245} y={this.svgHeight - 25} width={30} height={30} xlinkHref={widthURL}></image>
+                    <text x={290} y={this.svgHeight - 7} fontSize="10px">Life Time:</text>
+                    <image x={340} y={this.svgHeight - 18} width={15} height={15} xlinkHref={radiusURL}></image>
+                
                 <g className="axis"></g>
                 <g className="text"></g>
             </svg>

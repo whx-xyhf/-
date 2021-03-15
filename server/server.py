@@ -3,11 +3,12 @@ import json
 import math
 import numpy as np
 from dataProcessing.Ged import getGed
-from dataProcessing.getTsne import reTsne
+from dataProcessing.getCCATsne import reTsne
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from dataProcessing.graph2vec import WeisfeilerLehmanMachine
 import networkx as nx
 import os
+import time
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
@@ -198,6 +199,18 @@ def match():#匹配相似图
                     resData.append(data[i])
             resData=sorted(resData,key=lambda x:x['distance'])#sort(key=lambda x:x["distance"])
             res = make_response(jsonify({'code': 200, "data": resData[:num]}))
+        file = './dataProcessing/data/' + dataType + '/' + 'historyRecord' + str(time_interval) + '.json'
+        date=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        oneRecord = {'graph': sourceGraph, 'dimensions': dimensions, 'attrChecked': attrChecked,'date':date}
+        if os.path.exists(file):
+            with open(file, 'r') as fr:
+                record = json.load(fr)
+            record.insert(0, oneRecord)
+            with open(file, 'w') as fw:
+                json.dump(record,fw)
+        else:
+            with open(file, 'w') as fw:
+                json.dump([oneRecord],fw)
     return res
 
 @app.route("/getAttr",methods = ['POST', 'GET'])
@@ -271,7 +284,7 @@ def matchModel():
                 tsneData=json.load(fr)
         else:
             tsneData=reTsne(name,docVectors,attrVector,dirPath = './dataProcessing/data/'+dataType+'/',dimensionsStr=dimensionsStr,dimensionsAttrChecked=attrStr
-                       ,strWeight=strWeight,attrWeight=attrWeight,saveFile=True,readDir='./dataProcessing/data/'+dataType+'/')
+                       ,strWeight=strWeight,attrWeight=attrWeight,saveFile=True)
 
         newData=[]
         for i in range(len(data)):
@@ -283,146 +296,25 @@ def matchModel():
         newData.append(centerPoint)
         newData=sorted(newData,key=lambda x:x['distance'])
         res = make_response(jsonify({'code': 200, "all": newData,'match':newData[:num],'center':centerPoint}))
+
     return res
 
-# @app.route("/matchModel",methods = ['POST', 'GET'])
-# def matchModel():
-#     if request.method == 'POST':
-#         name='0'
-#         features= request.get_json()['features']
-#         features_={}
-#         for i in features:
-#             features_[int(i)]=features[i]
-#         edges = request.get_json()['edges']
-#         strWeight = request.get_json()['strWeight']
-#         attrWeight = request.get_json()['attrWeight']
-#         dimensions = str(request.get_json()['dimensions'])
-#         attrChecked = request.get_json()['attrChecked']
-#         num = request.get_json()['num']
-#         attrRange=request.get_json()['attrValue']
-#         attrValue={}
-#         for key in attrRange:
-#             attrValue[key]=int((attrRange[key][0]+attrRange[key][1])/2)
-#         graph=nx.from_edgelist(edges)
-#         machine = WeisfeilerLehmanMachine(graph, features_, 2)
-#         doc = TaggedDocument(words=machine.extracted_features, tags=["g_" + name])
-#         doc = machine.extracted_features
-#         model = Doc2Vec.load('./dataProcessing/data/paper/Graph2vec_'+dimensions+'.model')
-#         docVectors = model.infer_vector(doc, epochs=100)
-#         docVectors=docVectors.tolist()
-#
-#         with open('./dataProcessing/data/paper/attrMeanStd_'+str(time_interval)+'.json','r') as fr:
-#             mean_std=json.load(fr)
-#             for key in attrValue:
-#                 attrValue[key]=(attrValue[key]-mean_std['mean'][key])/mean_std['std'][key]
-#
-#         with open('./dataProcessing/data/paper/subGraphs_'+str(time_interval)+'.json','r') as fr:
-#             data=json.load(fr)
-#         attrStr = ''
-#         attrVector = []
-#         useAttr=[]
-#         for i in data[0]['attr']:
-#             if {'name': i, 'value': True} in attrChecked:
-#                 attrVector.append(attrValue[i])
-#                 attrStr += '1'
-#                 useAttr.append(i)
-#             else:
-#                 attrStr += '0'
-#                 attrVector.append(0)
-#         docVectors.extend(attrVector)
-#
-#         dimensionsAttr=len(attrStr)
-#         dimensionsStr=int(dimensions)
-#
-#         with open('./dataProcessing/data/paper/vectors_' + str(
-#                 time_interval) + '_' + dimensions + '.csv', 'r') as fr:
-#             csvdata = csv.reader(fr)
-#             index1 = 0
-#             vectors={}
-#             for i in csvdata:
-#                 if index1 != 0:
-#                     vectors[i[0]]=i[1:]
-#                 index1 += 1
-#
-#             for i in range(len(data)):
-#                 flag=True
-#                 if attrWeight!=0:
-#                     for key in useAttr:
-#                         if data[i]['attr'][key]<attrRange[key][0] or data[i]['attr'][key]>attrRange[key][1]:
-#                             flag=False
-#                             break
-#                 if flag:
-#                     vector2=vectors[str(data[i]['id'])]
-#                     distanceStr = 0
-#                     distanceAttr = 0
-#                     for index in range(len(docVectors)):
-#                         if index < dimensionsStr:
-#                             distanceStr += math.pow(float(docVectors[index]) - float(vector2[index]), 2)
-#                         elif index >= dimensionsStr and attrStr[index - dimensionsStr] == '1':
-#                             distanceAttr += math.pow(float(docVectors[index]) - float(vector2[index]), 2)
-#
-#                     distance=math.sqrt(distanceStr / dimensionsStr) * strWeight + math.sqrt(distanceAttr / dimensionsAttr) * attrWeight
-#                     data[i]['distance']=distance
-#                 else:
-#                     data[i]['distance'] = float('inf')
-#             resData = sorted(data, key=lambda x: x['distance'])
-#         res = make_response(jsonify({'code': 200, "data": resData[:num]}))
-#     return res
+@app.route("/readHistoryRecord",methods = ['POST', 'GET'])
+def readHistoryRecord():
+    if request.method == 'POST':
+        dimensions = str(request.get_json()['dimensions'])
+        attrChecked = request.get_json()['attrChecked']
+        dataType = request.get_json()['dataType']
+        resData=[]
+        file = './dataProcessing/data/' + dataType + '/' + 'historyRecord' + str(time_interval) + '.json'
+        with open(file,'r') as fr:
+            data=json.load(fr)
+        for i in data:
+            if i['dimensions']==dimensions and i['attrChecked']==attrChecked:
+                resData.append({'graph':i['graph'],'date':i['date']})
+        res = make_response(jsonify({'code': 200, 'data':resData}))
+    return res
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0",
             port=8080)
-
-# @app.route("/compare",methods = ['POST', 'GET'])
-# def compare():
-#     if request.method == 'POST':
-#         num = int(request.get_json()['num'])
-#         sourceGraph = request.get_json()['graph']  # 要匹配的图
-#         matchGraphs=[]
-#         dimensionsArr=[]
-#         matchGraphsDic={}
-#         attr = {}
-#         ged={}
-#         resData={}
-#         with open('./dataProcessing/data/paper/subGraphs_'+str(time_interval)+'.json','r') as fr:
-#             data=json.load(fr)
-#             #获取所有维度的相似图
-#             for i in range(len(data)):
-#                 if data[i]['id'] == sourceGraph['id']:
-#                     sourceGraph=data[i]
-#                     del data[i]
-#                     break
-#             for i in range(len(data)):
-#                 distanceDic = {}
-#                 for dimensions in data[i]['x']:
-#                     distance = math.pow(sourceGraph['x'][dimensions] - data[i]['x'][dimensions], 2) + math.pow(sourceGraph['y'][dimensions] - data[i]['y'][dimensions],2)
-#                     distanceDic[dimensions]=distance
-#                     if i==0:
-#                         dimensionsArr.append(dimensions)
-#                 data[i]['distance'] = distanceDic
-#                 matchGraphs.append(data[i])
-#
-#             for dimensions in dimensionsArr:
-#                 attr[dimensions]={'mean':{},'std':{}}
-#                 ged[dimensions]={'mean':0,'std':0}
-#                 matchGraphsDic[dimensions]=sorted(matchGraphs, key=lambda x: x['distance'][dimensions])[:num]
-#                 attrValue = {}
-#                 gedValue=[]
-#                 for graph in matchGraphsDic[dimensions]:
-#                     gedValue.append(getGed(sourceGraph['edges'],graph['edges']))
-#                     for key in graph['attr']:
-#                         if key in attrValue.keys():
-#                             attrValue[key].append(graph['attr'][key])
-#                         else:
-#                             attrValue[key]=[]
-#                 ged[dimensions]['mean']=np.mean(np.array(gedValue))
-#                 ged[dimensions]['std'] = np.std(np.array(gedValue))
-#                 for key in attrValue:
-#                     attr[dimensions]['mean'][key]=np.mean(np.array(attrValue[key]))
-#                     attr[dimensions]['std'][key] = np.std(np.array(attrValue[key]))
-#             resData['attr']=attr
-#             resData['ged']=ged
-#             res = make_response(jsonify({'code': 200, "data": resData}))
-#     return res
-
-

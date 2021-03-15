@@ -14,14 +14,24 @@ type graph = {
 interface Props {
     graphs: Array<graph>,
     dataType: string,
+    parent:any;
 }
 
 class ForceCompute extends React.Component<Props, any>{
 
+    constructor(props:Props){
+        super(props)
+        this.selectCondidate=this.selectCondidate.bind(this);
+    }
+
+    selectCondidate(graph:graph){
+        this.props.parent.setPersonGraphs([graph]);
+    }
+
     render(): React.ReactElement {
 
         let graphElements = null;
-        const { dataType } = this.props;
+        const { dataType ,parent} = this.props;
         if (dataType === 'Author') {
             graphElements = this.props.graphs.map((value: graph, index: number) =>
                 <div className="forceBox" key={index}>
@@ -31,7 +41,7 @@ class ForceCompute extends React.Component<Props, any>{
                             Nodes:{value.str.nodes} Year:{value.year}
                         </div>
                         <div className="candidateContent">
-                            <NodeLink graph={value} />
+                            <NodeLink graph={value} onClick={this.selectCondidate} parent={parent}/>
                         </div>
                     </div>
                 </div>
@@ -46,7 +56,7 @@ class ForceCompute extends React.Component<Props, any>{
                             Nodes:{value.str.nodes} Depth:{value.str.depth}
                         </div>
                         <div className="candidateContent">
-                            <TargetTree graph={value} />
+                            <TargetTree graph={value} onClick={this.selectCondidate} parent={parent}/>
                         </div>
                     </div>
                 </div>

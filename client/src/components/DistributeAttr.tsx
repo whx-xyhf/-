@@ -20,6 +20,7 @@ interface Props {
     graphType: string,//结构还是属性
     x: string,//x轴字段
     y: string,//y轴字段
+    personGraphs:Array<attr>,
 }
 //定义边数组
 type edges = Array<number>;
@@ -161,8 +162,8 @@ class DistributeAttr extends React.Component<Props, any>{
 
 
     render(): React.ReactElement {
-        const { data, centerPoint, choosePoints } = this.state;
-        const {x,y,display,graphType} = this.props;
+        const { data, centerPoint, choosePoints} = this.state;
+        const {x,y,display,graphType,personGraphs} = this.props;
         let allPointEl = data.map((value: any, index: number) =>
             <circle key={index} cx={value.x} cy={value.y} r='2px' fill='#1890ff' fillOpacity={0.4} stroke='white' strokeWidth='0.5px'
                 onClick={this.searchGraph.bind(this, value)}></circle>
@@ -181,6 +182,18 @@ class DistributeAttr extends React.Component<Props, any>{
                 onClick={this.searchGraph.bind(this, value)}></circle>
         )
 
+        //点击的点，试选阶段
+        let persongraphs = personGraphs.map((value: any, index: number) =>{
+            for(let i=0;i<data.length;i++){
+                if(data[i].id===value.id){
+                    return <circle r="2px" cx={data[i].x} cy={data[i].y} key={index} fill={this.centerColor} stroke='white' strokeWidth='0.5px'
+                    onClick={this.searchGraph.bind(this, value)}></circle>
+                }
+            }
+            return null;
+        }
+        )
+
         return (
             <div className="distributeAttr" style={{ position: 'absolute', left: display === '0' ? '-100%' : '0' }}>
                 
@@ -192,7 +205,7 @@ class DistributeAttr extends React.Component<Props, any>{
                     {allPointEl}
                     {pointsChooseEl}
                     {centerPointEl}
-
+                    {persongraphs}
                 </svg>
             </div>
         )

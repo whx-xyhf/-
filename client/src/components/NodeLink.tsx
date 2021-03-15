@@ -28,9 +28,7 @@ class NodeLink extends React.Component<Props,any>{
     constructor(props:Props){
         super(props);
         this.svgRef=React.createRef();
-        this.state={layOutNodes:[],layOutLinks:[],focusNode:{}};
-        this.showInfo=this.showInfo.bind(this);
-        this.hideInfo=this.hideInfo.bind(this);
+        this.state={layOutNodes:[],layOutLinks:[]};
         this.forceLayout=this.forceLayout.bind(this);
     }
     forceLayout(nodes:Array<number>,edges:Array<edges>,width:number,height:number):void{
@@ -120,12 +118,6 @@ class NodeLink extends React.Component<Props,any>{
             // this.setState({layOutNodes:nodesid,layOutLinks:links});
         })
     }
-    showInfo(data:any):void{
-        this.setState({focusNode:data});
-    }
-    hideInfo():void{
-        this.setState({focusNode:{}});
-    }
     componentDidMount():void{
         this.svgWidth=this.svgRef.current?.clientWidth || 0;
         this.svgHeight=this.svgRef.current?.clientHeight || 0;
@@ -138,21 +130,20 @@ class NodeLink extends React.Component<Props,any>{
         // console.log(this.state.layOutNodes)
         const {layOutNodes,layOutLinks,focusNode}=this.state;
         let nodes=layOutNodes.map((value:any,index:number)=>{
-            return <circle r={this.circleR} cx={value.x} cy={value.y} key={index} fill="#ccc" strokeWidth="1px" stroke="white"
-            onMouseOver={this.showInfo.bind(this,value)} onMouseOut={this.hideInfo} cursor='pointer'></circle>
+            return <circle r={this.circleR} cx={value.x} cy={value.y} key={index} fill="#ccc" strokeWidth="1px" stroke="white" cursor='pointer'></circle>
         })
         let links=layOutLinks.map((value:any)=>{
             return <line x1={value.source.x} y1={value.source.y} x2={value.target.x} 
             y2={value.target.y} fill="none" strokeWidth="1px" stroke="#ccc" key={value.index}></line>
         })
         return (
-            <svg ref={this.svgRef} style={{width:'100%',height:'100%'}} onClick={this.props.onClick?this.props.onClick.bind(this.props.parent,this.state.layOutNodes,this.state.layOutLinks,this.props.graph.id):null}>
+            <svg ref={this.svgRef} style={{width:'100%',height:'100%'}} onClick={this.props.onClick?this.props.onClick.bind(this.props.parent,this.props.graph,this.state.layOutNodes,this.state.layOutLinks,this.props.graph.id):null}>
                 {/* <text x="0"y='20'>{this.props.graph.year}</text> */}
                 <g>{links}</g>
                 <g>{nodes}</g>
-                <text x={focusNode.x?focusNode.x:null} y={focusNode.y?focusNode.y:null} fontSize='0.6rem'>
+                {/* <text x={focusNode.x?focusNode.x:null} y={focusNode.y?focusNode.y:null} fontSize='0.6rem'>
                     {focusNode.id?this.props.graph['authorInfo'][focusNode.id]['name']:''}
-                </text>
+                </text> */}
             </svg>
         )
     }

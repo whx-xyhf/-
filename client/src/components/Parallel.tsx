@@ -13,6 +13,7 @@ interface Props{
     attrValue:attr,
     attrChecked:attr,
     dataType:string,
+    personGraphs:Array<attr>
 }
 type attr={
     [propName: string]: any,
@@ -118,7 +119,7 @@ class Parallel extends React.Component<Props,any>{
         return d;
     }
     componentWillReceiveProps(nextProps:Props){
-        if(nextProps.attrValue!==this.props.attrValue && nextProps.attrWeight!==0){
+        if(nextProps.attrValue!==this.props.attrValue){
             let checkedArr:any=[];
             for(let key in nextProps.attrChecked){
                 if(nextProps.attrChecked[key]===true)
@@ -182,11 +183,21 @@ class Parallel extends React.Component<Props,any>{
         let pathCenter=null;
         for(let i in this.state.data){
             if(this.state.data[i].id===this.props.centerPoint.id){
-                console.log("true")
                 pathCenter=<path d={this.line(this.state.data[i].pathData)} strokeWidth={1.5} strokeOpacity={0.5} stroke={this.pathStrokeCenter} fill='none'></path>
                 break;
             }
         }
+
+        //点击的点，试选
+        let personGraphs=this.props.personGraphs.map((value:any,index:number)=>{
+            for(let i in this.state.data){
+                if(this.state.data[i].id===value.id){
+                    return (<path d={this.line(this.state.data[i].pathData)} key={index} strokeWidth={1.5} strokeOpacity={0.5} stroke={this.pathStrokeCenter} fill='none'></path>)
+                }
+            }
+            return null;
+        })
+
 
         return (
             <div className='parallel'>
@@ -194,6 +205,7 @@ class Parallel extends React.Component<Props,any>{
                     {path}
                     {pathChoose}
                     {pathCenter}
+                    {personGraphs}
                     <g className="axis"></g>
                     <g className="text"></g>
                 </svg>

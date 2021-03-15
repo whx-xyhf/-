@@ -280,8 +280,7 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
             }
         }
         
-        if(nextProps.dimensions!==this.props.dimensions || nextProps.attrWeight!==this.props.attrWeight
-             || nextProps.strWeight!==this.props.strWeight || nextProps.attrChecked!==this.props.attrChecked){
+        if(nextProps.dimensions!==this.props.dimensions || nextProps.attrChecked!==this.props.attrChecked){
             console.log(111)
             let checkedArr:any=[];
             for(let key in nextProps.attrChecked){
@@ -291,7 +290,9 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
                 this.getPointsData(nextProps.url,nextProps.dataType,this.svgWidth,this.svgHeight,nextProps.dimensions,nextProps.strWeight,nextProps.attrWeight,checkedArr);
         }
         
-        if(nextProps.attrValue!==this.props.attrValue && nextProps.attrWeight!==0){
+        if(nextProps.attrValue!==this.props.attrValue && nextProps.dataType===this.props.dataType){
+            console.log(nextProps.dataType===this.props.dataType)
+            console.log(nextProps.attrValue)
             let checkedArr:any=[];
             for(let key in nextProps.attrChecked){
                 if(nextProps.attrChecked[key]===true)

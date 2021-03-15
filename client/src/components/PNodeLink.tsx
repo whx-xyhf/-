@@ -29,7 +29,7 @@ class PNodeLink extends React.Component<Props,any>{
     private svgRef:React.RefObject<SVGSVGElement>;
     public svgWidth:number=0;
     public svgHeight:number=0;
-    public circleR:number=25;
+    public circleR:number=30;
     public circleFill:RGBColor=rgb(246,196,103);
     public circleStroke:RGBColor=rgb(216,160,25);
     public linkWidthMax:number=5;
