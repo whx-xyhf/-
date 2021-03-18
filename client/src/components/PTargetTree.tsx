@@ -26,7 +26,8 @@ class PTargetTree extends React.Component<Props, any>{
     private circleR_max=15;
     private lineWidthMin: number = 1;
     private lineWidthMax: number = 5;
-    private color = d3.schemePaired;
+    // private color = d3.schemePaired;
+    private color=["#fbb4ae","#b3cde3","#ccebc5","#decbe4","#fed9a6","#ffffcc","#e5d8bd","#fddaec","#f2f2f2","#e41a1c"];
     constructor(props: Props) {
         super(props);
         this.svgRef = React.createRef();
@@ -46,10 +47,6 @@ class PTargetTree extends React.Component<Props, any>{
         let xAxis = d3.axisBottom(YearScale);
         d3.select("#svg_pTargetTree")
             .select(".axis")
-            .selectAll("g")
-            .remove()
-        d3.select("#svg_pTargetTree")
-            .select(".text")
             .selectAll("g")
             .remove()
         d3.select("#svg_pTargetTree")
@@ -295,12 +292,15 @@ class PTargetTree extends React.Component<Props, any>{
         let svg=d3.select('#svg_pTargetTree')
         svg.call(d3.zoom()
         .scaleExtent([0.1,7])
-        .on("zoom",zoomed));
+        .on("zoom",zoomed.bind(this)));
+        let height=this.svgHeight - this.padding.top - 30;
         
         function zoomed(){
             let transform = d3.zoomTransform(svg.node());
+            let y=transform.y+ height;
             //svg_point.selectAll("circle").attr("r",1);
-            svg.selectAll("g").attr("transform", "translate(" + transform.x + "," + transform.y + ") scale(" + transform.k + ")");
+            svg.selectAll(".pTargetTree").attr("transform", "translate(" + transform.x + "," + transform.y + ") scale(" + transform.k + ")");
+            // svg.selectAll(".axis").attr("transform", "translate(" + transform.x + "," + y + ") scale(" + transform.k + ")");
         }
     }
     componentWillReceiveProps(nextProps: Props): void {
@@ -344,9 +344,9 @@ class PTargetTree extends React.Component<Props, any>{
         })
         return (
             <svg id="svg_pTargetTree" ref={this.svgRef} style={{ width: '100%', height: '100%' }} onClick={this.props.onClick ? this.props.onClick.bind(this.props.parent, this.props.graph) : null}>
-                <g transform='translate(0,0)'>{links}</g>
-                <g transform='translate(0,0)'>{nodes}</g>
-                <g>{icons}</g>
+                <g className="pTargetTree" transform='translate(0,0)'>{links}</g>
+                <g className="pTargetTree" transform='translate(0,0)'>{nodes}</g>
+                <g className="pTargetTree">{icons}</g>
                 <g>{villageFlag}</g>
                 
                     <text x={this.svgWidth - 10 * 10 - 10 - 8 * 5} y={this.svgHeight - 7} fontSize="10px">Village:</text>
@@ -362,7 +362,6 @@ class PTargetTree extends React.Component<Props, any>{
                     <image x={340} y={this.svgHeight - 18} width={15} height={15} xlinkHref={radiusURL}></image>
                 
                 <g className="axis"></g>
-                <g className="text"></g>
             </svg>
         )
     }

@@ -21,21 +21,26 @@ class ForceCompute extends React.Component<Props, any>{
 
     constructor(props:Props){
         super(props)
+        this.state={selectIndex:-1,selectBorder:'red'};
         this.selectCondidate=this.selectCondidate.bind(this);
     }
 
     selectCondidate(graph:graph){
         this.props.parent.setPersonGraphs([graph]);
     }
+    selectIndex(index:number){
+        this.setState({selectIndex:index});
+    }
 
     render(): React.ReactElement {
 
         let graphElements = null;
         const { dataType ,parent} = this.props;
+        const {selectIndex,selectBorder}=this.state;
         if (dataType === 'Author') {
             graphElements = this.props.graphs.map((value: graph, index: number) =>
-                <div className="forceBox" key={index}>
-                    <div className="condidateBox">
+                <div className="forceBox" key={index} onClick={this.selectIndex.bind(this,index)}>
+                    <div className="condidateBox" style={{borderColor:index===selectIndex?selectBorder:'#ccc'}}>
                         <div className="candidateTitle">
                             Graph:{value.id}<br/>
                             Nodes:{value.str.nodes} Year:{value.year}
@@ -49,8 +54,8 @@ class ForceCompute extends React.Component<Props, any>{
         }
         else if (dataType === 'Family') {
             graphElements = this.props.graphs.map((value: graph, index: number) =>
-                <div className="forceBox" key={index}>
-                    <div className="condidateBox">
+                <div className="forceBox" key={index} onClick={this.selectIndex.bind(this,index)}>
+                    <div className="condidateBox" style={{borderColor:index===selectIndex?selectBorder:'#ccc'}}>
                         <div className="candidateTitle">
                             Graph:{value.id}<br/>
                             Nodes:{value.str.nodes} Depth:{value.str.depth}

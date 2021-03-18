@@ -91,7 +91,7 @@ class Info extends React.Component<Props, any>{
         components.push(<HistoryRecord parent={parent} changePage={this.changePage} url={url+'/readHistoryRecord'} display={this.state.selectNum===2?true:false} dimensions={dimensions} attrChecked={attrChecked} dataType={dataType}/>)
         let iconsEl = this.icons.map((value: string, index: number) => {
             return (
-                <div style={{ width: '100%', height: '60px', borderBottom:'1px solid #ccc',cursor:'pointer'}} key={index} >
+                <div style={{ width: '100%', height: '60px', borderBottom:'1px solid #ccc',borderRight:'1px solid #ccc',cursor:'pointer'}} key={index} >
                     <img src={this.state.selectNum === index ? this.selectIcos[index] : value} width="100%" height="100%" onClick={this.changePage.bind(this,index)} />
                 </div>
             )
@@ -108,15 +108,19 @@ class Info extends React.Component<Props, any>{
         return (
             <div className='info'>
                 {/* <input type="button" value="match" onClick={this.match.bind(this,graph)}></input> */}
-                <div className="infoName" style={{
+                {/* <div className="infoName" style={{
                     height: '100%', width: '50px', fontSize: '0.5rem', float: 'left',
                     overflowX: 'hidden', overflowY: 'auto', backgroundColor: 'rgb(254,254,254)', border: '1px solid #ccc',
                     borderTop: 'none', boxSizing: 'border-box'
                 }}>
                     {iconsEl}
-                </div>
-                <div style={{width: "calc(100% - 50px)" ,height:'100%',float:"left"}}>
+                </div> */}
+                
+                <div style={{width: "100%" ,height:'100%',float:"left"}}>
                     {pageEl}
+                </div>
+                <div style={{position:'absolute',top:'0',right:'0',width:'50px',height:'auto'}}>
+                    {iconsEl}
                 </div>
             </div>
         )

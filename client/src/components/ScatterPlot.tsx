@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as d3 from 'd3';
 import axios from 'axios';
+import { RecordWithTtl } from 'dns';
 
 interface Props{
     reTsneData:Array<PointData>,
@@ -49,9 +50,9 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
     private canvasRef:React.RefObject<HTMLCanvasElement>;
     public svgWidth:number=0;
     public svgHeight:number=0;
-    public padding={top:10,bottom:10,left:10,right:10};
+    public padding={top:10,bottom:20,left:10,right:10};
     public ctx:CanvasRenderingContext2D | null=null;
-    public color:Array<string>=['white','black', 'blue', 'green', 'yellow', 'red', 'purple', 'orange', 'brown'];
+    public color:Array<string>=["#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99","#e31a1c","#fdbf6f","#ff7f00","#cab2d6","#e41a1c","#b3cde3","#4daf4a","#984ea3","#ffff33","#a65628","#f781bf","#999999","#8dd3c7","#ffffb3","#bebada","#fb8072","#80b1d3","#fdb462","#b3de69","#fccde5","#d9d9d9"];
     public lightColor:string='orange';
     public centerColor:string='red';
     public path:PathData={
@@ -70,6 +71,7 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
         this.onMouseMove=this.onMouseMove.bind(this);
         this.onMouseUp=this.onMouseUp.bind(this);
         this.compute=this.compute.bind(this);
+        this.getClusterNodes=this.getClusterNodes.bind(this);
         this.state={
             data:[],
             choosePoints:[],
@@ -258,6 +260,33 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
         })
         this.setState({centerPoint:pointData});
     }
+    getClusterNodes(cluster:number):void{
+        const {url,dimensions,attrWeight,strWeight,attrChecked,dataType}=this.props;
+        let checkedArr:any=[];
+        for(let key in attrChecked){
+            checkedArr.push({name:key,value:attrChecked[key]})
+        }
+        axios.post(url+'/getCluster',{cluster:cluster,dataType:dataType,dimensions:dimensions,attrWeight:attrWeight,strWeight:strWeight,attrChecked:checkedArr})
+        .then(res=>{
+            let ids=res.data.data;
+            let chooseData:any=[];
+            for(let i=0;i<ids.length;i++){
+                for(let j=0;j<this.state.data.length;j++){
+                    if(this.state.data[j]['id']===Number(ids[i])){
+                        chooseData.push(this.state.data[j]);
+                        break;
+                    }
+                }
+            }
+            this.state.data.forEach((value:any)=>{
+                if(value.opacity===1)
+                    value.opacity=0.3;
+            })
+            // this.setState({choosePoints:chooseData});
+            this.props.parent.setChoosePoints(chooseData);
+
+        })
+    }
     componentWillReceiveProps(nextProps:Props):void{
         if(nextProps.choosePoints!==this.props.choosePoints){
             let choosePoints=[];
@@ -281,7 +310,7 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
         }
         
         if(nextProps.dimensions!==this.props.dimensions || nextProps.attrChecked!==this.props.attrChecked){
-            console.log(111)
+            // console.log(111)
             let checkedArr:any=[];
             for(let key in nextProps.attrChecked){
                 checkedArr.push({name:key,value:nextProps.attrChecked[key]})
@@ -291,8 +320,8 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
         }
         
         if(nextProps.attrValue!==this.props.attrValue && nextProps.dataType===this.props.dataType){
-            console.log(nextProps.dataType===this.props.dataType)
-            console.log(nextProps.attrValue)
+            // console.log(nextProps.dataType===this.props.dataType)
+            // console.log(nextProps.attrValue)
             let checkedArr:any=[];
             for(let key in nextProps.attrChecked){
                 if(nextProps.attrChecked[key]===true)
@@ -322,20 +351,28 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
         let data=this.state.data;
         //所有点
         let points=[];
+        let useColor:Array<number>=[];
         for(let i=0;i<data.length;i++){
+            if(useColor.indexOf(data[i].cluster)<0)
+            useColor.push(data[i].cluster);
             points.push(
-                <circle r="2px" cx={data[i].x} cy={data[i].y} key={data[i].id} fill='none' 
-                strokeWidth='1px' stroke='#666' onClick={this.searchGraph.bind(this,data[i])} opacity={data[i].opacity}></circle>
+                <circle r="2px" cx={data[i].x} cy={data[i].y} key={data[i].id} fill={this.color[data[i].cluster]} 
+                 onClick={this.searchGraph.bind(this,data[i])} opacity={data[i].opacity}></circle>
             )
         }
         //圈选的点，匹配到的点
         let pointsChoose=this.state.choosePoints.map((value:ChoosePointData,index:number)=>
-            <circle r="2px" cx={value.x} cy={value.y} key={index} fill={this.lightColor} onClick={this.searchGraph.bind(this,value)}></circle>
+            <circle r="2px" cx={value.x} cy={value.y} key={index} fill={this.color[value.cluster]} onClick={this.searchGraph.bind(this,value)}></circle>
         )
         //点击的点，需要匹配的点
         let centerPoint=null;
         if(this.state.centerPoint!=null){
             centerPoint=<circle r="2px" cx={this.state.centerPoint.x} cy={this.state.centerPoint.y} fill={this.centerColor} onClick={this.searchGraph.bind(this,this.state.centerPoint)}></circle>
+        }
+
+        let colorRect:Array<React.ReactElement>=[];
+        for(let i=0;i<useColor.length;i++){
+            colorRect.push(<rect key={i} onClick={this.getClusterNodes.bind(this,i)} x={this.padding.left+10*i} y={this.svgHeight-this.padding.bottom+10} height={10} width={10} fill={this.color[i]}></rect>)
         }
         return(
             <div className="scatter">
@@ -343,6 +380,7 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
                     <g>{points}</g>
                     <g>{pointsChoose}</g>
                     <g>{centerPoint}</g>
+                    {colorRect}
                 </svg>
                 {/* <canvas ref={this.canvasRef} style={{position:'absolute',top:'0',left:'0'}}
                 onMouseMove={this.onMouseMove} onMouseDown={this.onMouseDown} onMouseUp={this.onMouseUp}></canvas> */}

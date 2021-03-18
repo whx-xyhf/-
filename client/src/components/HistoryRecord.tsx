@@ -91,7 +91,13 @@ class HistoryRecord extends React.Component<Props, any>{
 
         return (
             <div style={{width:'100%',height:'100%'}}>
-                {el}
+                
+                <div style={{width:'calc(100% - 50px)',height:'100%',float:'left'}}>
+                    {el}
+                </div>
+                <div style={{width:'50px',height:'100%',float:'left'}}>
+
+                </div>
             </div>
         )
     }

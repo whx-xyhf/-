@@ -26,8 +26,8 @@ class App extends React.Component<any, any> {
   constructor(props: any) {
     super(props)
     this.state = {
-      dataType:'Author',//数据集名称
-      // dataType:'Family',//数据集名称
+      // dataType:'Author',//数据集名称
+      dataType:'Family',//数据集名称
       reTsneData:[],//重新降维的数据
       choosePoints: [],//圈选的点
       personGraphs: [],//选中的人所在的子图
@@ -35,9 +35,9 @@ class App extends React.Component<any, any> {
       dimensions: 128,//向量维度
       num: 8,//匹配的限制数量
       strWeight: 1,//拓扑权重
-      attrWeight: 0,//属性权重
+      attrWeight: 1,//属性权重
       strWeight_slider: 1,//拓扑权重(保存滑块的值)
-      attrWeight_slider: 0,//属性权重(保存滑块的值)
+      attrWeight_slider: 1,//属性权重(保存滑块的值)
       attr: {},//属性及对应的最大范围
       attrSliderValue: {},//属性slider选择的范围
       attrValue: {},//确认时属性的范围
@@ -103,13 +103,18 @@ class App extends React.Component<any, any> {
     this.setState({ dimensions: e.target.value, choosePoints: [] });
   }
   //设置结构权重滑块
-  changeStrWeight(value: string | number | null | undefined): void {
-    this.setState({ strWeight_slider: value, attrWeight_slider: typeof value === 'number' ? Number((1 - value).toFixed(1)) : 0 })
+  changeStrWeight(e: CheckboxChangeEvent): void {
+    if(e.target.checked===true)
+      this.setState({ strWeight_slider: 1});
+    else
+      this.setState({ strWeight_slider: 0});
   }
   //设置属性权重滑块
-  changeAttrWeight(value: string | number | null | undefined): void {
-
-    this.setState({ attrWeight_slider: value, strWeight_slider: typeof value === 'number' ? Number((1 - value).toFixed(1)) : 0 })
+  changeAttrWeight(e: CheckboxChangeEvent): void {
+    if(e.target.checked===true)
+      this.setState({ attrWeight_slider: 1});
+    else
+      this.setState({ attrWeight_slider: 0});
   }
   changeNum(value: string | number | null | undefined): void {
     this.setState({ num: value });
@@ -138,18 +143,18 @@ class App extends React.Component<any, any> {
   }
   //
   setAttrValueMin(key:string,value:any):void{
-    let attrValue = this.state.attrValue;
-    attrValue[key][0] = value;
+    // let attrValue = this.state.attrValue;
+    // attrValue[key][0] = value;
     let attrSliderValue = this.state.attrSliderValue;
     attrSliderValue[key][0] = value;
-    this.setState({ attrValue: JSON.parse(JSON.stringify(attrValue)) });
+    this.setState({ attrSliderValue: JSON.parse(JSON.stringify(attrSliderValue)) });
   }
   setAttrValueMax(key:string,value:any):void{
-    let attrValue = this.state.attrValue;
-    attrValue[key][1] = value;
+    // let attrValue = this.state.attrValue;
+    // attrValue[key][1] = value;
     let attrSliderValue = this.state.attrSliderValue;
     attrSliderValue[key][1] = value;
-    this.setState({ attrValue: JSON.parse(JSON.stringify(attrValue)) });
+    this.setState({ attrSliderValue: JSON.parse(JSON.stringify(attrSliderValue)) });
   }
   //设置属性状态
   initAttrChecked(value: any): void {
@@ -207,14 +212,16 @@ class App extends React.Component<any, any> {
   }
 
   match():void{//匹配相似图
-    const {dimensions,strWeight,attrWeight,attrChecked,attrValue,dataType,num}=this.state;
+    const {dimensions,strWeight,attrWeight,attrChecked,attrValue,attrSliderValue,dataType,num}=this.state;
     const graph =this.state.personGraphs[0];
     const url='http://localhost:8080';
+    if(attrValue!==attrSliderValue)
+        this.setState({attrValue:JSON.parse(JSON.stringify(attrSliderValue))})
     let checkedArr:any=[];
     for(let key in attrChecked){
         checkedArr.push({name:key,value:attrChecked[key]})
     }
-    axios.post(url+'/matchGraph',{wd:graph,dataType:dataType,num:num,dimensions:dimensions,strWeight:strWeight,attrWeight:attrWeight,attrChecked:checkedArr,attrValue:attrValue})
+    axios.post(url+'/matchGraph',{wd:graph,dataType:dataType,num:num,dimensions:dimensions,strWeight:strWeight,attrWeight:attrWeight,attrChecked:checkedArr,attrValue:attrSliderValue})
     .then(res=>{
         this.setChoosePoints(res.data.data);
     })
@@ -227,7 +234,7 @@ class App extends React.Component<any, any> {
 }
 
   render(): React.ReactElement {
-    const {dataType, dimensions, strWeight, attrWeight, num, choosePoints,reTsneData,
+    const {dataType, dimensions, strWeight, attrWeight, num, choosePoints,reTsneData,strWeight_slider,attrWeight_slider,
       centerPoint, personGraphs, attr, attrSliderValue, attrValue, attrChecked, attrCheckedBox ,displaySlider,displayDrawPanel,
     attrList,strList,attr_x,attr_y,str_x,str_y} = this.state;
     let attrEl: Array<React.ReactElement> = [];
@@ -249,7 +256,7 @@ class App extends React.Component<any, any> {
               value={[Math.floor(attrSliderValue[key][0]), Math.floor(attrSliderValue[key][1])]}
               style={{ position: 'relative', top: '-4px' }}
               onChange={this.setOneAttrSliderValue.bind(this, key)}
-              onAfterChange={this.setAttrValue.bind(this, key)}
+              onAfterChange={this.setOneAttrSliderValue.bind(this, key)}
             />
             {/* <span style={{ position: 'absolute', bottom: '-4px', left: 0, fontSize: '0.3rem' }}>{Math.floor(attr[key][0])}</span>
             <span style={{ position: 'absolute', bottom: '-4px', right: 0, fontSize: '0.3rem' }}>{Math.floor(attr[key][1])}</span> */}
@@ -298,7 +305,7 @@ class App extends React.Component<any, any> {
 
         <div className="controlView">
           <div className="controlPanel">
-            <div className="title">Control Panel</div>
+            <div className="title controlTitle">Control Panel</div>
             <div className="content" style={{textAlign:'left'}}>
               <Row style={{ height: '27px' }}>
               <Col span={7}>
@@ -406,13 +413,22 @@ class App extends React.Component<any, any> {
                 </Col>
               </Row>
               <Row style={{ height: '27px' }}>
-                <Col><Button onClick={this.changeWeight} style={{ margin: '0 5px' }} size='small'>search</Button></Col>
-                <Col><Button onClick={this.match} style={{ margin: '0 5px' }} size='small'>match</Button></Col>
+                <Col span={2}>
+                  <Checkbox checked={strWeight_slider===1?true:false} onChange={this.changeStrWeight}></Checkbox>
+                </Col>
+                <Col span={2} style={{ margin: '0 0 0 -2px' }}>Str</Col>
+                <Col span={2}>
+                  <Checkbox checked={attrWeight_slider===1?true:false} onChange={this.changeAttrWeight}></Checkbox>
+                </Col>
+                <Col span={2} style={{ margin: '0 0 0 -2px' }}>Attr</Col>
+                <Col><Button onClick={this.changeWeight} style={{ margin: '0 5px' }} size='small'>Project</Button></Col>
+                <Col><Button onClick={this.match} style={{ margin: '0 5px' }} size='small'>Match</Button></Col>
+                <Col><Button style={{ margin: '0 5px' }} size='small'>Reset</Button></Col>
               </Row>
             </div>
           </div>
           <div className="filter">
-            <div className="title">
+            <div className="title controlTitle">
               Attribute Panel
               <select style={{ float: "right", height: '100%' }} onChange={this.setAttrDisplaySlider} defaultValue="Slider">
                 <option value="Slider">Slider</option>
@@ -439,7 +455,7 @@ class App extends React.Component<any, any> {
             </div>
           </div>
           <div className="drawPanel">
-            <div className="title">Structure Panel
+            <div className='title controlTitle'>Structure Panel
             <select style={{ float: "right", height: '100%' }} onChange={this.setStrDisplaySlider} defaultValue='Slider'>
                 <option value="Slider">Paint</option>
                 <option value="Graph">Scatter</option>

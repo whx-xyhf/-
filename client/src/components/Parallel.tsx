@@ -23,22 +23,31 @@ class Parallel extends React.Component<Props,any>{
     private svgRef:React.RefObject<SVGSVGElement>;
     public svgWidth:number=0;
     public svgHeight:number=0;
-    public padding={top:10,bottom:30,left:30,right:50};
+    public padding={top:30,bottom:30,left:30,right:60};
     public pathStroke:string='#99CCFF';
     public pathStrokeChoose:string='orange';
     public pathStrokeCenter:string='red';
+    // public rectColor:Array<string>=['#FEF0D9','#FDCC8A','#FC8D59','#E34A33','#B30000'];
+    public rectHeight:number=6;
+    public yscale:any=null;
+    public rectWidthMax:number=0;
+    // public rectColor=d3.interpolate(d3.rgb(254,240,217),d3.rgb(179,0,0));
+    public rectColor=d3.interpolateYlOrRd;
     constructor(props:Props){
         super(props);
         this.svgRef=React.createRef();
-        this.state={data:[]};
+        this.state={data:[],rect:{}};
         this.getAttrData=this.getAttrData.bind(this);
         this.compute=this.compute.bind(this);
     }
     compute(data:any,updateAttr:boolean):void{
         let attr_name:Array<string>=[];
         let str_name:Array<string>=[];
+        let rectNum=Math.ceil((this.svgHeight-this.padding.bottom-this.padding.top)/this.rectHeight)+1;
+        let rectArray:attr={};
         for(let key in data[0].attr){
             attr_name.push(key);
+            rectArray[key]=[];
         }
         for(let key in data[0].str){
             str_name.push(key);
@@ -61,12 +70,40 @@ class Parallel extends React.Component<Props,any>{
         }
 
         let yscale:any = new Map(Array.from(attr_name, key => [key, d3.scaleLinear(min_max.get(key), [this.svgHeight-this.padding.bottom, this.padding.top])]));
+        this.yscale=yscale;
+        for(let i in rectArray){
+            for(let j=0;j<rectNum;j++){
+                rectArray[i].push([xscale(i),this.svgHeight-this.padding.bottom-j*this.rectHeight,0,0])//[x,y,height,color]
+            }
+        }
         for(let i in data){
             let pathData=[];
             for(let j in data[i].attr){
-                pathData.push([xscale(j),yscale.get(j)(data[i].attr[j])])
+                let y=Math.floor((this.svgHeight-this.padding.bottom-yscale.get(j)(data[i].attr[j]))/this.rectHeight);
+                rectArray[j][y][3]+=data[i].attr[j];
+                pathData.push([xscale(j),yscale.get(j)(data[i].attr[j])]);
+                rectArray[j][y][2]+=1;
             }
             data[i].pathData=pathData;
+        }
+        let rectx1=xscale(attr_name[1]) || 0;
+        let rectx2=xscale(attr_name[0]) || 0;
+        let rectWidthMax=(rectx1-rectx2)/2-10>this.padding.left-5?this.padding.left-5:(rectx1-rectx2)/2-10;
+        this.rectWidthMax=rectWidthMax;
+        for(let i in rectArray){
+            let v=d3.extent(rectArray[i],(d:Array<number>)=>Math.sqrt(d[2]));
+            let c=d3.extent(rectArray[i],(d:Array<number>)=>Math.sqrt(d[3]));
+            let rectWidthScale=d3.scaleLinear(v,[0,rectWidthMax]);
+            // let mean=d3.mean(rectArray[i],(d:any)=>d[3])||0;
+            // let std=this.getStd(rectArray[i],mean);
+            // console.log(mean,std)
+            let colorScale=d3.scaleLinear(c,[0,0.9]);
+    
+            rectArray[i].forEach((value:Array<number>)=>{
+                value[2]=rectWidthScale(Math.sqrt(value[2]));
+                // value[3]=(value[3]-mean)/std/4+0.5;
+                value[3]=colorScale(Math.sqrt(value[3]));
+            })
         }
         d3.select("#svg_parallel")
             .select(".axis")
@@ -95,7 +132,8 @@ class Parallel extends React.Component<Props,any>{
             .attr("transform", `translate(${xscale(attr_name[i])},${this.svgHeight})`)
         }
        
-        this.setState({data:data});
+       
+        this.setState({data:data,rect:rectArray});
     }
     getAttrData(dataType:string):void{
         axios.post(this.props.url,{dataType:dataType})
@@ -117,6 +155,35 @@ class Parallel extends React.Component<Props,any>{
                 d+=`L${data[i][0]} ${data[i][1]} `;
         }
         return d;
+    }
+    // getStd(values: Array<number>,mean:number,valueof: (datum: any, index: number, array: Iterable<number>) => number
+    // ):number{
+    //     let count = 0;
+    //     let sum = 0;
+    //     if (valueof === undefined) {
+    //         for (let value of values) {
+    //         if (value != null ) {
+    //             ++count, sum += Math.pow(value-mean,2);
+    //         }
+    //         }
+    //     } else {
+    //         let index = -1;
+    //         for (let value of values) {
+    //             if ((value = valueof(value, ++index, values)) != null) {
+    //                 ++count, sum += Math.pow(value-mean,2);
+    //             }
+    //         }
+    //     }
+    //     return Math.sqrt(sum)/ count;
+        
+    // }
+    getStd(values:any,mean:number):number{
+        let count=0,sum=0;
+        for(let i in values){
+            sum+=Math.pow(values[i][3]-mean,2);
+            count+=1;
+        }
+        return Math.sqrt(sum)/ count;
     }
     componentWillReceiveProps(nextProps:Props){
         if(nextProps.attrValue!==this.props.attrValue){
@@ -162,6 +229,42 @@ class Parallel extends React.Component<Props,any>{
         if(nextProps.dataType!==this.props.dataType){
             this.getAttrData(nextProps.dataType);
         }
+        if(nextProps.choosePoints!==this.props.choosePoints){
+            const {data}=this.state;
+            let rectArray=JSON.parse(JSON.stringify(this.state.rect));
+            for(let i in rectArray){
+                rectArray[i].forEach((value:Array<number>)=>{
+                    value[2]=0;
+                    value[3]=0;
+                })
+            }
+            
+            nextProps.choosePoints.forEach((value:any)=>{
+                for(let i in value.attr){
+                    let y=Math.floor((this.svgHeight-this.padding.bottom-this.yscale.get(i)(value.attr[i]))/this.rectHeight);
+                    rectArray[i][y][2]+=1;
+                    rectArray[i][y][3]+=value.attr[i];
+                }
+            })
+
+            let rectWidthMax=this.rectWidthMax;
+            for(let i in rectArray){
+                let v=d3.extent(rectArray[i],(d:Array<number>)=>Math.sqrt(d[2]));
+                let c=d3.extent(rectArray[i],(d:Array<number>)=>Math.sqrt(d[3]));
+                let rectWidthScale=d3.scaleLinear(v,[0,rectWidthMax]);
+                // let mean=d3.mean(rectArray[i],(d:any)=>d[3])||0;
+                // let std=this.getStd(rectArray[i],mean);
+                // console.log(mean,std)
+                let colorScale=d3.scaleLinear(c,[0,0.9]);
+        
+                rectArray[i].forEach((value:Array<number>)=>{
+                    value[2]=rectWidthScale(Math.sqrt(value[2]));
+                    // value[3]=(value[3]-mean)/std/4+0.5;
+                    value[3]=colorScale(Math.sqrt(value[3]));
+                })
+            }
+            this.setState({rect:rectArray});
+        }
     }
     render(){
         //所有线
@@ -198,6 +301,17 @@ class Parallel extends React.Component<Props,any>{
             return null;
         })
 
+        //画矩形
+        let rectLeft:Array<React.ReactElement>=[];
+        let rectRight:Array<React.ReactElement>=[];
+        for(let i in this.state.rect){
+            this.state.rect[i].forEach((value:Array<number>,index:number)=>{
+                // console.log(value[3])
+                rectRight.push(<rect key={index+'i'+i} x={value[0]-value[2]} y={value[1]-this.rectHeight} height={this.rectHeight} fill={this.rectColor(value[3])} width={value[2]} stroke='#ccc' strokeWidth="0.5"></rect>)
+                rectLeft.push(<rect key={index+'l'+i} x={value[0]} y={value[1]-this.rectHeight} height={this.rectHeight} fill={this.rectColor(value[3])} width={value[2]} stroke='#ccc' strokeWidth="0.5"></rect>)
+            })
+        }
+
 
         return (
             <div className='parallel'>
@@ -206,8 +320,21 @@ class Parallel extends React.Component<Props,any>{
                     {pathChoose}
                     {pathCenter}
                     {personGraphs}
+                    {rectLeft}
+                    {rectRight}
                     <g className="axis"></g>
                     <g className="text"></g>
+                    <defs>
+                        <linearGradient id='linearColor' x1="0%" y1="0%" x2='0%' y2="100%">
+                            <stop offset="0%" stopColor={this.rectColor(0.9)}></stop>
+                            <stop offset="20%" stopColor={this.rectColor(0.8)}></stop>
+                            <stop offset="40%" stopColor={this.rectColor(0.6)}></stop>
+                            <stop offset="60%" stopColor={this.rectColor(0.4)}></stop>
+                            <stop offset="80%" stopColor={this.rectColor(0.2)}></stop>
+                            <stop offset="100%" stopColor={this.rectColor(0)}></stop>
+                        </linearGradient>
+                    </defs>
+                    <rect fill='url(#linearColor)' x={this.svgWidth-this.padding.right/2+10} y={this.svgHeight-this.padding.bottom-100} height={100} width={20}></rect>
                 </svg>
             </div>
         )

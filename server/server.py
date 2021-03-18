@@ -44,6 +44,7 @@ def index():
         for i in range(len(data)):
             data[i]['x']=float(vectors[str(data[i]['id'])]['x'])
             data[i]['y']=float(vectors[str(data[i]['id'])]['y'])
+            data[i]['cluster']=vectors[str(data[i]['id'])]['cluster']
         res = make_response(jsonify({'code': 200, "data": data}))
     return res
 
@@ -147,6 +148,7 @@ def searchGraphByGraphId():#根据图id搜索该图
                     #     graph['names'] = nodeName
                     graph['x'] = float(vectors[str(graph['id'])]['x'])
                     graph['y'] = float(vectors[str(graph['id'])]['y'])
+                    graph['cluster'] = vectors[str(graph['id'])]['cluster']
                     resData.append(graph)
                     break
             res = make_response(jsonify({'code': 200, "data": resData}))
@@ -192,6 +194,7 @@ def match():#匹配相似图
                     if flag:
                         data[i]['x'] = float(vectors[str(data[i]['id'])]['x'])
                         data[i]['y'] = float(vectors[str(data[i]['id'])]['y'])
+                        data[i]['cluster'] = vectors[str(data[i]['id'])]['cluster']
                         distance=math.pow(float(vectors[str(sourceGraph['id'])]['x'])-data[i]['x'],2)+math.pow(float(vectors[str(sourceGraph['id'])]['y'])-data[i]['y'],2)
                         data[i]['distance']=distance
                     else:
@@ -201,7 +204,7 @@ def match():#匹配相似图
             res = make_response(jsonify({'code': 200, "data": resData[:num]}))
         file = './dataProcessing/data/' + dataType + '/' + 'historyRecord' + str(time_interval) + '.json'
         date=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        oneRecord = {'graph': sourceGraph, 'dimensions': dimensions, 'attrChecked': attrChecked,'date':date}
+        oneRecord = {'graph': sourceGraph, 'dimensions': dimensions, 'attrChecked': attrChecked,'date':date,'strWeight':strWeight,'attrWeight':attrWeight}
         if os.path.exists(file):
             with open(file, 'r') as fr:
                 record = json.load(fr)
@@ -290,6 +293,7 @@ def matchModel():
         for i in range(len(data)):
             data[i]['x']=float(tsneData[str(data[i]['id'])]['x'])
             data[i]['y']=float(tsneData[str(data[i]['id'])]['y'])
+            data[i]['cluster'] = tsneData[str(data[i]['id'])]['cluster']
             data[i]['distance']=math.pow(data[i]['x']-float(tsneData[name]['x']),2)+math.pow(data[i]['y']-float(tsneData[name]['y']),2)
             newData.append(data[i])
         centerPoint={'id':int(name),'nodes':nodes,'edges':edges,'attr':attrValue_,'x':float(tsneData[name]['x']),'y':float(tsneData[name]['y']),'distance':100000}
@@ -305,15 +309,44 @@ def readHistoryRecord():
         dimensions = str(request.get_json()['dimensions'])
         attrChecked = request.get_json()['attrChecked']
         dataType = request.get_json()['dataType']
+        strWeight = request.get_json()['strWeight']
+        attrWeight = request.get_json()['attrWeight']
         resData=[]
         file = './dataProcessing/data/' + dataType + '/' + 'historyRecord' + str(time_interval) + '.json'
         with open(file,'r') as fr:
             data=json.load(fr)
         for i in data:
-            if i['dimensions']==dimensions and i['attrChecked']==attrChecked:
+            if i['dimensions']==dimensions and i['attrChecked']==attrChecked and i['strWeight']==strWeight and i['attrWeight']==attrWeight:
                 resData.append({'graph':i['graph'],'date':i['date']})
         res = make_response(jsonify({'code': 200, 'data':resData}))
     return res
+
+@app.route("/getCluster",methods = ['POST', 'GET'])
+def getCluster():
+    if request.method == 'POST':
+        dimensions = str(request.get_json()['dimensions'])
+        attrChecked = request.get_json()['attrChecked']
+        dataType = request.get_json()['dataType']
+        strWeight = request.get_json()['strWeight']
+        attrWeight = request.get_json()['attrWeight']
+        cluster=str(request.get_json()['cluster'])
+        with open('./dataProcessing/data/'+dataType+'/subGraphs_'+str(time_interval)+'.json','r') as fr:
+            data=json.load(fr)
+        attrStr = ''
+        for i in data[0]['attr']:
+            if {'name': i, 'value': True} in attrChecked:
+                attrStr += '1'
+            else:
+                attrStr += '0'
+        with open('./dataProcessing/data/'+dataType+'/'+ 'cluster_points_' + str(time_interval) + '_' + str(dimensions) + '_' + str(
+                    strWeight) + '_' + str(attrWeight) + '_' + attrStr + '.json','r') as fr:
+            clusterData=json.load(fr)
+            ids=clusterData[cluster]
+        res = make_response(jsonify({'code': 200, 'data': ids}))
+    return res
+
+
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0",
