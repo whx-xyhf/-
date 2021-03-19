@@ -126,33 +126,47 @@ def run(dataType,dir,sampleNum,matchNum,dimensions,weight,dimensionsAttrChecked)
     y_data_mean = np.array(gedValueMeanEveryWeight)
     print(y_data_mean)
     y_data_std = np.array(gedValueStdEveryWeight)
-    x_data = np.array([i[0] for i in weight])
+    x_data = ['Str','Attr','Str+Attr']
     plt.legend(loc="upper right")  # 显示图例
-    plt.xlabel('Str Weight')
+    plt.xlabel('Combination')
     plt.ylabel('Ged Value')
-    plt.plot(x_data, y_data_mean, color='red', linewidth=2, label="Ged Mean", marker="o", markerfacecolor='red')
+    plt.bar(x_data, translate(y_data_mean,1,10), label="Ged Mean",align='center')
     # plt.plot(x_data, y_data_std,color='blue', linewidth=2,label="Ged Std",marker = "o" ,markerfacecolor = 'Orange')
     plt.savefig('./data/'+dataType+'/images/'+dimensionsAttrChecked+'/' + str(dir) + "/GedMean.png")
     plt.close()
 
-    x_data = np.array([i[1] for i in weight])
-
     for name in attrNames:
         y_data_mean = np.array(attrEveryWeight[name])
-        plt.xlabel('Attr Weight')
+        plt.xlabel('Combination')
         plt.ylabel(name)
-        plt.plot(x_data, y_data_mean, color='red', linewidth=2, marker="o", markerfacecolor='red')
+        plt.bar(x_data, translate(y_data_mean,1,10), label="Ged Mean",align='center')
         plt.savefig("./data/"+dataType+"/images/"+dimensionsAttrChecked+'/' + str(dir) + "/" + name + ".png")
         plt.close()
 
+def translate(array,rightMin, rightMax):
+    # Figure out how 'wide' each range is
+    leftMax=max(array)
+    leftMin=min(array)
+    leftSpan = leftMax - leftMin
+    rightSpan = rightMax - rightMin
+
+    # Convert the left range into a 0-1 range (float)
+    newArray=[]
+    for i in array:
+        valueScaled = float(i - leftMin) / float(leftSpan)
+        newArray.append(rightMin + (valueScaled * rightSpan))
+
+    # Convert the 0-1 range into a value in the right range.
+    return newArray
+
 if __name__=="__main__":
-    dataType="Family"
+    dataType="Author"
     dir=5
     sampleNum = 50
     matchNum = 10
     dimensions = 128
-    dimensionsAttrChecked = '11000'
-    weight = [[1, 0], [0.8, 0.2],  [0.2, 0.8], [0, 1]]
+    dimensionsAttrChecked = '111000'
+    weight = [[1, 0],[0,1],[1,1]]
     for i in range(dir):
         print(i)
         run(dataType,i,sampleNum,matchNum,dimensions,weight,dimensionsAttrChecked)

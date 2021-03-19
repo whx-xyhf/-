@@ -31,35 +31,36 @@ def plotFeature(data, clusters, clusterNum):
 
 if __name__ == '__main__':
     print("正在进行dbscan聚类！！！")
-    dirPath = './data/Family/'
-    strWeight=1
-    attrWeight=0
+    dirPath = './data/Author/'
+    weight=[[1,0],[0,1]]
     time_interval = 1
     dimensions = 128
-    attrStr='11111'
-    data,points,ids=loadDataSet(dirPath+'vectors2d_'+str(time_interval)+'_'+str(dimensions)+'_'+str(strWeight)+'_'+str(attrWeight)+'_'+attrStr+'.json')
-    clustering = DBSCAN(eps=5, min_samples=0).fit(points)
-    labels = set(clustering.labels_)
-    # pointsM=np.mat(points).transpose()
-    # plotFeature(pointsM,clustering.labels_,len(labels))
-    # plt.show()
-    dic={}
-    subGraphs=[]
-    for label in labels:
-        dic[str(label)]=[]
-    index=0
-    for label in clustering.labels_:
-        dic[str(label)].append(ids[index])
-        index+=1
-    with open(dirPath+'cluster_points_'+str(time_interval)+'_'+str(dimensions)+'_'+str(strWeight)+'_'+str(attrWeight)+'_'+attrStr+'.json','w') as fw:#每个标签有哪些点
-        json.dump(dic,fw)
-    out = {}
-    for i in range(len(ids)):
-        out[ids[i]]={'id':ids[i],'cluster':int(clustering.labels_[i])}
-    for i in data:
-        data[i]['cluster']=out[i]['cluster']
-    with open(dirPath+'vectors2d_'+str(time_interval)+'_'+str(dimensions)+'_'+str(strWeight)+'_'+str(attrWeight)+'_'+attrStr+'.json','w') as fw:
-        json.dump(data,fw)
+    attrStr=['111111']
+    for i in weight:
+        for j in attrStr:
+            data,points,ids=loadDataSet(dirPath+'vectors2d_'+str(time_interval)+'_'+str(dimensions)+'_'+str(i[0])+'_'+str(i[1])+'_'+j+'.json')
+            clustering = DBSCAN(eps=5, min_samples=0).fit(points)
+            labels = set(clustering.labels_)
+            # pointsM=np.mat(points).transpose()
+            # plotFeature(pointsM,clustering.labels_,len(labels))
+            # plt.show()
+            dic={}
+            subGraphs=[]
+            for label in labels:
+                dic[str(label)]=[]
+            index=0
+            for label in clustering.labels_:
+                dic[str(label)].append(ids[index])
+                index+=1
+            with open(dirPath+'cluster_points_'+str(time_interval)+'_'+str(dimensions)+'_'+str(i[0])+'_'+str(i[1])+'_'+j+'.json','w') as fw:#每个标签有哪些点
+                json.dump(dic,fw)
+            out = {}
+            for i in range(len(ids)):
+                out[ids[i]]={'id':ids[i],'cluster':int(clustering.labels_[i])}
+            for i in data:
+                data[i]['cluster']=out[i]['cluster']
+            with open(dirPath+'vectors2d_'+str(time_interval)+'_'+str(dimensions)+'_'+str(i[0])+'_'+str(i[1])+'_'+j+'.json','w') as fw:
+                json.dump(data,fw)
 
-    print("聚类完成！！！")
-    print("共"+str(len(labels))+"类")
+            print("聚类完成！！！")
+            print("共"+str(len(labels))+"类")

@@ -26,8 +26,8 @@ class App extends React.Component<any, any> {
   constructor(props: any) {
     super(props)
     this.state = {
-      // dataType:'Author',//数据集名称
-      dataType:'Family',//数据集名称
+      dataType:'Author',//数据集名称
+      // dataType:'Family',//数据集名称
       reTsneData:[],//重新降维的数据
       choosePoints: [],//圈选的点
       personGraphs: [],//选中的人所在的子图
@@ -121,8 +121,8 @@ class App extends React.Component<any, any> {
   }
   //确认权重
   changeWeight(): void {
-    const { strWeight_slider, attrWeight_slider } = this.state;
-    this.setState({ strWeight: strWeight_slider, attrWeight: attrWeight_slider, choosePoints: [], centerPoint: {} });
+    const { strWeight_slider, attrWeight_slider,attrCheckedBox } = this.state;
+    this.setState({ strWeight: strWeight_slider, attrWeight: attrWeight_slider,attrChecked:JSON.parse(JSON.stringify(attrCheckedBox)), choosePoints: [], centerPoint: {} });
   }
   //设置属性类型
   setAttr(value: attr): void {
@@ -171,7 +171,7 @@ class App extends React.Component<any, any> {
     let attrCheckedBox = JSON.parse(JSON.stringify(this.state.attrCheckedBox));
     attrCheckedBox[key] = e.target.checked;
     // this.setState({ attrCheckedBox: attrCheckedBox });
-    this.setState({ attrCheckedBox: attrCheckedBox,attrChecked: attrCheckedBox, choosePoints: [], centerPoint: {} });
+    this.setState({ attrCheckedBox: attrCheckedBox, choosePoints: [], centerPoint: {} });
   }
   setAttrDisplaySlider(e: ChangeEvent<HTMLSelectElement>): void {
     let value = e.target.value;
@@ -212,11 +212,12 @@ class App extends React.Component<any, any> {
   }
 
   match():void{//匹配相似图
-    const {dimensions,strWeight,attrWeight,attrChecked,attrValue,attrSliderValue,dataType,num}=this.state;
+    const {dimensions,strWeight,attrWeight,attrChecked,attrValue,attrSliderValue,dataType,num,attrCheckedBox}=this.state;
     const graph =this.state.personGraphs[0];
     const url='http://localhost:8080';
     if(attrValue!==attrSliderValue)
         this.setState({attrValue:JSON.parse(JSON.stringify(attrSliderValue))})
+
     let checkedArr:any=[];
     for(let key in attrChecked){
         checkedArr.push({name:key,value:attrChecked[key]})

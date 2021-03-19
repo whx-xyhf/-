@@ -258,7 +258,8 @@ select{
 .candidateTitle{
     height:40px;
     width:100%;
-    background-color: rgba(245, 245, 245, 1);
+    /* background-color: rgba(245, 245, 245, 1); */
+    background-color: #fdbf6f;
     color: #000;
     font-size: 0.1rem;
 }

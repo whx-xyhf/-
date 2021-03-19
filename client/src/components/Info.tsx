@@ -66,7 +66,7 @@ class Info extends React.Component<Props, any>{
         this.setState({selectNum:number});
     }
     render(): React.ReactElement {
-        const {dimensions,attrChecked,dataType,url,parent}=this.props;
+        const {dimensions,attrChecked,dataType,url,parent,attrWeight,strWeight}=this.props;
         let components:any=[];
         let elements = this.props.graphs.map((graph: graph, index: number) => {
             let el = null;
@@ -88,7 +88,7 @@ class Info extends React.Component<Props, any>{
         })
         components.push(elements) 
         components.push(<p>table</p>)
-        components.push(<HistoryRecord parent={parent} changePage={this.changePage} url={url+'/readHistoryRecord'} display={this.state.selectNum===2?true:false} dimensions={dimensions} attrChecked={attrChecked} dataType={dataType}/>)
+        components.push(<HistoryRecord attrWeight={attrWeight} strWeight={strWeight} parent={parent} changePage={this.changePage} url={url+'/readHistoryRecord'} display={this.state.selectNum===2?true:false} dimensions={dimensions} attrChecked={attrChecked} dataType={dataType}/>)
         let iconsEl = this.icons.map((value: string, index: number) => {
             return (
                 <div style={{ width: '100%', height: '60px', borderBottom:'1px solid #ccc',borderRight:'1px solid #ccc',cursor:'pointer'}} key={index} >

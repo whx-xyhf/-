@@ -23,16 +23,16 @@ class Parallel extends React.Component<Props,any>{
     private svgRef:React.RefObject<SVGSVGElement>;
     public svgWidth:number=0;
     public svgHeight:number=0;
-    public padding={top:30,bottom:30,left:30,right:60};
-    public pathStroke:string='#99CCFF';
-    public pathStrokeChoose:string='orange';
+    public padding={top:30,bottom:30,left:30,right:100};
+    public pathStroke:string='#ccc';
+    public pathStrokeChoose:string='#2987E4'//'#99CCFF';
     public pathStrokeCenter:string='red';
     // public rectColor:Array<string>=['#FEF0D9','#FDCC8A','#FC8D59','#E34A33','#B30000'];
-    public rectHeight:number=6;
+    public rectHeight:number=4;
     public yscale:any=null;
     public rectWidthMax:number=0;
     // public rectColor=d3.interpolate(d3.rgb(254,240,217),d3.rgb(179,0,0));
-    public rectColor=d3.interpolateYlOrRd;
+    public rectColor=d3.interpolateRdYlGn;
     constructor(props:Props){
         super(props);
         this.svgRef=React.createRef();
@@ -91,18 +91,22 @@ class Parallel extends React.Component<Props,any>{
         let rectWidthMax=(rectx1-rectx2)/2-10>this.padding.left-5?this.padding.left-5:(rectx1-rectx2)/2-10;
         this.rectWidthMax=rectWidthMax;
         for(let i in rectArray){
-            let v=d3.extent(rectArray[i],(d:Array<number>)=>Math.sqrt(d[2]));
-            let c=d3.extent(rectArray[i],(d:Array<number>)=>Math.sqrt(d[3]));
-            let rectWidthScale=d3.scaleLinear(v,[0,rectWidthMax]);
+            let v=d3.extent(rectArray[i],(d:Array<number>)=>{ if(d[2]!==0) return Math.sqrt(d[2])});
+            let c=d3.extent(rectArray[i],(d:Array<number>)=>{ if(d[2]!==0) return d[3]/d[2]});
+            if(v[0]===v[1] && c[0]===c[1])
+                c[0]=0;
+            let rectWidthScale=d3.scaleLinear(v,[5,rectWidthMax]);
             // let mean=d3.mean(rectArray[i],(d:any)=>d[3])||0;
             // let std=this.getStd(rectArray[i],mean);
             // console.log(mean,std)
-            let colorScale=d3.scaleLinear(c,[0,0.9]);
+            let colorScale=d3.scaleLinear(c,[0,1]);
     
             rectArray[i].forEach((value:Array<number>)=>{
-                value[2]=rectWidthScale(Math.sqrt(value[2]));
-                // value[3]=(value[3]-mean)/std/4+0.5;
-                value[3]=colorScale(Math.sqrt(value[3]));
+                if(value[2]!==0){
+                    value[3]=colorScale(value[3]/value[2]);
+                    value[2]=rectWidthScale(Math.sqrt(value[2]));
+                    // value[3]=(value[3]-mean)/std/4+0.5;
+                }
             })
         }
         d3.select("#svg_parallel")
@@ -230,7 +234,7 @@ class Parallel extends React.Component<Props,any>{
             this.getAttrData(nextProps.dataType);
         }
         if(nextProps.choosePoints!==this.props.choosePoints){
-            const {data}=this.state;
+            
             let rectArray=JSON.parse(JSON.stringify(this.state.rect));
             for(let i in rectArray){
                 rectArray[i].forEach((value:Array<number>)=>{
@@ -248,19 +252,24 @@ class Parallel extends React.Component<Props,any>{
             })
 
             let rectWidthMax=this.rectWidthMax;
+            // console.log(rectArray)
             for(let i in rectArray){
-                let v=d3.extent(rectArray[i],(d:Array<number>)=>Math.sqrt(d[2]));
-                let c=d3.extent(rectArray[i],(d:Array<number>)=>Math.sqrt(d[3]));
-                let rectWidthScale=d3.scaleLinear(v,[0,rectWidthMax]);
+                let v=d3.extent(rectArray[i],(d:Array<number>)=>{ if(d[2]!==0) return Math.sqrt(d[2])});
+                let c=d3.extent(rectArray[i],(d:Array<number>)=>{ if(d[2]!==0) return d[3]/d[2]});
+                let rectWidthScale=d3.scaleLinear(v,[5,rectWidthMax]);
                 // let mean=d3.mean(rectArray[i],(d:any)=>d[3])||0;
                 // let std=this.getStd(rectArray[i],mean);
                 // console.log(mean,std)
-                let colorScale=d3.scaleLinear(c,[0,0.9]);
+                if(v[0]===v[1] && c[0]===c[1])
+                    c[0]=0;
+                let colorScale=d3.scaleLinear(c,[0,1]);
         
                 rectArray[i].forEach((value:Array<number>)=>{
-                    value[2]=rectWidthScale(Math.sqrt(value[2]));
-                    // value[3]=(value[3]-mean)/std/4+0.5;
-                    value[3]=colorScale(Math.sqrt(value[3]));
+                    if(value[2]!==0){
+                        value[3]=colorScale(value[3]/value[2]);
+                        value[2]=rectWidthScale(Math.sqrt(value[2]));
+                        // value[3]=(value[3]-mean)/std/4+0.5;
+                    }
                 })
             }
             this.setState({rect:rectArray});
@@ -277,7 +286,7 @@ class Parallel extends React.Component<Props,any>{
         let pathChoose=this.props.choosePoints.map((value:any,index:number)=>{
             for(let i in this.state.data){
                 if(this.state.data[i].id===value.id){
-                    return (<path d={this.line(this.state.data[i].pathData)} key={index} strokeWidth={1.5} strokeOpacity={0.5} stroke={this.pathStrokeChoose} fill='none'></path>)
+                    return (<path d={this.line(this.state.data[i].pathData)} key={index} strokeWidth={1.5} strokeOpacity={1} stroke={this.pathStrokeChoose} fill='none'></path>)
                 }
             }
             return null;
@@ -306,9 +315,10 @@ class Parallel extends React.Component<Props,any>{
         let rectRight:Array<React.ReactElement>=[];
         for(let i in this.state.rect){
             this.state.rect[i].forEach((value:Array<number>,index:number)=>{
-                // console.log(value[3])
-                rectRight.push(<rect key={index+'i'+i} x={value[0]-value[2]} y={value[1]-this.rectHeight} height={this.rectHeight} fill={this.rectColor(value[3])} width={value[2]} stroke='#ccc' strokeWidth="0.5"></rect>)
-                rectLeft.push(<rect key={index+'l'+i} x={value[0]} y={value[1]-this.rectHeight} height={this.rectHeight} fill={this.rectColor(value[3])} width={value[2]} stroke='#ccc' strokeWidth="0.5"></rect>)
+                if(value[2]!==0){
+                    rectRight.push(<rect key={index+'i'+i} x={value[0]-value[2]} y={value[1]-this.rectHeight} height={this.rectHeight} fill={this.rectColor(value[3])} width={value[2]}></rect>)
+                    rectLeft.push(<rect key={index+'l'+i} x={value[0]} y={value[1]-this.rectHeight} height={this.rectHeight} fill={this.rectColor(value[3])} width={value[2]}></rect>)
+                }
             })
         }
 
@@ -326,7 +336,7 @@ class Parallel extends React.Component<Props,any>{
                     <g className="text"></g>
                     <defs>
                         <linearGradient id='linearColor' x1="0%" y1="0%" x2='0%' y2="100%">
-                            <stop offset="0%" stopColor={this.rectColor(0.9)}></stop>
+                            <stop offset="0%" stopColor={this.rectColor(1)}></stop>
                             <stop offset="20%" stopColor={this.rectColor(0.8)}></stop>
                             <stop offset="40%" stopColor={this.rectColor(0.6)}></stop>
                             <stop offset="60%" stopColor={this.rectColor(0.4)}></stop>
@@ -335,6 +345,10 @@ class Parallel extends React.Component<Props,any>{
                         </linearGradient>
                     </defs>
                     <rect fill='url(#linearColor)' x={this.svgWidth-this.padding.right/2+10} y={this.svgHeight-this.padding.bottom-100} height={100} width={20}></rect>
+                    <text style={{transform:`translate(${this.svgWidth-this.padding.right+85}px,${this.svgHeight-this.padding.bottom-100}px) rotate(90deg)`}}>Z-score</text>
+                    <text x={this.svgWidth-this.padding.right/2-5} y={this.svgHeight-this.padding.bottom-95}>2</text>
+                    <text x={this.svgWidth-this.padding.right/2-5} y={this.svgHeight-this.padding.bottom-50}>0</text>
+                    <text x={this.svgWidth-this.padding.right/2-5} y={this.svgHeight-this.padding.bottom}>-2</text>
                 </svg>
             </div>
         )

@@ -293,11 +293,11 @@ class PTargetTree extends React.Component<Props, any>{
         svg.call(d3.zoom()
         .scaleExtent([0.1,7])
         .on("zoom",zoomed.bind(this)));
-        let height=this.svgHeight - this.padding.top - 30;
+        // let height=this.svgHeight - this.padding.top - 30;
         
         function zoomed(){
             let transform = d3.zoomTransform(svg.node());
-            let y=transform.y+ height;
+            // let y=transform.y+ height;
             //svg_point.selectAll("circle").attr("r",1);
             svg.selectAll(".pTargetTree").attr("transform", "translate(" + transform.x + "," + transform.y + ") scale(" + transform.k + ")");
             // svg.selectAll(".axis").attr("transform", "translate(" + transform.x + "," + y + ") scale(" + transform.k + ")");

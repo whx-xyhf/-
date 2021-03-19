@@ -1,7 +1,6 @@
 import * as React from 'react';
 import * as d3 from 'd3';
 import axios from 'axios';
-import { RecordWithTtl } from 'dns';
 
 interface Props{
     reTsneData:Array<PointData>,
@@ -52,7 +51,7 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
     public svgHeight:number=0;
     public padding={top:10,bottom:20,left:10,right:10};
     public ctx:CanvasRenderingContext2D | null=null;
-    public color:Array<string>=["#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99","#e31a1c","#fdbf6f","#ff7f00","#cab2d6","#e41a1c","#b3cde3","#4daf4a","#984ea3","#ffff33","#a65628","#f781bf","#999999","#8dd3c7","#ffffb3","#bebada","#fb8072","#80b1d3","#fdb462","#b3de69","#fccde5","#d9d9d9"];
+    public color:Array<string>=["#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99","#e31a1c","#fdbf6f","#ff7f00","#cab2d6","#fddaec","#b3cde3","#4daf4a","#984ea3","#ffff33","#a65628","#f781bf","#999999","#8dd3c7","#ffffb3","#bebada","#fb8072","#80b1d3","#fdb462","#b3de69","#fccde5","#d9d9d9"];
     public lightColor:string='orange';
     public centerColor:string='red';
     public path:PathData={
@@ -298,6 +297,10 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
                     }
                 }
             }
+            this.state.data.forEach((value:any)=>{
+                if(value.opacity===1)
+                    value.opacity=0.3;
+            })
             this.setState({choosePoints:choosePoints});
         }
         if(nextProps.centerPoint!==this.props.centerPoint){
@@ -362,12 +365,12 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
         }
         //圈选的点，匹配到的点
         let pointsChoose=this.state.choosePoints.map((value:ChoosePointData,index:number)=>
-            <circle r="2px" cx={value.x} cy={value.y} key={index} fill={this.color[value.cluster]} onClick={this.searchGraph.bind(this,value)}></circle>
+            <circle r="2px" opacity={1} cx={value.x} cy={value.y} key={index} fill={this.color[value.cluster]} onClick={this.searchGraph.bind(this,value)}></circle>
         )
         //点击的点，需要匹配的点
         let centerPoint=null;
         if(this.state.centerPoint!=null){
-            centerPoint=<circle r="2px" cx={this.state.centerPoint.x} cy={this.state.centerPoint.y} fill={this.centerColor} onClick={this.searchGraph.bind(this,this.state.centerPoint)}></circle>
+            centerPoint=<circle r="5px" cx={this.state.centerPoint.x} cy={this.state.centerPoint.y} fill={this.centerColor} onClick={this.searchGraph.bind(this,this.state.centerPoint)}></circle>
         }
 
         let colorRect:Array<React.ReactElement>=[];

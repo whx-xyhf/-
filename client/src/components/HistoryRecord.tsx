@@ -11,6 +11,8 @@ interface Props{
     attrChecked: attr,
     dataType: string,
     changePage:any,
+    attrWeight:number,
+    strWeight:number
 }
 type attr = {
     [propName: string]: any,
@@ -24,12 +26,12 @@ class HistoryRecord extends React.Component<Props, any>{
         this.selectCondidate=this.selectCondidate.bind(this);
     }
 
-    getHistoryRecord(url:string,dimensions:number,attrChecked:attr,dataType:string):void{
+    getHistoryRecord(url:string,dimensions:number,attrChecked:attr,dataType:string,strWeight:number,attrWeight:number):void{
         let checkedArr:any=[];
         for(let key in attrChecked){
             checkedArr.push({name:key,value:attrChecked[key]})
         }
-        axios.post(url,{dimensions:dimensions,attrChecked:checkedArr,dataType:dataType})
+        axios.post(url,{dimensions:dimensions,attrChecked:checkedArr,dataType:dataType,attrWeight:attrWeight,strWeight:strWeight})
         .then(res=>{
             if(res.data.data!==this.state.record)
                 this.setState({record:res.data.data});
@@ -42,13 +44,13 @@ class HistoryRecord extends React.Component<Props, any>{
     }
 
     componentWillReceiveProps(nextProps:Props){
-        const {display,dimensions,attrChecked,dataType}=this.props;
+        const {display,dimensions,attrChecked,dataType,strWeight,attrWeight}=this.props;
         if(nextProps.display===true && nextProps.display!==display){
-            this.getHistoryRecord(nextProps.url,nextProps.dimensions,nextProps.attrChecked,nextProps.dataType);
+            this.getHistoryRecord(nextProps.url,nextProps.dimensions,nextProps.attrChecked,nextProps.dataType,strWeight,attrWeight);
         }
         else if(nextProps.display===true && nextProps.display===display){
             if(nextProps.dimensions!==dimensions || nextProps.dataType!==dataType || nextProps.attrChecked!==attrChecked){
-                this.getHistoryRecord(nextProps.url,nextProps.dimensions,nextProps.attrChecked,nextProps.dataType);
+                this.getHistoryRecord(nextProps.url,nextProps.dimensions,nextProps.attrChecked,nextProps.dataType,strWeight,attrWeight);
             }
         }
     }

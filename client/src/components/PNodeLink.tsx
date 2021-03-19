@@ -30,6 +30,8 @@ class PNodeLink extends React.Component<Props,any>{
     public svgWidth:number=0;
     public svgHeight:number=0;
     public circleR:number=30;
+    public circleR_Max:number=30;
+    public circleR_Min:number=15;
     public circleFill:RGBColor=rgb(246,196,103);
     public circleStroke:RGBColor=rgb(216,160,25);
     public linkWidthMax:number=5;
@@ -49,8 +51,17 @@ class PNodeLink extends React.Component<Props,any>{
         //连线粗细比例尺
         let weight_min_max=d3.extent(weight,(d:any)=>d);
         let weightScale=d3.scaleLinear(weight_min_max,[this.linkWidthMin,this.linkWidthMax])
+
+        let authorInfo=graph['authorInfo'];
+        let cite:Array<number>=[];
+        for(let i in authorInfo){
+            cite.push(authorInfo[i]['cite']);
+        }
+        let cite_min_max=d3.extent(cite,(d:any)=>d);
+        let rScale=d3.scaleLinear(cite_min_max,[this.circleR_Min,this.circleR_Max]);
+
         let nodesid=nodes.map((value:number)=>{
-            return {id:value,x:0,y:0,rx:this.circleR,ry:this.circleR};
+            return {id:value,x:0,y:0,rx:rScale(graph['authorInfo'][value]['cite']),ry:rScale(graph['authorInfo'][value]['cite'])};
         })
 
         let links:Array<Link>=edges.map((value:edges,index:number)=>{
@@ -98,16 +109,16 @@ class PNodeLink extends React.Component<Props,any>{
         const {graph}=this.props;
         let icons:Array<React.ReactElement>=[];
         let nodes=layOutNodes.map((value:any,index:number)=>{
-            icons.push(<image key={index} x={value.x-this.circleR/1.5/2} y={value.y-this.circleR/1.5-5} width={this.circleR/1.5} height={this.circleR/1.5} xlinkHref={menURL}></image>)
-            return <circle r={this.circleR} cx={value.x} cy={value.y} key={index} fill={this.circleFill.toString()} strokeWidth="1px" stroke={this.circleStroke.toString()}
+            icons.push(<image key={index} x={value.x-value.rx/1.5/2} y={value.y-value.rx/1.5-5} width={value.rx/1.5} height={value.rx/1.5} xlinkHref={menURL}></image>)
+            return <circle r={value.rx} cx={value.x} cy={value.y} key={index} fill={this.circleFill.toString()} strokeWidth="1px" stroke={this.circleStroke.toString()}
             onMouseOver={this.showInfo.bind(this,value)} onMouseOut={this.hideInfo} cursor='pointer'></circle>
         })
         
         let names=layOutNodes.map((value:any,index:number)=>{
             if(graph['authorInfo'][value.id]){
                 let name=graph['authorInfo'][value.id]['name'];
-                let count=(this.circleR-1)*2/(this.nameFontSize/2);
-                if(name.length/2*this.nameFontSize>(this.circleR-1)*2){
+                let count=(value.rx-1)*2/(this.nameFontSize/2);
+                if(name.length/2*this.nameFontSize>(value.rx-1)*2){
                     name=name.substr(0,count);
                 }
                 return <text x={value.x-name.length*this.nameFontSize/4} y={value.y+this.nameFontSize/4} key={index} fontSize={this.nameFontSize+'px'}>{name}</text>

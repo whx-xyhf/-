@@ -45,7 +45,9 @@ def getTSNE(dirPath,dimensionsStr=128,dimensionsAttrChecked='111111',strWeight=0
             if index != 0:
                 id.append(str(i[0]))
                 del (i[0])
-                if dimensionsAttr==0:
+                if attrWeight ==0 and strWeight==1:
+                    vectors.append(i[:dimensionsStr])
+                elif strWeight==0 and attrWeight==1:
                     vector=[]
                     for j in range(len(dimensionsAttrChecked)):
                         if dimensionsAttrChecked[j]=='1':
@@ -55,7 +57,7 @@ def getTSNE(dirPath,dimensionsStr=128,dimensionsAttrChecked='111111',strWeight=0
                     i=list(map(float,i))
                     vectors.append(i)
             index += 1
-    if dimensionsAttr!=0:
+    if dimensionsAttr!=0 and strWeight==1 and attrWeight==1:
         vectorStr,vectorAttr=divideVectorsToStrAndAttr(vectors,dimensionsStr,dimensionsAttrChecked)
         cca = CCA(n_components=dimensionsAttr)
         cca.fit(vectorStr, vectorAttr)
@@ -150,8 +152,8 @@ def reTsne(modelId,modelVectorStr,modelVectorAttr,dirPath,dimensionsStr=128,dime
 
 
 if __name__=='__main__':
-    data=[[1,0]]
-    data2=['111111']
+    data=[[1,0],[0,1],[1,1]]
+    data2=['111000']
     dataType='Author'
     dirPath='./data/'+dataType+'/'
     for j in data2:
