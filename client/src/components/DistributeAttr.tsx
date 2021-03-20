@@ -138,13 +138,15 @@ class DistributeAttr extends React.Component<Props, any>{
                     this.compute(data, x, y);
                 })
         }
-        if (nextProps.x !== this.props.x || nextProps.y !== this.props.y) {
+        if ((nextProps.x !== this.props.x || nextProps.y !== this.props.y)) {
             const { data } = this.state;
             const { x, y } = nextProps;
+
             if (data.length > 0) {
-                this.compute(data, x, y);
+                    this.compute(data, x, y);    
             }
             else{
+                
                 const { url, dimensions, attrWeight, strWeight, attrChecked, dataType } = nextProps;
                 let checkedArr: any = [];
                 for (let key in attrChecked) {
@@ -158,6 +160,10 @@ class DistributeAttr extends React.Component<Props, any>{
                     })
             }
         }
+        if(nextProps.dataType!==this.props.dataType){
+            this.setState({data:[],centerPoint:null,choosePoints:[]});
+        }
+
     }
 
 

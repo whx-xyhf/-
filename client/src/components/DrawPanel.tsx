@@ -39,7 +39,7 @@ class DrawPanel extends React.Component<Props, any>{
     private svgRef: React.RefObject<SVGSVGElement>;
     private svgWidth: number = 0;
     private svgHeight: number = 0;
-    private circleR:number=3.5;
+    private circleR:number=5;
     private padding = { top: 10, bottom: 10, left: 40, right: 10 };
     private modelGraohs = [
         { id: -1, nodes: [1, 2, 3], edges: [[1, 2], [2, 3]] },

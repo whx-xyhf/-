@@ -4,6 +4,9 @@ import * as React from 'react';
 import * as d3 from 'd3';
 import { rgb, RGBColor } from 'd3';
 import menURL from '../assets/men.png';
+import paperURL from '../assets/paper.png';
+import widthURL from '../assets/width.png';
+import radiusURL from '../assets/radius.png';
 
 
 //定义边数组
@@ -118,25 +121,24 @@ class PNodeLink extends React.Component<Props,any>{
             if(graph['authorInfo'][value.id]){
                 let name=graph['authorInfo'][value.id]['name'];
                 let count=(value.rx-1)*2/(this.nameFontSize/2);
-                if(name.length/2*this.nameFontSize>(value.rx-1)*2){
-                    name=name.substr(0,count);
-                }
+                // if(name.length/2*this.nameFontSize>(value.rx-1)*2){
+                //     name=name.substr(0,count);
+                // }
                 return <text x={value.x-name.length*this.nameFontSize/4} y={value.y+this.nameFontSize/4} key={index} fontSize={this.nameFontSize+'px'}>{name}</text>
             }
             
         })
-        // let cites=layOutNodes.map((value:any,index:number)=>{
-        //     let a=[];
-        //     if(graph['authorInfo'][value.id]){
-        //         let cite=graph['authorInfo'][value.id]['cite'];
-        //         let middle=cite/2;
-        //         for(let i=0;i<cite;i++){
-
-        //             a.push(<image x={value.x+2*(i-middle)} y={value.y-this.circleR/2-5} width={this.circleR/2} height={this.circleR/2} xlinkHref={menURL}></image>)
-        //         }
-        //         return a;
-        //     }
-        // })
+        let paper=layOutNodes.map((value:any,index:number)=>{
+            let a=[];
+            if(graph['authorInfo'][value.id]){
+                let count=graph['authorInfo'][value.id]['count'];
+                let middle=Math.floor(count/2);
+                for(let i=0;i<count;i++){
+                    a.push(<image key={index+'_'+i} x={value.x+2*(i-middle)-value.rx/4} y={value.y+value.rx/4} width={value.rx/2} height={value.rx/2} xlinkHref={paperURL}></image>)
+                }
+                return a;
+            }
+        })
         let links=layOutLinks.map((value:any)=>{
             return <line x1={value.source.x} y1={value.source.y} x2={value.target.x} 
             y2={value.target.y} fill="none" strokeWidth={value.width} stroke="#ccc" key={value.index}></line>
@@ -149,6 +151,13 @@ class PNodeLink extends React.Component<Props,any>{
                 <g>{nodes}</g>
                 <g>{names}</g>
                 <g>{icons}</g>
+                <g>{paper}</g>
+                <text x={this.svgWidth-this.padding.left-210} y={this.svgHeight - 7} fontSize="10px">Paper:</text>
+                <image x={this.svgWidth-this.padding.left-170} y={this.svgHeight - 14} width={10} height={10} xlinkHref={paperURL}></image>
+                <text x={this.svgWidth-this.padding.left-150} y={this.svgHeight - 7} fontSize="10px">Weight:</text>
+                <image x={this.svgWidth-this.padding.left-105} y={this.svgHeight - 25} width={30} height={30} xlinkHref={widthURL}></image>
+                <text x={this.svgWidth-this.padding.left-65} y={this.svgHeight - 7} fontSize="10px">Cite:</text>
+                <image x={this.svgWidth-this.padding.left-35} y={this.svgHeight - 18} width={15} height={15} xlinkHref={radiusURL}></image>
             </svg>
         )
     }

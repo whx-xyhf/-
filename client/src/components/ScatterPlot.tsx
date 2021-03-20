@@ -51,7 +51,7 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
     public svgHeight:number=0;
     public padding={top:10,bottom:20,left:10,right:10};
     public ctx:CanvasRenderingContext2D | null=null;
-    public color:Array<string>=["#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99","#e31a1c","#fdbf6f","#ff7f00","#cab2d6","#fddaec","#b3cde3","#4daf4a","#984ea3","#ffff33","#a65628","#f781bf","#999999","#8dd3c7","#ffffb3","#bebada","#fb8072","#80b1d3","#fdb462","#b3de69","#fccde5","#d9d9d9"];
+    public color:Array<string>=["#1f78b4","#b2df8a","#33a02c","#fb9a99","#e31a1c","#fdbf6f","#ff7f00","#cab2d6","#fddaec","#b3cde3","#4daf4a","#984ea3","#ffff33","#a65628","#f781bf","#999999","#8dd3c7","#ffffb3","#bebada","#fb8072","#80b1d3","#fdb462","#b3de69","#fccde5","#d9d9d9","#a6cee3"];
     public lightColor:string='orange';
     public centerColor:string='red';
     public path:PathData={
@@ -279,7 +279,7 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
             }
             this.state.data.forEach((value:any)=>{
                 if(value.opacity===1)
-                    value.opacity=0.3;
+                    value.opacity=0.1;
             })
             // this.setState({choosePoints:chooseData});
             this.props.parent.setChoosePoints(chooseData);
@@ -299,7 +299,7 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
             }
             this.state.data.forEach((value:any)=>{
                 if(value.opacity===1)
-                    value.opacity=0.3;
+                    value.opacity=0.1;
             })
             this.setState({choosePoints:choosePoints});
         }
@@ -320,9 +320,10 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
             }
             if(checkedArr.length>0)
                 this.getPointsData(nextProps.url,nextProps.dataType,this.svgWidth,this.svgHeight,nextProps.dimensions,nextProps.strWeight,nextProps.attrWeight,checkedArr);
+            this.setState({centerPoint:{}})
         }
         
-        if(nextProps.attrValue!==this.props.attrValue && nextProps.dataType===this.props.dataType){
+        if(JSON.stringify(nextProps.attrValue)!==JSON.stringify(this.props.attrValue) && JSON.stringify(nextProps.centerPoint)!=='{}' && JSON.stringify(nextProps.centerPoint)!==JSON.stringify(this.props.centerPoint)){
             // console.log(nextProps.dataType===this.props.dataType)
             // console.log(nextProps.attrValue)
             let checkedArr:any=[];
@@ -370,7 +371,7 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
         //点击的点，需要匹配的点
         let centerPoint=null;
         if(this.state.centerPoint!=null){
-            centerPoint=<circle r="5px" cx={this.state.centerPoint.x} cy={this.state.centerPoint.y} fill={this.centerColor} onClick={this.searchGraph.bind(this,this.state.centerPoint)}></circle>
+            centerPoint=<circle r="3.5px" cx={this.state.centerPoint.x} cy={this.state.centerPoint.y} fill={this.centerColor} onClick={this.searchGraph.bind(this,this.state.centerPoint)}></circle>
         }
 
         let colorRect:Array<React.ReactElement>=[];

@@ -91,7 +91,7 @@ class Info extends React.Component<Props, any>{
         components.push(<HistoryRecord attrWeight={attrWeight} strWeight={strWeight} parent={parent} changePage={this.changePage} url={url+'/readHistoryRecord'} display={this.state.selectNum===2?true:false} dimensions={dimensions} attrChecked={attrChecked} dataType={dataType}/>)
         let iconsEl = this.icons.map((value: string, index: number) => {
             return (
-                <div style={{ width: '100%', height: '60px', borderBottom:'1px solid #ccc',borderRight:'1px solid #ccc',cursor:'pointer'}} key={index} >
+                <div style={{ width: '100%', height: '40px', borderBottom:'1px solid #ccc',borderRight:'1px solid #ccc',cursor:'pointer'}} key={index} >
                     <img src={this.state.selectNum === index ? this.selectIcos[index] : value} width="100%" height="100%" onClick={this.changePage.bind(this,index)} />
                 </div>
             )
@@ -119,7 +119,7 @@ class Info extends React.Component<Props, any>{
                 <div style={{width: "100%" ,height:'100%',float:"left"}}>
                     {pageEl}
                 </div>
-                <div style={{position:'absolute',top:'0',right:'0',width:'50px',height:'auto'}}>
+                <div style={{position:'absolute',top:'0',left:'0',width:'40px',height:'auto'}}>
                     {iconsEl}
                 </div>
             </div>

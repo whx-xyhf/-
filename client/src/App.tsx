@@ -80,7 +80,7 @@ class App extends React.Component<any, any> {
   setDataType(e: ChangeEvent<HTMLSelectElement>):void{
     let value = e.target.value;
     
-    this.setState({dataType:value});
+    this.setState({dataType:value,choosePoints: [], centerPoint: {},personGraphs:[]});
   }
   setReTsneData(data:ChoosePointData):void{
     this.setState({reTsneData:JSON.parse(JSON.stringify(data))});

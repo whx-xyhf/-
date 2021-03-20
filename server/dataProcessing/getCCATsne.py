@@ -152,9 +152,9 @@ def reTsne(modelId,modelVectorStr,modelVectorAttr,dirPath,dimensionsStr=128,dime
 
 
 if __name__=='__main__':
-    data=[[1,0],[0,1],[1,1]]
-    data2=['111000']
-    dataType='Author'
+    data=[[1,0],[0,1]]
+    data2=['11111']
+    dataType='Family'
     dirPath='./data/'+dataType+'/'
     for j in data2:
         for i in data:

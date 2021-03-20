@@ -309,8 +309,8 @@ def readHistoryRecord():
         dimensions = str(request.get_json()['dimensions'])
         attrChecked = request.get_json()['attrChecked']
         dataType = request.get_json()['dataType']
-        strWeight = request.get_json()['strWeight']
-        attrWeight = request.get_json()['attrWeight']
+        strWeight = str(request.get_json()['strWeight'])
+        attrWeight = str(request.get_json()['attrWeight'])
         resData=[]
         file = './dataProcessing/data/' + dataType + '/' + 'historyRecord' + str(time_interval) + '.json'
         with open(file,'r') as fr:

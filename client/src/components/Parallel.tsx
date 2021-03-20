@@ -1,6 +1,7 @@
 import * as React from 'react';
 import axios from 'axios';
 import * as d3 from 'd3';
+import { createNonNullChain } from 'typescript';
 
 
 interface Props{
@@ -24,8 +25,8 @@ class Parallel extends React.Component<Props,any>{
     public svgWidth:number=0;
     public svgHeight:number=0;
     public padding={top:30,bottom:30,left:30,right:100};
-    public pathStroke:string='#ccc';
-    public pathStrokeChoose:string='#2987E4'//'#99CCFF';
+    public pathStroke:string='#2987E4';
+    public pathStrokeChoose:string='orange'//'#99CCFF';'#2987E4'
     public pathStrokeCenter:string='red';
     // public rectColor:Array<string>=['#FEF0D9','#FDCC8A','#FC8D59','#E34A33','#B30000'];
     public rectHeight:number=4;
@@ -99,7 +100,7 @@ class Parallel extends React.Component<Props,any>{
             // let mean=d3.mean(rectArray[i],(d:any)=>d[3])||0;
             // let std=this.getStd(rectArray[i],mean);
             // console.log(mean,std)
-            let colorScale=d3.scaleLinear(c,[0,1]);
+            let colorScale=d3.scaleLinear(c,[0.1,1]);
     
             rectArray[i].forEach((value:Array<number>)=>{
                 if(value[2]!==0){
@@ -150,6 +151,7 @@ class Parallel extends React.Component<Props,any>{
         this.svgHeight=this.svgRef.current?.clientHeight || 0;
         this.getAttrData(this.props.dataType);
     }
+
     line(data:[[number,number]]):string{//生成路径
         let d='';
         for(let i=0;i<data.length;i++){
@@ -190,14 +192,16 @@ class Parallel extends React.Component<Props,any>{
         return Math.sqrt(sum)/ count;
     }
     componentWillReceiveProps(nextProps:Props){
-        if(nextProps.attrValue!==this.props.attrValue){
+        if(JSON.stringify(nextProps.attrValue)!==JSON.stringify(this.props.attrValue) && JSON.stringify(nextProps.centerPoint)!=='{}' && JSON.stringify(nextProps.centerPoint)!==JSON.stringify(this.props.centerPoint)){
+            const data=JSON.parse(JSON.stringify(this.state.data));
+            const {attrValue}=nextProps;
+
             let checkedArr:any=[];
             for(let key in nextProps.attrChecked){
                 if(nextProps.attrChecked[key]===true)
                     checkedArr.push({name:key,value:true})
             }
-            const data=JSON.parse(JSON.stringify(this.state.data));
-            const {attrValue}=nextProps;
+            
             data.forEach((value:any)=>{
                 for(let i in checkedArr){
                     let attr=value.attr[checkedArr[i].name];
@@ -262,7 +266,7 @@ class Parallel extends React.Component<Props,any>{
                 // console.log(mean,std)
                 if(v[0]===v[1] && c[0]===c[1])
                     c[0]=0;
-                let colorScale=d3.scaleLinear(c,[0,1]);
+                let colorScale=d3.scaleLinear(c,[0.1,1]);
         
                 rectArray[i].forEach((value:Array<number>)=>{
                     if(value[2]!==0){
