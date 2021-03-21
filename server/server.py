@@ -6,6 +6,7 @@ from dataProcessing.Ged import getGed
 from dataProcessing.getCCATsne import reTsne
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from dataProcessing.graph2vec import WeisfeilerLehmanMachine
+from dataProcessing.getdbscan import runDBSCAN
 import networkx as nx
 import os
 import time
@@ -41,11 +42,18 @@ def index():
         print(attrStr)
         with open('./dataProcessing/data/'+dataType+'/vectors2d_'+str(time_interval)+'_'+dimensions+'_'+strWeight+'_'+attrWeight+'_'+attrStr+'.json','r') as fr:
             vectors=json.load(fr)
+        with open('./dataProcessing/data/'+dataType+'/dbscanParameter.json','r') as fr:
+            parameter=json.load(fr)
+            for i in parameter:
+                if i['dimensions']==int(dimensions) and i['strWeight']==int(strWeight) and i['attrWeight']==int(attrWeight) and i['attrStr']==attrStr:
+                    eps=i['eps']
+                    min_samples=i['min_samples']
+
         for i in range(len(data)):
             data[i]['x']=float(vectors[str(data[i]['id'])]['x'])
             data[i]['y']=float(vectors[str(data[i]['id'])]['y'])
             data[i]['cluster']=vectors[str(data[i]['id'])]['cluster']
-        res = make_response(jsonify({'code': 200, "data": data}))
+        res = make_response(jsonify({'code': 200, "data": data,'eps':eps,'minSamples':min_samples}))
     return res
 
 @app.route("/searchPerson",methods = ['POST', 'GET'])
@@ -345,6 +353,27 @@ def getCluster():
         res = make_response(jsonify({'code': 200, 'data': ids}))
     return res
 
+@app.route("/reDbscan",methods = ['POST', 'GET'])
+def reDbscan():
+    if request.method == 'POST':
+        dimensions = request.get_json()['dimensions']
+        attrChecked = request.get_json()['attrChecked']
+        dataType = request.get_json()['dataType']
+        strWeight = request.get_json()['strWeight']
+        attrWeight = request.get_json()['attrWeight']
+        eps = request.get_json()['eps']
+        minSamples=request.get_json()['minSamples']
+        with open('./dataProcessing/data/' + dataType + '/subGraphs_' + str(time_interval) + '.json', 'r') as fr:
+            data = json.load(fr)
+        attrStr = ''
+        for i in data[0]['attr']:
+            if {'name': i, 'value': True} in attrChecked:
+                attrStr += '1'
+            else:
+                attrStr += '0'
+        vectors=runDBSCAN('./dataProcessing/data/' + dataType + '/',dimensions,strWeight,attrWeight,attrStr,eps,minSamples,time_interval)
+        res = make_response(jsonify({'code': 200, "data": vectors}))
+    return res
 
 
 

@@ -8,7 +8,7 @@ import DrawPanel from './components/DrawPanel';
 import DisTributeAttr from './components/DistributeAttr';
 import { Slider, InputNumber, Row, Col, Button, Checkbox } from 'antd';
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
-import axios from 'axios'
+import axios from './components/http';
 
 
 type ChoosePointData = {

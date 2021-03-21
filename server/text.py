@@ -53,11 +53,19 @@
 # for i,j,k in g.subgraph([1,2]).edges(data=True):
 #     print(i,j,k)
 
-from sklearn.cross_decomposition import CCA
+# from sklearn.cross_decomposition import CCA
+#
+# X = [[0., 0., 1.], [1.,0.,0.], [2.,2.,2.], [3.,5.,4.]]
+# Y = [[0.1, -0.2], [0.9, 1.1], [6.2, 5.9], [11.9, 12.3]]
+# cca = CCA(n_components=1)
+# cca.fit(X, Y)
+# XY= cca.transform(X, Y)
+# print(XY)
 
-X = [[0., 0., 1.], [1.,0.,0.], [2.,2.,2.], [3.,5.,4.]]
-Y = [[0.1, -0.2], [0.9, 1.1], [6.2, 5.9], [11.9, 12.3]]
-cca = CCA(n_components=1)
-cca.fit(X, Y)
-XY= cca.transform(X, Y)
-print(XY)
+# from sklearn.cluster import OPTICS
+# import numpy as np
+# X = np.array([[0.1, 0.2], [0.2, 0.5], [0.3, 0.6],
+#               [0.8, 0.7], [0.8, 0.8], [0.7, 0.3]])
+# clustering = OPTICS(min_samples=2).fit(X)
+# print(clustering.labels_)
+

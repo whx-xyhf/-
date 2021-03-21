@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as d3 from 'd3';
 import axios from 'axios';
+import {Row,Col,InputNumber,Button} from 'antd';
 
 interface Props{
     reTsneData:Array<PointData>,
@@ -44,7 +45,7 @@ type attr={
     [propName: string]: any,
   }
 
-class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:Array<ChoosePointData>,centerPoint:any}>{
+class Scatter extends React.Component<Props,any>{
     private svgRef:React.RefObject<SVGSVGElement>;
     private canvasRef:React.RefObject<HTMLCanvasElement>;
     public svgWidth:number=0;
@@ -71,10 +72,15 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
         this.onMouseUp=this.onMouseUp.bind(this);
         this.compute=this.compute.bind(this);
         this.getClusterNodes=this.getClusterNodes.bind(this);
+        this.setEps=this.setEps.bind(this);
+        this.setMinSample=this.setMinSample.bind(this);
+        this.reDbscan=this.reDbscan.bind(this);
         this.state={
             data:[],
             choosePoints:[],
-            centerPoint:null,
+            centerPoint:{},
+            eps:null,
+            minSamples:null,
         };
         
 
@@ -98,6 +104,7 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
     getPointsData(url:string,dataType:string,width:number,height:number,dimensions:number,strWeight:number,attrWeight:number,attrChecked:Array<any>):void{
         axios.post(url,{dataType:dataType,dimensions:dimensions,strWeight:strWeight,attrWeight:attrWeight,attrChecked:attrChecked}).then(res=>{
             this.compute(res.data.data,width,height);
+            this.setState({eps:res.data.eps,minSamples:res.data.minSamples});
             // let x_max:number=d3.max(res.data.data,(d:PointData):number=>d.x) || 0;
             // let x_min:number=d3.min(res.data.data,(d:PointData):number=>d.x) || 0;
             // let y_max:number=d3.max(res.data.data,(d:PointData):number=>d.y) || 0;
@@ -113,6 +120,12 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
             
             // this.setState({data:res.data.data});
         })
+    }
+    setEps(value:any):void{
+        this.setState({eps:value});
+    }
+    setMinSample(value:any):void{
+        this.setState({minSamples:value});
     }
     onMouseDown(event:React.MouseEvent<HTMLCanvasElement, MouseEvent>):void{
         let path=this.path;
@@ -286,6 +299,26 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
 
         })
     }
+    reDbscan():void{
+        const {url,dimensions,attrWeight,strWeight,attrChecked,dataType}=this.props;
+        const {eps,minSamples}=this.state;
+        let checkedArr:any=[];
+        for(let key in attrChecked){
+            checkedArr.push({name:key,value:attrChecked[key]})
+        }
+        axios.post(url+'/reDbscan',{dataType:dataType,dimensions:dimensions,attrWeight:attrWeight,strWeight:strWeight,attrChecked:checkedArr,eps:eps,minSamples:minSamples})
+        .then(res=>{
+            const {data,choosePoints}=this.state;
+            let newCluterData=res.data.data;
+            for(let i in data){
+                data[i]['cluster']=newCluterData[Number(data[i]['id'])]['cluster'];
+            }
+            for(let i in choosePoints){
+                choosePoints[i]['cluster']=newCluterData[Number(choosePoints[i]['id'])]['cluster'];
+            }
+            this.setState({data:data,choosePoints:choosePoints});
+        })
+    }
     componentWillReceiveProps(nextProps:Props):void{
         if(nextProps.choosePoints!==this.props.choosePoints){
             let choosePoints=[];
@@ -303,7 +336,7 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
             })
             this.setState({choosePoints:choosePoints});
         }
-        if(nextProps.centerPoint!==this.props.centerPoint){
+        if(JSON.stringify(nextProps.centerPoint)!==JSON.stringify(this.props.centerPoint)){
             for(let i in this.state.data){
                 if(this.state.data[i].id===nextProps.centerPoint.id){
                     this.setState({centerPoint:this.state.data[i]});
@@ -357,10 +390,10 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
         let points=[];
         let useColor:Array<number>=[];
         for(let i=0;i<data.length;i++){
-            if(useColor.indexOf(data[i].cluster)<0)
+            if(data[i].cluster!==-1&&useColor.indexOf(data[i].cluster)<0)
             useColor.push(data[i].cluster);
             points.push(
-                <circle r="2px" cx={data[i].x} cy={data[i].y} key={data[i].id} fill={this.color[data[i].cluster]} 
+                <circle r="2px" cx={data[i].x} cy={data[i].y} key={data[i].id} fill={data[i].cluster===-1?'black':this.color[data[i].cluster]} 
                  onClick={this.searchGraph.bind(this,data[i])} opacity={data[i].opacity}></circle>
             )
         }
@@ -370,7 +403,8 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
         )
         //点击的点，需要匹配的点
         let centerPoint=null;
-        if(this.state.centerPoint!=null){
+        if(JSON.stringify(this.state.centerPoint)!=='{}'){
+            console.log(this.state.centerPoint)
             centerPoint=<circle r="3.5px" cx={this.state.centerPoint.x} cy={this.state.centerPoint.y} fill={this.centerColor} onClick={this.searchGraph.bind(this,this.state.centerPoint)}></circle>
         }
 
@@ -388,6 +422,24 @@ class Scatter extends React.Component<Props,{data:Array<PointData>,choosePoints:
                 </svg>
                 {/* <canvas ref={this.canvasRef} style={{position:'absolute',top:'0',left:'0'}}
                 onMouseMove={this.onMouseMove} onMouseDown={this.onMouseDown} onMouseUp={this.onMouseUp}></canvas> */}
+                <div style={{position:'absolute',width:'160px',height:'100px',right:this.padding.right,top:5,border:'1px solid #ccc',fontSize:'0.5rem',padding:'5px 5px',}}>
+                    <Row style={{height:'30px'}}>
+                        <Col span={8}>EPS:</Col>
+                        <Col span={14}>
+                            <InputNumber value={this.state.eps} style={{margin:'0',width:'100%'}} size='small' onChange={this.setEps}></InputNumber>
+                        </Col>
+                        
+                    </Row>
+                    <Row style={{height:'30px'}}>
+                        <Col span={8}>MS：</Col>
+                        <Col span={14}>
+                            <InputNumber value={this.state.minSamples} style={{margin:'0',width:'100%'}} size='small' onChange={this.setMinSample}></InputNumber>
+                        </Col>
+                    </Row>
+                    <Row style={{height:'30px'}}>
+                        <Col span={20}><Button style={{ margin: '0 10%' ,width:'100%'}} size='small' onClick={this.reDbscan}>Apply</Button></Col>
+                    </Row>
+                </div>
             </div>
         )
     }
