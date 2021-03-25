@@ -69,3 +69,30 @@
 # clustering = OPTICS(min_samples=2).fit(X)
 # print(clustering.labels_)
 
+
+from dataProcessing.gedNew import GraphEditDistance
+import networkx as nx
+from dataProcessing.Ged import getGed
+
+g = nx.Graph()
+g.add_edge("A", "B")
+g.add_edge("B", "C")
+g.add_edge("B", "D")
+
+
+g2 = nx.Graph()
+g2.add_edge("A", "C")
+g2.add_edge("B", "C")
+g2.add_edge("B", "E")
+
+# from ged4py.algorithm import graph_edit_dist
+
+print(g.nodes())
+print(g2.nodes())
+
+ged = GraphEditDistance(g, g2)
+dist1 = ged.normalized_distance()
+
+dist=getGed(g.edges(),g2.edges(),g.nodes(),g2.nodes())
+
+print(dist1,dist)

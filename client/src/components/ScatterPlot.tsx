@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as d3 from 'd3';
 import axios from 'axios';
-import {Row,Col,InputNumber,Button} from 'antd';
+// import {Row,Col,InputNumber,Button} from 'antd';
 
 interface Props{
     reTsneData:Array<PointData>,
@@ -15,6 +15,8 @@ interface Props{
     attrChecked:attr,
     attrValue:attr,
     dataType:string,
+    // eps:number,
+    // minSamples:number,
 }
 //定义边数组
 type edges=Array<number>;
@@ -52,7 +54,7 @@ class Scatter extends React.Component<Props,any>{
     public svgHeight:number=0;
     public padding={top:10,bottom:20,left:10,right:10};
     public ctx:CanvasRenderingContext2D | null=null;
-    public color:Array<string>=["#1f78b4","#b2df8a","#33a02c","#fb9a99","#e31a1c","#fdbf6f","#ff7f00","#cab2d6","#fddaec","#b3cde3","#4daf4a","#984ea3","#ffff33","#a65628","#f781bf","#999999","#8dd3c7","#ffffb3","#bebada","#fb8072","#80b1d3","#fdb462","#b3de69","#fccde5","#d9d9d9","#a6cee3"];
+    public color:Array<string>=["#1f78b4","#b2df8a","#33a02c","#fb9a99","#e31a1c","#fdbf6f","#ff7f00","#cab2d6","#fddaec","#b3cde3","#984ea3","#ffff33","#a65628","#f781bf","#999999","#8dd3c7","#ffffb3","#bebada","#fb8072","#80b1d3","#fdb462","#b3de69","#fccde5","#d9d9d9","#a6cee3"];
     public lightColor:string='orange';
     public centerColor:string='red';
     public path:PathData={
@@ -72,15 +74,11 @@ class Scatter extends React.Component<Props,any>{
         this.onMouseUp=this.onMouseUp.bind(this);
         this.compute=this.compute.bind(this);
         this.getClusterNodes=this.getClusterNodes.bind(this);
-        this.setEps=this.setEps.bind(this);
-        this.setMinSample=this.setMinSample.bind(this);
         this.reDbscan=this.reDbscan.bind(this);
         this.state={
             data:[],
             choosePoints:[],
             centerPoint:{},
-            eps:null,
-            minSamples:null,
         };
         
 
@@ -121,12 +119,7 @@ class Scatter extends React.Component<Props,any>{
             // this.setState({data:res.data.data});
         })
     }
-    setEps(value:any):void{
-        this.setState({eps:value});
-    }
-    setMinSample(value:any):void{
-        this.setState({minSamples:value});
-    }
+
     onMouseDown(event:React.MouseEvent<HTMLCanvasElement, MouseEvent>):void{
         let path=this.path;
         path.isFill='none';
@@ -284,7 +277,7 @@ class Scatter extends React.Component<Props,any>{
             let chooseData:any=[];
             for(let i=0;i<ids.length;i++){
                 for(let j=0;j<this.state.data.length;j++){
-                    if(this.state.data[j]['id']===Number(ids[i])){
+                    if(this.state.data[j]['id']===Number(ids[i]['id'])){
                         chooseData.push(this.state.data[j]);
                         break;
                     }
@@ -296,7 +289,8 @@ class Scatter extends React.Component<Props,any>{
             })
             // this.setState({choosePoints:chooseData});
             this.props.parent.setChoosePoints(chooseData);
-
+            this.props.parent.setPersonGraphs([chooseData[0]]);
+            this.setState({centerPoint:chooseData[0]})
         })
     }
     reDbscan():void{
@@ -404,13 +398,12 @@ class Scatter extends React.Component<Props,any>{
         //点击的点，需要匹配的点
         let centerPoint=null;
         if(JSON.stringify(this.state.centerPoint)!=='{}'){
-            console.log(this.state.centerPoint)
             centerPoint=<circle r="3.5px" cx={this.state.centerPoint.x} cy={this.state.centerPoint.y} fill={this.centerColor} onClick={this.searchGraph.bind(this,this.state.centerPoint)}></circle>
         }
 
         let colorRect:Array<React.ReactElement>=[];
         for(let i=0;i<useColor.length;i++){
-            colorRect.push(<rect key={i} onClick={this.getClusterNodes.bind(this,i)} x={this.padding.left+10*i} y={this.svgHeight-this.padding.bottom+10} height={10} width={10} fill={this.color[i]}></rect>)
+            colorRect.push(<rect key={i} onClick={this.getClusterNodes.bind(this,i)} x={this.svgWidth-(useColor.length-i)*10-10} y={this.svgHeight-12} height={10} width={10} fill={this.color[i]}></rect>)
         }
         return(
             <div className="scatter">
@@ -422,7 +415,7 @@ class Scatter extends React.Component<Props,any>{
                 </svg>
                 {/* <canvas ref={this.canvasRef} style={{position:'absolute',top:'0',left:'0'}}
                 onMouseMove={this.onMouseMove} onMouseDown={this.onMouseDown} onMouseUp={this.onMouseUp}></canvas> */}
-                <div style={{position:'absolute',width:'160px',height:'100px',right:this.padding.right,top:5,border:'1px solid #ccc',fontSize:'0.5rem',padding:'5px 5px',}}>
+                {/* <div style={{position:'absolute',width:'160px',height:'100px',right:this.padding.right,top:5,border:'1px solid #ccc',fontSize:'0.5rem',padding:'5px 5px',}}>
                     <Row style={{height:'30px'}}>
                         <Col span={8}>EPS:</Col>
                         <Col span={14}>
@@ -439,7 +432,7 @@ class Scatter extends React.Component<Props,any>{
                     <Row style={{height:'30px'}}>
                         <Col span={20}><Button style={{ margin: '0 10%' ,width:'100%'}} size='small' onClick={this.reDbscan}>Apply</Button></Col>
                     </Row>
-                </div>
+                </div> */}
             </div>
         )
     }

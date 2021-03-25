@@ -131,8 +131,8 @@ def main(args,dirPath):
 if __name__ == "__main__":
     args = parser()
     time_interval = 1
-    dimensions=128
-    dirPath = './data/Author/'
+    dimensions=5
+    dirPath = './data/Family/'
     subGraphs_dirName = 'subGraphs' + '_' + str(time_interval)+'/'
     args.input_path=dirPath+subGraphs_dirName
     args.output_path=dirPath+'vectors_'+str(time_interval)+'_'+str(dimensions)+'.csv'

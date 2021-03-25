@@ -6,7 +6,7 @@ from dataProcessing.Ged import getGed
 from dataProcessing.getCCATsne import reTsne
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from dataProcessing.graph2vec import WeisfeilerLehmanMachine
-from dataProcessing.getdbscan import runDBSCAN
+from dataProcessing.getdbscan import runDBSCAN,reDBSCAN
 import networkx as nx
 import os
 import time
@@ -253,6 +253,7 @@ def matchModel():
         num = request.get_json()['num']
         attrRange=request.get_json()['attrValue']
         dataType = request.get_json()['dataType']
+
         attrValue={}
         attrValue_={}
         for key in attrRange:
@@ -288,14 +289,33 @@ def matchModel():
         dimensionsAttr=len(attrStr)
         dimensionsStr=int(dimensions)
 
+        with open('./dataProcessing/data/'+dataType+'/dbscanParameter.json', 'r') as fr:
+            parameter = json.load(fr)
+            for p in parameter:
+                if p['dimensions'] == dimensions and p['strWeight'] == strWeight and p['attrWeight'] == attrWeight and p[
+                    'attrStr'] == attrStr:
+                    eps=p['eps']
+                    minSamples=p['min_samples']
+                    break
+
         file='./dataProcessing/data/'+dataType+'/'+ 'vectors2d_' + str(time_interval) + '_' + str(dimensionsStr) + '_' + str(
                     strWeight) + '_' + str(attrWeight) + '_' + attrStr +'model'+name+ '.json'
         if os.path.exists(file):
             with open(file,'r') as fr:
-                tsneData=json.load(fr)
+                Data=json.load(fr)
+            dataSet=[]
+            ids=[]
+            for i in Data:
+                dataSet.append([float(data[i]['x']), float(data[i]['y'])])
+                ids.append(i)
+            tsneData,dic=reDBSCAN(dataSet, id, eps,minSamples)
+            with open('./dataProcessing/data/'+dataType+'/' + 'cluster_points_' + str(time_interval) + '_' + str(dimensionsStr) + '_' + str(
+                    strWeight) + '_' + str(attrWeight) + '_' + attrStr + 'model' + '.json',
+                      'w') as fw:  # 每个标签有哪些点
+                json.dump(dic, fw)
         else:
             tsneData=reTsne(name,docVectors,attrVector,dirPath = './dataProcessing/data/'+dataType+'/',dimensionsStr=dimensionsStr,dimensionsAttrChecked=attrStr
-                       ,strWeight=strWeight,attrWeight=attrWeight,saveFile=True)
+                       ,strWeight=strWeight,attrWeight=attrWeight,eps=eps,min_samples=minSamples,saveFile=True)
 
         newData=[]
         for i in range(len(data)):
@@ -350,7 +370,21 @@ def getCluster():
                     strWeight) + '_' + str(attrWeight) + '_' + attrStr + '.json','r') as fr:
             clusterData=json.load(fr)
             ids=clusterData[cluster]
-        res = make_response(jsonify({'code': 200, 'data': ids}))
+        with open('./dataProcessing/data/'+dataType+'/vectors2d_' + str(
+                time_interval) + '_' + str(dimensions) + '_' + str(strWeight) + '_' + str(attrWeight) + '_' +attrStr+ '.json', 'r') as fr:
+            vectors = json.load(fr)
+        centerx=0
+        centery=0
+        for i in ids:
+            centerx+=float(vectors[i]['x'])
+            centery+=float(vectors[i]['y'])
+        centerx/=len(ids)
+        centery/=len(ids)
+        resData=[]
+        for i in ids:
+            resData.append({'id':i,'distance':math.pow(float(vectors[i]['x'])-centerx,2)+math.pow(float(vectors[i]['y'])-centery,2)})
+        resData = sorted(resData, key=lambda x: x['distance'])
+        res = make_response(jsonify({'code': 200, 'data': resData}))
     return res
 
 @app.route("/reDbscan",methods = ['POST', 'GET'])

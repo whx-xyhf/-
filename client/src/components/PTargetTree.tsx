@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as d3 from 'd3';
-import manURL from '../assets/man.png';
-import womanURL from '../assets/woman.png';
+// import manURL from '../assets/man.png';
+// import womanURL from '../assets/woman.png';
 import guanURL from '../assets/guan.png';
 import widthURL from '../assets/width.png';
 import radiusURL from '../assets/radius.png';
@@ -327,15 +327,18 @@ class PTargetTree extends React.Component<Props, any>{
 
 
             if ((value.data.sex === "2" || value.data.sex === "-99" || value.data.sex === "-98") && value.children){
-                icons.push(<image key={index} x={value.y - value.r / 2} y={value.x - value.r/2} width={value.r} height={value.r} xlinkHref={value.data.guan==="0"?manURL:guanURL}></image>)
-                // return <rect onMouseOver={this.mouseOver.bind(this,value.data)} x={value.y - this.circleR} y={value.x - this.circleR} width={this.circleR * 2} height={this.circleR * 2} key={index} fill={villageColor} strokeWidth="1px" stroke={value.data.guan==="0"?"white":"red"}></rect>
+                if(value.data.guan!=="0")
+                    icons.push(<image key={index} x={value.y - value.r / 2} y={value.x - value.r/2} width={value.r} height={value.r} xlinkHref={guanURL}></image>)
+                return <rect onMouseOver={this.mouseOver.bind(this,value.data)} x={value.y - value.r} y={value.x - value.r} width={value.r * 2} height={value.r * 2} key={index} fill={villageColor} strokeWidth="1px"></rect>
             }
             else{
-                icons.push(<image key={index} x={value.y - value.r / 2} y={value.x - value.r/2} width={value.r} height={value.r} xlinkHref={womanURL}></image>)
+                return <circle onMouseOver={this.mouseOver.bind(this, value.data)} r={value.r} cx={value.y} cy={value.x} key={index} fill={villageColor} strokeWidth="1px" stroke="white"
+                cursor='pointer'></circle>
+                // icons.push(<image key={index} x={value.y - value.r / 2} y={value.x - value.r/2} width={value.r} height={value.r} xlinkHref={womanURL}></image>)
             }
 
-            return <circle onMouseOver={this.mouseOver.bind(this, value.data)} r={value.r} cx={value.y} cy={value.x} key={index} fill={villageColor} strokeWidth="1px" stroke="white"
-                cursor='pointer'></circle>
+            // return <circle onMouseOver={this.mouseOver.bind(this, value.data)} r={value.r} cx={value.y} cy={value.x} key={index} fill={villageColor} strokeWidth="1px" stroke="white"
+            //     cursor='pointer'></circle>
         })
 
 
@@ -347,15 +350,18 @@ class PTargetTree extends React.Component<Props, any>{
                 <g className="pTargetTree" transform='translate(0,0)'>{links}</g>
                 <g className="pTargetTree" transform='translate(0,0)'>{nodes}</g>
                 <g className="pTargetTree">{icons}</g>
-                <g>{villageFlag}</g>
+                {villageFlag}
                 
                     <text x={this.svgWidth - 10 * 10 - 10 - 8 * 5} y={this.svgHeight - 7} fontSize="10px">Village:</text>
                     <text x={2} y={this.svgHeight - 7}  fontSize="10px">Male:</text>
-                    <image x={30} y={this.svgHeight - 15} width={10} height={10} xlinkHref={manURL}></image>
+                    {/* <image x={30} y={this.svgHeight - 15} width={10} height={10} xlinkHref={manURL}></image> */}
+                    <rect x={30} y={this.svgHeight - 15} width={10} height={10} fill="#ccc"></rect>
                     <text x={50} y={this.svgHeight - 7} fontSize="10px">Female:</text>
-                    <image x={89} y={this.svgHeight - 15} width={10} height={10} xlinkHref={womanURL}></image>
+                    {/* <image x={89} y={this.svgHeight - 15} width={10} height={10} xlinkHref={womanURL}></image> */}
+                    <circle cx={94} cy={this.svgHeight - 10} r={5} fill="#ccc"></circle>
                     <text x={115} y={this.svgHeight - 7} fontSize="10px">Officer:</text>
-                    <image x={152} y={this.svgHeight - 15} width={10} height={10} xlinkHref={guanURL}></image>
+                    <rect x={152} y={this.svgHeight - 15} width={10} height={10} fill="#ccc"></rect>
+                    <image x={152} y={this.svgHeight - 15} width={8} height={8} xlinkHref={guanURL}></image>
                     <text x={177} y={this.svgHeight - 7} fontSize="10px">Progeny Size:</text>
                     <image x={245} y={this.svgHeight - 25} width={30} height={30} xlinkHref={widthURL}></image>
                     <text x={290} y={this.svgHeight - 7} fontSize="10px">Life Time:</text>

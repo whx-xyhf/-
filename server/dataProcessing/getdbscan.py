@@ -12,11 +12,17 @@ def loadDataSet(fileName):
     """
     dataSet = []
     ids=[]
-    with open(fileName,'r') as fr:
-        data=json.load(fr)
-    for i in data:
-        dataSet.append([float(data[i]['x']),float(data[i]['y'])])
-        ids.append(i)
+    if type(fileName)==str:
+        with open(fileName,'r') as fr:
+            data=json.load(fr)
+        for i in data:
+            dataSet.append([float(data[i]['x']),float(data[i]['y'])])
+            ids.append(i)
+    else:
+        data=fileName
+        for i in data:
+            dataSet.append([float(data[i]['x']),float(data[i]['y'])])
+            ids.append(i)
     return data,dataSet,ids
 
 def plotFeature(data, clusters, clusterNum):
@@ -84,14 +90,37 @@ def runDBSCAN(dirPath,dimensions,strWeight,attrWeight,attrStr,eps,min_samples,ti
     print("共" + str(len(labels)) + "类")
     return data
 
+def reDBSCAN(points,ids,eps,min_samples):
+    clustering = DBSCAN(eps=eps, min_samples=min_samples).fit(points)
+    labels = set(clustering.labels_)
+    # pointsM=np.mat(points).transpose()
+    # plotFeature(pointsM,clustering.labels_,len(labels))
+    # plt.show()
+    dic = {}
+    for label in labels:
+        dic[str(label)] = []
+    index = 0
+    for label in clustering.labels_:
+        dic[str(label)].append(ids[index])
+        index += 1
+    out = {}
+    for k in range(len(ids)):
+        out[ids[k]] = {"x": str(points[0]), "y": str(points[1]) ,'cluster': int(clustering.labels_[k])}
+
+    print("聚类完成！！！")
+    print("共" + str(len(labels)) + "类")
+    return out,dic
+
+
+
 if __name__ == '__main__':
     print("正在进行dbscan聚类！！！")
-    dirPath = './data/Author/'
+    dirPath = './data/Family/'
     weight=[[1,1]]
     time_interval = 1
     dimensions = 128
-    attrStr=['111111']
-    eps=4
+    attrStr=['11111']
+    eps=5
     min_samples=10
     for i in weight:
         for j in attrStr:

@@ -9,6 +9,7 @@ import re
 from dataProcessing.tongji import run
 from sklearn.metrics.pairwise import euclidean_distances
 from sklearn.cross_decomposition import CCA
+from dataProcessing.getdbscan import reDBSCAN
 
 #分割向量
 def divideVectorsToStrAndAttr(vectors,dimensionsStr,dimensionsAttrChecked):
@@ -38,6 +39,8 @@ def getTSNE(dirPath,dimensionsStr=128,dimensionsAttrChecked='111111',strWeight=0
     id = []
     time_interval = 1
     dimensionsAttr=dimensionsAttrChecked.count("1")
+    if strWeight==3:
+        dimensionsStr=dimensionsAttr
     with open(dirPath + 'vectors_' + str(time_interval) + '_' + str(dimensionsStr) + '.csv', 'r') as fr:
         data = csv.reader(fr)
         index = 0
@@ -67,7 +70,16 @@ def getTSNE(dirPath,dimensionsStr=128,dimensionsAttrChecked='111111',strWeight=0
         print('start tsne')
         tsne = TSNE(method='barnes_hut',angle=0.2, n_iter=1000)
         data_tsne = tsne.fit_transform(np.c_[vectorStr_c,vectorAttr_c])
-    else:
+    # elif strWeight==3:
+    #     vectorStr, vectorAttr = divideVectorsToStrAndAttr(vectors, dimensionsStr, dimensionsAttrChecked)
+    #     tsne = TSNE(method='exact', angle=0.2, n_iter=1000,n_components=dimensionsAttr)
+    #     data_tsne = tsne.fit_transform(vectorStr)
+    #     data_tsne = np.mat(data_tsne)
+    #     vectors = np.c_[data_tsne, vectorAttr]
+    #     print(vectors.shape)
+    #     tsne = TSNE(method='barnes_hut', angle=0.2, n_iter=1000)
+    #     data_tsne = tsne.fit_transform(vectors)
+    else :
         print('start tsne')
         tsne = TSNE(method='barnes_hut', angle=0.2, n_iter=1000)
         data_tsne = tsne.fit_transform(vectors)
@@ -85,7 +97,8 @@ def getTSNE(dirPath,dimensionsStr=128,dimensionsAttrChecked='111111',strWeight=0
     print((end - start).seconds)
     return outdata
 
-def reTsne(modelId,modelVectorStr,modelVectorAttr,dirPath,dimensionsStr=128,dimensionsAttrChecked='111111',strWeight=0.5,attrWeight=0.5,saveFile=False):
+
+def reTsne(modelId,modelVectorStr,modelVectorAttr,dirPath,dimensionsStr=128,dimensionsAttrChecked='111111',strWeight=0.5,attrWeight=0.5,eps=3,min_samples=10,saveFile=False):
     '''
     :param modelId:新加入的id
     :param modelVectorStr:新加入的向量结构部分
@@ -96,6 +109,8 @@ def reTsne(modelId,modelVectorStr,modelVectorAttr,dirPath,dimensionsStr=128,dime
     :param strWeight: 结构向量权重
     :param attrWeight: 属性向量权重
     :param saveFile:是否保存文件
+    :param eps: 半径
+    :param min_samples:最小簇
     :return: 点的二维向量
     '''
     vectors = []
@@ -139,22 +154,25 @@ def reTsne(modelId,modelVectorStr,modelVectorAttr,dirPath,dimensionsStr=128,dime
         vectors.append(modelVectorStr)
         data_tsne = tsne.fit_transform(vectors)
 
-    index = 0
-    outdata = {}
-    for vector in data_tsne:
-        outdata[id[index]] = {"x": str(vector[0]), "y": str(vector[1])}
-        index += 1
+    outdata,dic=reDBSCAN(data_tsne, id, eps,min_samples)
+
     if saveFile:
         with open(dirPath + 'vectors2d_' + str(time_interval) + '_' + str(dimensionsStr) + '_' + str(
                 strWeight) + '_' + str(attrWeight) + '_' + dimensionsAttrChecked +'model'+modelId+ '.json', "w") as fr:
             json.dump(outdata, fr)
+
+        with open(dirPath + 'cluster_points_' + str(time_interval) + '_' + str(dimensionsStr) + '_' + str(
+            strWeight) + '_' + str(attrWeight) + '_' + dimensionsAttrChecked +'model'+ '.json', 'w') as fw:  # 每个标签有哪些点
+            json.dump(dic, fw)
+
         return outdata
 
 
+
 if __name__=='__main__':
-    data=[[1,0],[0,1]]
-    data2=['11111']
-    dataType='Family'
+    data=[[3,1]]
+    data2=['111111']
+    dataType='Author'
     dirPath='./data/'+dataType+'/'
     for j in data2:
         for i in data:

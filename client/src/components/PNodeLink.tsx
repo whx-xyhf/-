@@ -33,10 +33,12 @@ class PNodeLink extends React.Component<Props,any>{
     public svgWidth:number=0;
     public svgHeight:number=0;
     public circleR:number=30;
-    public circleR_Max:number=30;
-    public circleR_Min:number=15;
+    public circleR_Max:number=35;
+    public circleR_Min:number=20;
     public circleFill:RGBColor=rgb(246,196,103);
     public circleStroke:RGBColor=rgb(216,160,25);
+    public arcFill:RGBColor=rgb(30,144,255);
+    public circleColor=["#edf8fb","#ccece6","#99d8c9","#66c2a4","#2ca25f","#006d2c"];
     public linkWidthMax:number=5;
     public linkWidthMin:number=1;
     public nameFontSize:number=6;
@@ -57,14 +59,27 @@ class PNodeLink extends React.Component<Props,any>{
 
         let authorInfo=graph['authorInfo'];
         let cite:Array<number>=[];
+        let paper:Array<number>=[];
         for(let i in authorInfo){
             cite.push(authorInfo[i]['cite']);
+            paper.push(authorInfo[i]['count']);
         }
         let cite_min_max=d3.extent(cite,(d:any)=>d);
         let rScale=d3.scaleLinear(cite_min_max,[this.circleR_Min,this.circleR_Max]);
 
-        let nodesid=nodes.map((value:number)=>{
-            return {id:value,x:0,y:0,rx:rScale(graph['authorInfo'][value]['cite']),ry:rScale(graph['authorInfo'][value]['cite'])};
+        let paper_max=d3.max(paper);
+
+        let nodesid=nodes.map((value:number,index:number)=>{
+            let v=rScale(graph['authorInfo'][value]['cite']);
+            let p=paper[index];
+            let pie=null;
+            if(p===paper_max)
+                pie=d3.pie().sort(null)([p/paper_max]);
+            else
+                pie=d3.pie().sort(null)([p/paper_max,1-p/paper_max]);
+            let arc_generator=d3.arc().innerRadius(v-5).outerRadius(v);
+            let arc=pie.map((value:any)=>arc_generator(value));
+            return {id:value,x:0,y:0,rx:v,ry:v,r:v-10,arc:arc,rank:Math.ceil(authorInfo[value]['rank'])-1};
         })
 
         let links:Array<Link>=edges.map((value:edges,index:number)=>{
@@ -100,7 +115,6 @@ class PNodeLink extends React.Component<Props,any>{
         
         function zoomed(){
             let transform = d3.zoomTransform(svg.node());
-            //svg_point.selectAll("circle").attr("r",1);
             svg.selectAll("g").attr("transform", "translate(" + transform.x + "," + transform.y + ") scale(" + transform.k + ")");
         }
     }
@@ -108,19 +122,30 @@ class PNodeLink extends React.Component<Props,any>{
         this.forceLayout(nextProps.graph,this.svgWidth,this.svgHeight);
     }
     render():React.ReactElement{
-        const {layOutNodes,layOutLinks,focusNode}=this.state;
+        const {layOutNodes,layOutLinks}=this.state;
         const {graph}=this.props;
+        let rankMax=d3.max(layOutNodes,(d:any)=>d.rank) as unknown as number;
         let icons:Array<React.ReactElement>=[];
+        let arc:Array<React.ReactElement>=[];
+        let rect:Array<React.ReactElement>=[];
+        let circle:Array<React.ReactElement>=[];
         let nodes=layOutNodes.map((value:any,index:number)=>{
-            icons.push(<image key={index} x={value.x-value.rx/1.5/2} y={value.y-value.rx/1.5-5} width={value.rx/1.5} height={value.rx/1.5} xlinkHref={menURL}></image>)
-            return <circle r={value.rx} cx={value.x} cy={value.y} key={index} fill={this.circleFill.toString()} strokeWidth="1px" stroke={this.circleStroke.toString()}
-            onMouseOver={this.showInfo.bind(this,value)} onMouseOut={this.hideInfo} cursor='pointer'></circle>
+            icons.push(<image key={index} x={value.x-value.r/1.5/2} y={value.y-value.r/1.5-5} width={value.r/1.5} height={value.r/1.5} xlinkHref={menURL}></image>)
+            arc.push(<path key={value.id+'arc0'} d={value.arc[0]} stroke="#ccc" strokeWidth={1} fill={this.circleColor[value.rank]} transform={`translate(${value.x},${value.y})`}></path>)
+            arc.push(<path key={value.id+'arc1'} d={value.arc[1]} stroke="#ccc" strokeWidth={1} fill="none" transform={`translate(${value.x},${value.y})`}></path>)
+            circle.push(<circle r={value.rx} cx={value.x} cy={value.y} key={index} fill="#fff"></circle>)
+            return <circle r={value.r} cx={value.x} cy={value.y} key={index} fill={this.circleColor[value.rank]} strokeWidth="1px" stroke={this.circleStroke.toString()}
+            cursor='pointer'></circle>
         })
+
+        for(let i=0;i<rankMax;i++){
+            rect.push(<rect key={i} x={this.svgWidth - (this.circleColor.length - i) * 10 - 10} y={this.svgHeight - 15} height={10} width={10} fill={this.circleColor[i]}></rect>)
+        }
         
         let names=layOutNodes.map((value:any,index:number)=>{
             if(graph['authorInfo'][value.id]){
                 let name=graph['authorInfo'][value.id]['name'];
-                let count=(value.rx-1)*2/(this.nameFontSize/2);
+                // let count=(value.r-1)*2/(this.nameFontSize/2);
                 // if(name.length/2*this.nameFontSize>(value.rx-1)*2){
                 //     name=name.substr(0,count);
                 // }
@@ -128,17 +153,7 @@ class PNodeLink extends React.Component<Props,any>{
             }
             
         })
-        let paper=layOutNodes.map((value:any,index:number)=>{
-            let a=[];
-            if(graph['authorInfo'][value.id]){
-                let count=graph['authorInfo'][value.id]['count'];
-                let middle=Math.floor(count/2);
-                for(let i=0;i<count;i++){
-                    a.push(<image key={index+'_'+i} x={value.x+2*(i-middle)-value.rx/4} y={value.y+value.rx/4} width={value.rx/2} height={value.rx/2} xlinkHref={paperURL}></image>)
-                }
-                return a;
-            }
-        })
+        
         let links=layOutLinks.map((value:any)=>{
             return <line x1={value.source.x} y1={value.source.y} x2={value.target.x} 
             y2={value.target.y} fill="none" strokeWidth={value.width} stroke="#ccc" key={value.index}></line>
@@ -146,18 +161,22 @@ class PNodeLink extends React.Component<Props,any>{
         return (
             <svg ref={this.svgRef} style={{width:'100%',height:'100%'}} onClick={this.props.onClick?this.props.onClick.bind(this.props.parent,this.state.layOutNodes,this.state.layOutLinks,this.props.graph.id):null}
             id={'svg'+this.props.graph.id}>
-                {/* <image width="100" height="100" xlinkHref={lineURL}></image> */}
+                
                 <g>{links}</g>
+                <g>{circle}</g>
                 <g>{nodes}</g>
+                <g>{arc}</g>
                 <g>{names}</g>
                 <g>{icons}</g>
-                <g>{paper}</g>
-                <text x={this.svgWidth-this.padding.left-210} y={this.svgHeight - 7} fontSize="10px">Paper:</text>
-                <image x={this.svgWidth-this.padding.left-170} y={this.svgHeight - 14} width={10} height={10} xlinkHref={paperURL}></image>
-                <text x={this.svgWidth-this.padding.left-150} y={this.svgHeight - 7} fontSize="10px">Weight:</text>
-                <image x={this.svgWidth-this.padding.left-105} y={this.svgHeight - 25} width={30} height={30} xlinkHref={widthURL}></image>
-                <text x={this.svgWidth-this.padding.left-65} y={this.svgHeight - 7} fontSize="10px">Cite:</text>
-                <image x={this.svgWidth-this.padding.left-35} y={this.svgHeight - 18} width={15} height={15} xlinkHref={radiusURL}></image>
+                
+
+                <text x={475} y={this.svgHeight - 7} fontSize="10px">Rank:</text>
+                {rect}
+
+                <text x={400} y={this.svgHeight - 7} fontSize="10px">Weight:</text>
+                <image x={440} y={this.svgHeight - 25} width={30} height={30} xlinkHref={widthURL}></image>
+                <text x={355} y={this.svgHeight - 7} fontSize="10px">Cite:</text>
+                <image x={380} y={this.svgHeight - 18} width={15} height={15} xlinkHref={radiusURL}></image>
             </svg>
         )
     }

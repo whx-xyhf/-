@@ -176,10 +176,10 @@ def run(url1,url2,url3,url4,url5,url6,url7,dimensions,isExist=False):
 
 if __name__=='__main__':
     time_interval = 1
-    dimensions=128
+    dimensions=6
     dirPath = './data/Author/'
     run(dirPath+'data_weight.json',dirPath+'node2Num.json',
         dirPath+'subGraphs_'+str(time_interval)+'.json',dirPath+'orignNetNum.csv',
         dirPath+'vectors_'+str(time_interval)+'_'+str(dimensions)+'.csv',
         dirPath+'attrVectors_'+str(time_interval)+'.json',
-        dirPath+'attrMeanStd_'+str(time_interval)+'.json',dimensions,False)
+        dirPath+'attrMeanStd_'+str(time_interval)+'.json',dimensions,True)
