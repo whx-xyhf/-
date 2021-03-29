@@ -22,12 +22,12 @@ class PTargetTree extends React.Component<Props, any>{
     private svgWidth: number = 0;
     private svgHeight: number = 0;
     private padding = { top: 10, bottom: 10, left: 20, right: 10 };
-    private circleR_min=10;
-    private circleR_max=15;
+    private circleR_min = 10;
+    private circleR_max = 15;
     private lineWidthMin: number = 1;
     private lineWidthMax: number = 5;
     // private color = d3.schemePaired;
-    private color=["#fbb4ae","#b3cde3","#ccebc5","#decbe4","#fed9a6","#ffffcc","#e5d8bd","#fddaec","#f2f2f2","#e41a1c"];
+    private color = ["#fbb4ae", "#b3cde3", "#ccebc5", "#decbe4", "#fed9a6", "#ffffcc", "#e5d8bd", "#fddaec", "#f2f2f2", "#e41a1c"];
     constructor(props: Props) {
         super(props);
         this.svgRef = React.createRef();
@@ -35,8 +35,8 @@ class PTargetTree extends React.Component<Props, any>{
     }
     treeLayout(tree: tree, height: number, width: number): void {
 
-        let maxAge=this.getMaxAge(tree);
-        let minAge=this.getMinAge(tree);
+        let maxAge = this.getMaxAge(tree);
+        let minAge = this.getMinAge(tree);
         let maxYear = this.getMaxYear(tree);
         let minYear = this.getMinYear(tree);
 
@@ -81,7 +81,7 @@ class PTargetTree extends React.Component<Props, any>{
             else
                 treeNodesDic[d.data.name] = d;
             if (d.data.birthyear === "-99" || d.data.birthyear === "-98") {
-                d.r=this.circleR_min;
+                d.r = this.circleR_min;
                 let ty = d.y;
                 if (!d.parent && d.children) {//根节点且有孩子
                     let childMinBiryear = this.getChildrenMinBirthyear(d);
@@ -102,7 +102,7 @@ class PTargetTree extends React.Component<Props, any>{
                             ty = YearScale(brotherMinBirthyear);
                     }
                     else {
-                        ty = YearScale(Number(d.parent.data.birthyear)+15);
+                        ty = YearScale(Number(d.parent.data.birthyear) + 15);
                     }
                 }
                 else if (d.parent && d.children) {//有父亲有孩子
@@ -132,9 +132,12 @@ class PTargetTree extends React.Component<Props, any>{
                 // return `translate(${ty},${d.x})`;
             }
 
-            else{
-                d.r=AgeScale(Number(d.data.age))
+            else {
+                d.r = AgeScale(Number(d.data.age))
                 d.y = YearScale(Number(d.data.birthyear));
+            }
+            if (!d.parent && d.x < this.svgHeight / 2) {
+                d.x = this.svgHeight / 2;
             }
             // return `translate(${YearScale(d.data.birthyear)},${d.x})`;
         })
@@ -192,7 +195,12 @@ class PTargetTree extends React.Component<Props, any>{
                 }
                 else return YearScale(Number(d.data.birthyear));
             })
-            .y((d: any) => d.x)
+            .y((d: any) => {
+                if (!d.parent && d.x < this.svgHeight / 2)
+                    return this.svgHeight / 2;
+                else
+                    return d.x
+            })
 
         treeDataLinks.forEach((value: any) => {
             value.d = createLink(value);
@@ -289,13 +297,13 @@ class PTargetTree extends React.Component<Props, any>{
         this.svgWidth = this.svgRef.current?.clientWidth || 0;
         this.svgHeight = this.svgRef.current?.clientHeight || 0;
         this.treeLayout(this.props.graph, this.svgHeight, this.svgWidth);
-        let svg=d3.select('#svg_pTargetTree')
+        let svg = d3.select('#svg_pTargetTree')
         svg.call(d3.zoom()
-        .scaleExtent([0.1,7])
-        .on("zoom",zoomed.bind(this)));
+            .scaleExtent([0.1, 7])
+            .on("zoom", zoomed.bind(this)));
         // let height=this.svgHeight - this.padding.top - 30;
-        
-        function zoomed(){
+
+        function zoomed() {
             let transform = d3.zoomTransform(svg.node());
             // let y=transform.y+ height;
             //svg_point.selectAll("circle").attr("r",1);
@@ -325,16 +333,20 @@ class PTargetTree extends React.Component<Props, any>{
             // let villageColor = value.data.village === "-99" ? "#ccc" : this.color[colorIndex];
             let villageColor = this.color[colorIndex];
 
-
-            if ((value.data.sex === "2" || value.data.sex === "-99" || value.data.sex === "-98") && value.children){
-                if(value.data.guan!=="0")
-                    icons.push(<image key={index} x={value.y - value.r / 2} y={value.x - value.r/2} width={value.r} height={value.r} xlinkHref={guanURL}></image>)
-                return <rect onMouseOver={this.mouseOver.bind(this,value.data)} x={value.y - value.r} y={value.x - value.r} width={value.r * 2} height={value.r * 2} key={index} fill={villageColor} strokeWidth="1px"></rect>
+            // console.log(value.data.sex);
+            if (value.data.sex === "2" || ((value.data.sex === "-99" || value.data.sex === "-98") && value.children)) {
+                if (value.data.guan !== "0" && value.data.guan!=="-99" && value.data.guan!=="-98")
+                    icons.push(<image key={index} x={value.y - value.r / 2} y={value.x - value.r / 2} width={value.r} height={value.r} xlinkHref={guanURL}></image>)
+                return <rect onMouseOver={this.mouseOver.bind(this, value.data)} x={value.y - value.r} y={value.x - value.r} width={value.r * 2} height={value.r * 2} key={index} fill={villageColor} strokeWidth="1px"></rect>
             }
+
+                
+                
+                // icons.push(<image key={index} x={value.y - value.r / 2} y={value.x - value.r/2} width={value.r} height={value.r} xlinkHref={womanURL}></image>)
+            
             else{
                 return <circle onMouseOver={this.mouseOver.bind(this, value.data)} r={value.r} cx={value.y} cy={value.x} key={index} fill={villageColor} strokeWidth="1px" stroke="white"
                 cursor='pointer'></circle>
-                // icons.push(<image key={index} x={value.y - value.r / 2} y={value.x - value.r/2} width={value.r} height={value.r} xlinkHref={womanURL}></image>)
             }
 
             // return <circle onMouseOver={this.mouseOver.bind(this, value.data)} r={value.r} cx={value.y} cy={value.x} key={index} fill={villageColor} strokeWidth="1px" stroke="white"
@@ -351,22 +363,22 @@ class PTargetTree extends React.Component<Props, any>{
                 <g className="pTargetTree" transform='translate(0,0)'>{nodes}</g>
                 <g className="pTargetTree">{icons}</g>
                 {villageFlag}
-                
-                    <text x={this.svgWidth - 10 * 10 - 10 - 8 * 5} y={this.svgHeight - 7} fontSize="10px">Village:</text>
-                    <text x={2} y={this.svgHeight - 7}  fontSize="10px">Male:</text>
-                    {/* <image x={30} y={this.svgHeight - 15} width={10} height={10} xlinkHref={manURL}></image> */}
-                    <rect x={30} y={this.svgHeight - 15} width={10} height={10} fill="#ccc"></rect>
-                    <text x={50} y={this.svgHeight - 7} fontSize="10px">Female:</text>
-                    {/* <image x={89} y={this.svgHeight - 15} width={10} height={10} xlinkHref={womanURL}></image> */}
-                    <circle cx={94} cy={this.svgHeight - 10} r={5} fill="#ccc"></circle>
-                    <text x={115} y={this.svgHeight - 7} fontSize="10px">Officer:</text>
-                    <rect x={152} y={this.svgHeight - 15} width={10} height={10} fill="#ccc"></rect>
-                    <image x={152} y={this.svgHeight - 15} width={8} height={8} xlinkHref={guanURL}></image>
-                    <text x={177} y={this.svgHeight - 7} fontSize="10px">Progeny Size:</text>
-                    <image x={245} y={this.svgHeight - 25} width={30} height={30} xlinkHref={widthURL}></image>
-                    <text x={290} y={this.svgHeight - 7} fontSize="10px">Life Time:</text>
-                    <image x={340} y={this.svgHeight - 18} width={15} height={15} xlinkHref={radiusURL}></image>
-                
+
+                <text x={this.svgWidth - 10 * 10 - 10 - 8 * 5} y={this.svgHeight - 7} fontSize="10px">Village:</text>
+                <text x={2} y={this.svgHeight - 7} fontSize="10px">Male:</text>
+                {/* <image x={30} y={this.svgHeight - 15} width={10} height={10} xlinkHref={manURL}></image> */}
+                <rect x={30} y={this.svgHeight - 15} width={10} height={10} fill="#ccc"></rect>
+                <text x={50} y={this.svgHeight - 7} fontSize="10px">Female:</text>
+                {/* <image x={89} y={this.svgHeight - 15} width={10} height={10} xlinkHref={womanURL}></image> */}
+                <circle cx={94} cy={this.svgHeight - 10} r={5} fill="#ccc"></circle>
+                <text x={115} y={this.svgHeight - 7} fontSize="10px">Officer:</text>
+                <rect x={152} y={this.svgHeight - 15} width={10} height={10} fill="#ccc"></rect>
+                <image x={152} y={this.svgHeight - 15} width={8} height={8} xlinkHref={guanURL}></image>
+                <text x={177} y={this.svgHeight - 7} fontSize="10px">Progeny Size:</text>
+                <image x={245} y={this.svgHeight - 25} width={30} height={30} xlinkHref={widthURL}></image>
+                <text x={290} y={this.svgHeight - 7} fontSize="10px">Life Time:</text>
+                <image x={340} y={this.svgHeight - 18} width={15} height={15} xlinkHref={radiusURL}></image>
+
                 <g className="axis"></g>
             </svg>
         )

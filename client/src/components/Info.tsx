@@ -10,9 +10,10 @@ import tableURL from '../assets/table.png';
 import tableSelectURL from '../assets/table_select.png';
 import historyURl from '../assets/history.png';
 import historySelectURL from '../assets/history_select.png';
+import Table from './Table';
 
 
-type edges = Array<number>;
+// type edges = Array<number>;
 type graph = {
     id: number,
     // nodes:Array<number>,
@@ -87,8 +88,8 @@ class Info extends React.Component<Props, any>{
             )
         })
         components.push(elements) 
-        components.push(<p>table</p>)
-        components.push(<HistoryRecord attrWeight={attrWeight} strWeight={strWeight} parent={parent} changePage={this.changePage} url={url+'/readHistoryRecord'} display={this.state.selectNum===2?true:false} dimensions={dimensions} attrChecked={attrChecked} dataType={dataType}/>)
+        components.push(<Table graphs={this.props.graphs} attrWeight={attrWeight} strWeight={strWeight} parent={this} changePage={this.changePage} display={this.state.selectNum===1?true:false} dataType={dataType}/>)
+        components.push(<HistoryRecord attrWeight={attrWeight} strWeight={strWeight} parent={this} changePage={this.changePage} url={url+'/readHistoryRecord'} display={this.state.selectNum===2?true:false} dimensions={dimensions} attrChecked={attrChecked} dataType={dataType}/>)
         let iconsEl = this.icons.map((value: string, index: number) => {
             return (
                 <div style={{ width: '100%', height: '40px', borderBottom:'1px solid #ccc',borderRight:'1px solid #ccc',cursor:'pointer'}} key={index} >
@@ -100,7 +101,7 @@ class Info extends React.Component<Props, any>{
         let pageEl=this.icons.map((value:string,index:number)=>{
             let translate=`translate(0,-${this.state.selectNum*100}%)`;
             return(
-                <div key={index} style={{ width: "100%" ,height:'100%',transform:translate,display:'inline-block',float:'left'}}>
+                <div key={index} id={'target'+index} style={{ width: "100%" ,height:'100%',transform:translate,display:'inline-block',float:'left',overflowY:'auto'}}>
                     {components[index]}
                 </div>
             )

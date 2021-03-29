@@ -1,130 +1,89 @@
 import * as React from 'react';
-import axios from 'axios';
+import NodeLink from './NodeLink';
+import TargetTree from './TargetTree';
 
-type ChoosePointData ={
-    id: number,
-    nodes: Array<number>,
-    edges:Array<edges>,
-    [propName:string]:any,
-  }
-type edges=Array<number>;
+
 
 interface Props{
-    display:string,
-    url:string,
-    num:number,
-    graph:ChoosePointData,
+    display:boolean;
+    parent: any,
+    dataType: string,
+    changePage:any,
+    attrWeight:number,
+    strWeight:number,
+    graphs: Array<graph>,
+}
+type graph = {
+    id: number,
+    // nodes:Array<number>,
+    // edges:Array<edges>,
+    [propName: string]: any,
 }
 
 class Table extends React.Component<Props,any>{
     constructor(props:Props){
         super(props);
-        this.state={data:{}};
-        this.getData=this.getData.bind(this);
+        this.state={data:[]};
+
     }
-    getData(graph:ChoosePointData):void{
-        if(graph.id){
-            axios.post(this.props.url,{graph:graph,num:this.props.num})
-            .then(res=>{
-                this.setState({data:res.data.data});
-            })
-        }
-    }
+    
     componentDidMount():void{
-        this.getData(this.props.graph);
+
     }
     componentWillReceiveProps(nextProps:Props):void{
-        if(nextProps.graph!==this.props.graph){
-            this.getData(nextProps.graph);
-        }
-        if(nextProps.graph===this.props.graph && nextProps.num!=this.props.num){
-            this.getData(nextProps.graph);
-        }
-        if(this.props.display!==nextProps.display && nextProps.display==='block'){
-            if(this.props.graph!==nextProps.graph){
-                this.getData(nextProps.graph);
-            }
+        if(nextProps.graphs!==this.props.graphs && nextProps.dataType==="Author"){
+            this.setState({data:nextProps.graphs})
         }
     }
     render():React.ReactElement{
-        let ged=this.state.data.ged;
-        let attr=this.state.data.attr;
-        let colName=[];
-        let rowName=[];
-        let rowValues=[];
-        for(let col in attr){
-            for(let type in attr[col]){
-                for(let key in attr[col][type]){
-                    let row=key+'_'+type;
-                    rowName.push(row);
+        let elements = this.state.data.map((graph: graph, index: number) => {
+            let el = null;
+           
+            if (this.props.dataType === "Author") {
+                el = <NodeLink graph={graph} key={index} />;
+            }
+            else if (this.props.dataType === "Family") {
+                el = <TargetTree graph={graph} key={index} />
+            }
+            let author:Array<React.ReactElement>=[];
+            for(let i in graph['authorInfo']){
+                let title:Array<React.ReactElement>=[];
+                for(let paper in graph["authorInfo"][i]["paper"]){
+                    title.push(
+                        <div className="paperInfo">
+                            {graph["authorInfo"][i]["paper"][paper]["title"]}
+                        </div>
+                    )
                 }
-            }
-            break;
-        }
-        for(let col in ged){
-            colName.push(col);
-        }
-        for(let col in ged){
-            for(let type in attr[col]){
-                let row='ged_'+type;
-                rowName.push(row);
-            }
-            break;
-        }
-        for(let row in rowName){
-            let rowValue=[];
-            for(let col in attr){
-                for(let type in attr[col]){
-                    if (rowName[row].indexOf(type)>=0){
-                        for(let key in attr[col][type]){
-                            if(rowName[row].indexOf(key)>=0){
-                                rowValue.push(attr[col][type][key]);
-                            }
-                        }
-                    }
+                author.push(<div className="authorInfo">
+                    <div className="author">
+                        <p>{graph["authorInfo"][i]["name"]}</p>
+                        <p>{"year"in graph["authorInfo"][i]?graph["authorInfo"][i]["year"]:graph["authorInfo"][i]["yaer"]}</p>
+                    </div>
+                    <div className="paper">
+                        {title}
+                    </div>
                     
-                }
+                </div>)
             }
-            if(rowValue.length>0)
-                rowValues.push(rowValue);
-        }
-        for(let row in rowName){
-            let rowValue=[];
-            for(let col in ged){
-                for(let type in ged[col]){
-                    if (rowName[row].indexOf(type)>=0 && rowName[row].indexOf('ged')>=0){
-                        rowValue.push(ged[col][type]);
-                    }
-                    
-                }
-            }
-            if(rowValue.length>0)
-                rowValues.push(rowValue);
-        }
-        
-        let tr=[];
-        let th=[<th key={'th'+1}></th>];
-        for(let i=0;i<colName.length;i++){
-            th.push(<th key={i}>{colName[i]}维</th>)
-        }
-        tr.push(<tr key={-1}>{th}</tr>)
-        for(let i=0;i<rowValues.length;i++){
-            let td=[];
-            td.push(<td key={'rowName'+i}>{rowName[i]}</td>)
-            for(let j=0;j<rowValues[i].length;j++){
-                td.push(
-                    <td key={j+i}>{rowValues[i][j].toFixed(2)}</td>
-                )
-            }
-            tr.push(
-                <tr key={'tr'+i}>{td}</tr>
+            
+            let info=<div style={{height: '100%', width: '100%',overflowY:"auto",overflowX:"hidden"}}>{author}</div>
+            return (
+                <div className='infoBox' key={index} style={{ width: "100%",height:'100%',float:'left',borderBottom:'1px solid #ccc',boxSizing:'border-box' }}>
+
+                    <div style={{ height: '100%', width: '40%', float: 'left' }}>
+                        {el}
+                    </div>
+                    <div style={{ height: '100%', width: '60%', float: 'left',borderLeft:'1px solid #ccc',boxSizing:'border-box' }}>
+                        {info}
+                    </div>
+
+                </div>
             )
-        }
+        })
         return(
-            <div className='table' style={{display:this.props.display}}>
-                <table style={{border:1}}>
-                    <tbody>{tr}</tbody>
-                </table>
+            <div style={{width:'100%',height:'100%',overflow:'auto'}}>
+                {elements}
             </div>
         )
         

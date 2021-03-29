@@ -39,7 +39,8 @@ class HistoryRecord extends React.Component<Props, any>{
     }
 
     selectCondidate(graph:any){
-        this.props.parent.setPersonGraphs([graph]);
+        console.log(graph)
+        this.props.parent.props.parent.setPersonGraphs([graph]);
         this.props.changePage(0);
     }
 
@@ -92,7 +93,7 @@ class HistoryRecord extends React.Component<Props, any>{
         })
 
         return (
-            <div style={{width:'100%',height:'100%'}}>
+            <div style={{width:'100%',height:'100%',overflow:'auto'}}>
                 <div style={{width:'40px',height:'100%',float:'left'}}>
 
                 </div>

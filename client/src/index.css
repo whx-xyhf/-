@@ -6,8 +6,8 @@
 html {
     font-size: 62.5% !important;
     /* 10÷16=62.5% */
-    width:100%;
-    height:100%;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
 }
 
@@ -31,56 +31,61 @@ html {
         /* 20÷16=125% */
     }
 }
+
 body {
-    width:100%;
-    height:100%;
+    width: 100%;
+    height: 100%;
     background-color: rgba(210, 214, 219, 1) !important;
 }
-body div{
+
+body div {
     /* font-family: 'Glyphicons Halflings'; */
     font-family: 'Microsoft YaHei';
 }
 
-select{
+select {
     font-size: 0.5rem !important;
 }
 
-#root{
-    width:100%;
-    height:100%;
+#root {
+    width: 100%;
+    height: 100%;
     box-sizing: border-box;
-    padding:8px 8px;
+    padding: 8px 8px;
 }
-.App{
-    width:100%;
-    height:100%;
+
+.App {
+    width: 100%;
+    height: 100%;
     /* border: 3px solid #ccc;
     box-sizing: border-box; */
 }
 
-.title{
-    height:30px;
-    width:100%;
+.title {
+    height: 30px;
+    width: 100%;
     position: relative;
     background-color: rgb(244, 244, 244);
     box-sizing: border-box;
     border: 1px solid #ccc;
     /* font-weight: bold; */
     box-sizing: border-box;
-    text-indent:10px;
-    color:#000;
+    text-indent: 10px;
+    color: #000;
     font-size: 0.8rem;
     line-height: 30px;
     text-align: left;
     box-shadow: 0 2px 4px rgba(0, 0, 0, .12)
 }
-.title input{
-    height:20px;
-    float:right;
-    margin:5px;
+
+.title input {
+    height: 20px;
+    float: right;
+    margin: 5px;
     padding: 0 5px;
     cursor: pointer;
 }
+
 /* .controlTitle{
     background-color:rgba(57,61,65,1);
     color:white;
@@ -90,247 +95,282 @@ select{
     background-color: rgba(57,61,65,1);
     border-color: rgba(144, 149, 160, 1);
 } */
-.content{
-    height:calc(100% - 30px);
-    width:100%;
-    padding:3px 5px;
+.content {
+    height: calc(100% - 30px);
+    width: 100%;
+    padding: 3px 5px;
     border: 1px solid #ccc;
     overflow-y: auto;
     background-color: white;
     box-shadow: 0 2px 4px rgba(0, 0, 0, .12)
 }
 
-.controlView{
-    width:23%;
-    height:100%;
-    float:left;
+.controlView {
+    width: 23%;
+    height: 100%;
+    float: left;
     /* border: 3px solid #ccc;
     box-sizing: border-box; */
 }
-.right{
-    width:77%;
-    height:100%;
-    float:left;
+
+.right {
+    width: 77%;
+    height: 100%;
+    float: left;
 }
-.controlPanel{
-    width:100%;
-    height:27%;
+
+.controlPanel {
+    width: 100%;
+    height: 22%;
     /* border: 3px solid #ccc; */
     box-sizing: border-box;
     padding: 3px 3px;
     /* margin-bottom: 5px; */
 }
-.filter{
-    width:100%;
-    height:28%;
+
+.filter {
+    width: 100%;
+    height: 28%;
     /* border: 3px solid #ccc; */
     box-sizing: border-box;
     padding: 3px 3px;
     /* margin-bottom: 5px; */
-    
+
 }
-.drawPanel{
-    width:100%;
-    height:45%;
+
+.drawPanel {
+    width: 100%;
+    height: 50%;
     /* border: 3px solid #ccc; */
     padding: 3px 3px;
     box-sizing: border-box;
 }
-.nodelistView{
-    width:100%;
-    height:auto;
+
+.nodelistView {
+    width: 100%;
+    height: auto;
     margin-top: 10px;
 }
-.searchView{
-    width:100%;
-    height:auto;
+
+.searchView {
+    width: 100%;
+    height: auto;
 }
-.search{
-    width:100%;
-    height:auto;
+
+.search {
+    width: 100%;
+    height: auto;
     margin-bottom: 10px;
 }
-.nodeList{
-    width:100%;
-    height:150px;
+
+.nodeList {
+    width: 100%;
+    height: 150px;
     overflow-x: hidden;
     overflow-y: auto;
 }
-.nodeList li{
+
+.nodeList li {
     list-style: none;
     font-size: 1rem;
     text-align: left;
-    width:100%;
-    height:auto;
+    width: 100%;
+    height: auto;
     border-top: 1px solid #ccc;
     box-sizing: border-box;
     padding: 5px;
 }
-.nodeList li:nth-of-type(1){
+
+.nodeList li:nth-of-type(1) {
     margin-top: 10px;
 }
-.nodeList li:last-child{
+
+.nodeList li:last-child {
     border-bottom: 1px solid #ccc;
 }
 
-.infoView{
-    width:50%;
-    height:50%;
-    float:left;
+.infoView {
+    width: 50%;
+    height: 50%;
+    float: left;
     /* border: 3px solid #ccc; */
     box-sizing: border-box;
     padding: 3px 3px;
     position: relative;
 }
-.info{
-    width:100%;
-    height:100%;
+
+.info {
+    width: 100%;
+    height: 100%;
     overflow-x: hidden;
     overflow-y: hidden;
     position: relative;
 }
-.infoBox{
-    float:left;
-    height:100%;
+
+.infoBox {
+    float: left;
+    height: 100%;
     /* border: 1px solid #ccc; */
     box-sizing: border-box;
 }
-.infoBox input{
+
+.infoBox input {
     position: absolute;
-    left:0;
-    top:40px;
+    left: 0;
+    top: 40px;
 }
+
 .infoName::-webkit-scrollbar {
-    display: none; /* Chrome Safari */
-  }
-.scatterView{
-    width:50%;
-    height:50%;
-    float:left;
-    /* border: 3px solid #ccc; */
-    box-sizing: border-box;
-    padding: 3px 3px;
+    display: none;
+    /* Chrome Safari */
 }
-.scatter{
-    width:100%;
-    height:100%;
-    position: relative;
-}
-.parallelView{
-    width:50%;
-    height:50%;
-    float:left;
-    /* border: 3px solid #ccc; */
-    box-sizing: border-box;
-    padding: 3px 3px;
-}
-.parallel{
-    width:100%;
-    height:100%;
-    position: relative;
-}
-.forceComputeView{
-    height:50%;
-    width:50%;
+
+.scatterView {
+    width: 50%;
+    height: 50%;
     float: left;
     /* border: 3px solid #ccc; */
     box-sizing: border-box;
     padding: 3px 3px;
 }
-.forceCompute{
-    height:100%;
+
+.scatter {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.parallelView {
+    width: 50%;
+    height: 50%;
+    float: left;
+    /* border: 3px solid #ccc; */
+    box-sizing: border-box;
+    padding: 3px 3px;
+    position: relative;
+}
+
+.parallel {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.forceComputeView {
+    height: 50%;
+    width: 50%;
+    float: left;
+    /* border: 3px solid #ccc; */
+    box-sizing: border-box;
+    padding: 3px 3px;
+}
+
+.forceCompute {
+    height: 100%;
     width: 100%;
     overflow-x: hidden;
     overflow-y: auto;
 }
-.forceBox{
-    float:left;
+
+.forceBox {
+    float: left;
     width: 25%;
-    height:50%;
+    height: 50%;
     padding: 5px 5px;
 }
-.condidateBox{
-    height:100%;
-    width:100%;
+
+.condidateBox {
+    height: 100%;
+    width: 100%;
     border: 1px solid #ccc;
     box-sizing: border-box;
 }
-.candidateTitle{
-    height:40px;
-    width:100%;
+
+.candidateTitle {
+    height: 40px;
+    width: 100%;
     background-color: rgba(245, 245, 245, 1);
     /* background-color: #fdbf6f; */
     color: #000;
     font-size: 0.1rem;
 }
-.candidateContent{
-    height:calc(100% - 40px);
-    width:100%;
+
+.candidateContent {
+    height: calc(100% - 40px);
+    width: 100%;
     cursor: pointer;
 }
 
-.tools{
-    height:36px;
-    width:100%;
+.tools {
+    height: 36px;
+    width: 100%;
     /* border:1px solid #ccc; */
-    padding:2px 2px;
+    padding: 2px 2px;
     box-sizing: border-box;
 }
-.btnGroup{
-    width:calc(20% - 4px);
-    height:100%;
+
+.btnGroup {
+    width: calc(20% - 4px);
+    height: 100%;
     /* border:1px solid #3072ad; */
-    border:1px solid #ccc;
+    border: 2px solid #ccc;
     background-color: white;
-    padding:2px 5px;
+    padding: 2px 5px;
     /* border-radius:4px; */
-    margin:0 2px;
+    margin: 0 2px;
     cursor: pointer;
 }
-.btnNode{
+
+.btnNode {
     /* width:45px; */
     background-image: url('./assets/node.png');
     background-position: center center;
     background-repeat: no-repeat;
     background-size: 40%;
 }
-.btnLine{
+
+.btnLine {
     /* width:45px; */
     background-image: url('./assets/line.png');
     background-position: center center;
     background-repeat: no-repeat;
 }
-.btnRedo{
+
+.btnRedo {
     /* width:45px; */
     background-image: url('./assets/redo.png');
     background-position: center center;
     background-repeat: no-repeat;
 }
-.btnUndo{
+
+.btnUndo {
     /* width:45px; */
     background-image: url('./assets/undo.png');
     background-position: center center;
     background-repeat: no-repeat;
 }
-.btnSearch{
+
+.btnSearch {
     /* width:45px; */
     background-image: url('./assets/search.png');
     background-position: center center;
     background-repeat: no-repeat;
 }
-.model{
-    height:80px;
+
+.model {
+    height: 80px;
     width: 100%;
     overflow-x: hidden;
     box-sizing: border-box;
-    border:1px solid #ccc;
-    padding:2px 2px;
+    border: 1px solid #ccc;
+    padding: 2px 2px;
     overflow-x: auto;
     position: relative;
     overflow-y: hidden;
 }
-.model .modelGraph{
-    height:74px;
+
+.model .modelGraph {
+    height: 74px;
     position: absolute;
     cursor: pointer;
     box-sizing: border-box;
@@ -338,18 +378,98 @@ select{
     margin-right: 2px;
 
 }
-.panel{
-    height:calc(100% - 116px);
+
+.panel {
+    height: calc(100% - 116px);
     box-sizing: border-box;
     position: relative;
     /* border:1px solid #ccc; */
 }
-.distributeAttr{
-    width:100%;
-    height:100%;
+
+.distributeAttr {
+    width: 100%;
+    height: 100%;
     position: relative;
 }
-.attrSliderBox{
-    height:100%;
+
+.attrSliderBox {
+    height: 100%;
+    width: 100%;
+}
+
+.clusterBackGround {
+    background-color: rgba(196, 196, 196, .3);
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+
+.clusterPanel {
+    width: 600px;
+    height: 450px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .12);
+    background-color: #F8F9FD;
+    z-index: 999;
+    overflow-y: scroll;
+}
+
+.showCluster {
+    width: 30px;
+    height: 100%;
+    float: right;
+    background-color: #fff;
+    background-size: 85%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url('./assets/set.jpeg');
+    border: 1px solid #ccc;
+}
+
+.authorInfo{
     width:100%;
+    height:auto;
+    margin-bottom: 10px;
+}
+.author{
+    height:30%;
+    width:100%;
+    
+}
+.paper{
+    height:70%;
+    width:100%;
+    border-left:1px solid #ccc;
+    box-sizing: border-box;
+}
+.paperInfo{
+    height:auto;
+    width:100%;
+    text-align: left;
+    box-sizing: border-box;
+    border-bottom:1px solid #ccc;
+}
+
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+/*滚动条里面小方块样式*/
+::-webkit-scrollbar-thumb {
+    border-radius: 100px;
+    -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    background: #ccc;
+}
+
+/*滚动条里面轨道样式*/
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    border-radius: 0;
+    background: rgba(0, 0, 0, 0.1);
 }

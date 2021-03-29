@@ -1,13 +1,13 @@
 import json
 import random
 import math
-from dataProcessing.Ged import getGed
+from dataProcessing.Ged import getGed,getTed
 import numpy as np
 import matplotlib.pyplot as plt
 import os
 import re
 import openpyxl as ox
-from zss import simple_distance, Node
+from datetime import datetime
 
 def getJson(url): #读取原始数据
     data = {}
@@ -61,12 +61,15 @@ def run(dataType,dir,sampleNum,matchNum,dimensions,weight,dimensionsAttrChecked)
         for i in graphs:
             graphsEgdes[str(i['id'])] = {'edges': i['edges'], 'attr': i['attr'], 'nodes': i['nodes']}
     else:
+        with open('./data/'+dataType+'/subGraphs_tree.json','r') as fr:
+            treeData=json.load(fr)
         for i in graphs:
-            edges=getTreeEdges(i)
-            nodes=getTreeNodes(i)
-            if len(edges)==0:
-                edges=[[nodes[0],nodes[0]]]
-            graphsEgdes[str(i['id'])] = {'edges': edges, 'attr': i['attr'], 'nodes': nodes}
+            # edges=getTreeEdges(i)
+            edges=treeData[str(i['id'])]
+            # nodes=getTreeNodes(i)
+            # if len(edges)==0:
+            #     edges=[[nodes[0],nodes[0]]]
+            graphsEgdes[str(i['id'])] = {'edges': edges, 'attr': i['attr']}
     attrIndex=list(i.start() for i in re.finditer('1', dimensionsAttrChecked))
     for i in graphs[0]['attr']:
         attrNamesAll.append(i)
@@ -95,8 +98,9 @@ def run(dataType,dir,sampleNum,matchNum,dimensions,weight,dimensionsAttrChecked)
         for j in sampleNode:
             sourceX = float(data[str(j)]['x'])
             sourceY = float(data[str(j)]['y'])
+            if dataType!='Family':
+                sourceNodes = graphsEgdes[str(j)]['nodes']
             sourceEdges = graphsEgdes[str(j)]['edges']
-            sourceNodes = graphsEgdes[str(j)]['nodes']
             sourceAttr = graphsEgdes[str(j)]['attr']
 
             data2 = []
@@ -113,10 +117,14 @@ def run(dataType,dir,sampleNum,matchNum,dimensions,weight,dimensionsAttrChecked)
                 attrValue[name] = []
 
             for graph in matchGraphs:
+
                 targetEdges = graphsEgdes[graph['id']]['edges']
-                targetNodes = graphsEgdes[graph['id']]['nodes']
                 targetAttr = graphsEgdes[graph['id']]['attr']
-                ged = getGed(sourceEdges, targetEdges, sourceNodes, targetNodes)
+                if dataType!='Family':
+                    targetNodes = graphsEgdes[graph['id']]['nodes']
+                    ged = getGed(sourceEdges, targetEdges, sourceNodes, targetNodes)
+                else:
+                    ged=getTed(sourceEdges,targetEdges)
                 gedValue.append(ged)
                 for name in attrNames:
                     attrValue[name].append(abs(targetAttr[name] - sourceAttr[name]))
@@ -324,12 +332,14 @@ def run1(dataType, sampleNum, matchNum, dimensions, weight, dimensionsAttrChecke
         for i in graphs:
             graphsEgdes[str(i['id'])] = {'edges': i['edges'], 'attr': i['attr'], 'nodes': i['nodes']}
     else:
+        with open('./data/'+dataType+'/subGraphs_tree.json','r') as fr:
+            treeData=json.load(fr)
         for i in graphs:
-            edges = getTreeEdges(i)
-            nodes = getTreeNodes(i)
-            if len(edges) == 0:
-                edges = [[nodes[0], nodes[0]]]
-            graphsEgdes[str(i['id'])] = {'edges': edges, 'attr': i['attr'], 'nodes': nodes}
+            edges = treeData[str(i['id'])]
+            # nodes = getTreeNodes(i)
+            # if len(edges) == 0:
+            #     edges = [[nodes[0], nodes[0]]]
+            graphsEgdes[str(i['id'])] = {'edges': edges, 'attr': i['attr']}
     attrIndex = list(i.start() for i in re.finditer('1', dimensionsAttrChecked))
     for i in graphs[0]['attr']:
         attrNamesAll.append(i)
@@ -361,10 +371,10 @@ def run1(dataType, sampleNum, matchNum, dimensions, weight, dimensionsAttrChecke
         for j in sampleNode:
             sourceX = float(data[str(j)]['x'])
             sourceY = float(data[str(j)]['y'])
-            sourceEdges = graphsEgdes[str(j)]['edges']
-            sourceNodes = graphsEgdes[str(j)]['nodes']
             sourceAttr = graphsEgdes[str(j)]['attr']
-
+            sourceEdges = graphsEgdes[str(j)]['edges']
+            if dataType!='Family':
+                sourceNodes = graphsEgdes[str(j)]['nodes']
             data2 = []
             for key in data:
                 targetX = float(data[key]['x'])
@@ -379,21 +389,24 @@ def run1(dataType, sampleNum, matchNum, dimensions, weight, dimensionsAttrChecke
                 attrValue[name] = []
 
             for graph in matchGraphs:
-                targetEdges = graphsEgdes[graph['id']]['edges']
-                targetNodes = graphsEgdes[graph['id']]['nodes']
                 targetAttr = graphsEgdes[graph['id']]['attr']
-                ged = getGed(sourceEdges, targetEdges, sourceNodes, targetNodes)
+                targetEdges = graphsEgdes[graph['id']]['edges']
+                if dataType!='Family':
+                    targetNodes = graphsEgdes[graph['id']]['nodes']
+                    ged = getGed(sourceEdges, targetEdges, sourceNodes, targetNodes)
+                else:
+                    ged=getTed(sourceEdges,targetEdges)
                 gedValue.append(ged)
                 for name in attrNames:
                     attrValue[name].append(abs(targetAttr[name] - sourceAttr[name]))
-            gedValueMeanEverySample.append(np.mean(np.array(gedValue)))
+            gedValueMeanEverySample.append(np.sum(np.array(gedValue)))
             gedValueStdEverySample.append(np.std(np.array(gedValue)))
             for name in attrNames:
-                attrEverySample[name].append(np.mean(np.array(attrValue[name])))
-        gedValueMeanEveryWeight.append(np.mean(np.array(gedValueMeanEverySample)))
+                attrEverySample[name].append(np.sum(np.array(attrValue[name])))
+        gedValueMeanEveryWeight.append(np.sum(np.array(gedValueMeanEverySample)))
         gedValueStdEveryWeight.append(np.std(np.array(gedValueStdEverySample)))
         for name in attrNames:
-            attrEveryWeight[name].append(np.mean(np.array(attrEverySample[name])))
+            attrEveryWeight[name].append(np.sum(np.array(attrEverySample[name])))
 
     dirname = '+'.join(attrNames)
 
@@ -450,10 +463,11 @@ def createExcel(data,path,columnNames,matchNodes):
 
 
 if __name__=="__main__":
+    start=datetime.now()
     dataType="Family"
-    dir=5
+    dir=1
     sampleNum = [50]
-    matchNum = [5,10,15]
+    matchNum = [20,40,60]
     dimensions = 128
     dimensionsAttrChecked = ['11111']
     weight = [[1, 0],[0,1],[1,1],[2,1],[3,1]]
@@ -481,3 +495,5 @@ if __name__=="__main__":
                 # with open(path+'result2.txt','w',encoding='utf-8') as fr:
                 #     fr.write("准确率："+str(results.count(True)/len(results)*100)+"%")
                 # print("准确率："+str(results.count(True)/len(results)*100)+"%")
+    end = datetime.now()
+    print((end - start).seconds)

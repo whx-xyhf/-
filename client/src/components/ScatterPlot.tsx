@@ -1,7 +1,8 @@
 import * as React from 'react';
 import * as d3 from 'd3';
 import axios from 'axios';
-// import {Row,Col,InputNumber,Button} from 'antd';
+import {Row,Col,InputNumber,Button} from 'antd';
+import NodeList from './NodeList';
 
 interface Props{
     reTsneData:Array<PointData>,
@@ -15,8 +16,7 @@ interface Props{
     attrChecked:attr,
     attrValue:attr,
     dataType:string,
-    // eps:number,
-    // minSamples:number,
+    showClusterPanel:string,
 }
 //定义边数组
 type edges=Array<number>;
@@ -54,9 +54,10 @@ class Scatter extends React.Component<Props,any>{
     public svgHeight:number=0;
     public padding={top:10,bottom:20,left:10,right:10};
     public ctx:CanvasRenderingContext2D | null=null;
-    public color:Array<string>=["#1f78b4","#b2df8a","#33a02c","#fb9a99","#e31a1c","#fdbf6f","#ff7f00","#cab2d6","#fddaec","#b3cde3","#984ea3","#ffff33","#a65628","#f781bf","#999999","#8dd3c7","#ffffb3","#bebada","#fb8072","#80b1d3","#fdb462","#b3de69","#fccde5","#d9d9d9","#a6cee3"];
+    public color:Array<string>=["#1f78b4","#b2df8a","#33a02c","#fb9a99","#fdbf6f","#ff7f00","#cab2d6","#fddaec","#b3cde3","#984ea3","#ffff33","#a65628","#f781bf","#999999","#8dd3c7","#ffffb3","#bebada","#fb8072","#80b1d3","#fdb462","#b3de69","#fccde5","#d9d9d9","#a6cee3"];
     public lightColor:string='orange';
     public centerColor:string='red';
+    public otherColor:Array<string>=['#ccc','black'];
     public path:PathData={
         pathPoints:[],
         dashArray:[7,7],
@@ -74,11 +75,19 @@ class Scatter extends React.Component<Props,any>{
         this.onMouseUp=this.onMouseUp.bind(this);
         this.compute=this.compute.bind(this);
         this.getClusterNodes=this.getClusterNodes.bind(this);
+        this.setEps=this.setEps.bind(this);
+        this.setMinSamples=this.setMinSamples.bind(this);
+        this.setKm=this.setKm.bind(this);
         this.reDbscan=this.reDbscan.bind(this);
+        this.reKMeans=this.reKMeans.bind(this);
+        this.cannel=this.cannel.bind(this);
         this.state={
             data:[],
             choosePoints:[],
             centerPoint:{},
+            eps:null,
+            minSamples:null,
+            km:null,
         };
         
 
@@ -96,13 +105,16 @@ class Scatter extends React.Component<Props,any>{
             value.x=xScale(value.x);
             value.y=yScale(value.y);
             value.opacity=1;
+            if(value.id===1455){
+                this.setState({centerPoint:value})
+            }
         })
         this.setState({data:data});
     }
     getPointsData(url:string,dataType:string,width:number,height:number,dimensions:number,strWeight:number,attrWeight:number,attrChecked:Array<any>):void{
         axios.post(url,{dataType:dataType,dimensions:dimensions,strWeight:strWeight,attrWeight:attrWeight,attrChecked:attrChecked}).then(res=>{
             this.compute(res.data.data,width,height);
-            this.setState({eps:res.data.eps,minSamples:res.data.minSamples});
+            // this.setState({eps:res.data.eps,minSamples:res.data.minSamples});
             // let x_max:number=d3.max(res.data.data,(d:PointData):number=>d.x) || 0;
             // let x_min:number=d3.min(res.data.data,(d:PointData):number=>d.x) || 0;
             // let y_max:number=d3.max(res.data.data,(d:PointData):number=>d.y) || 0;
@@ -266,41 +278,68 @@ class Scatter extends React.Component<Props,any>{
         this.setState({centerPoint:pointData});
     }
     getClusterNodes(cluster:number):void{
-        const {url,dimensions,attrWeight,strWeight,attrChecked,dataType}=this.props;
-        let checkedArr:any=[];
-        for(let key in attrChecked){
-            checkedArr.push({name:key,value:attrChecked[key]})
-        }
-        axios.post(url+'/getCluster',{cluster:cluster,dataType:dataType,dimensions:dimensions,attrWeight:attrWeight,strWeight:strWeight,attrChecked:checkedArr})
-        .then(res=>{
-            let ids=res.data.data;
-            let chooseData:any=[];
-            for(let i=0;i<ids.length;i++){
-                for(let j=0;j<this.state.data.length;j++){
-                    if(this.state.data[j]['id']===Number(ids[i]['id'])){
-                        chooseData.push(this.state.data[j]);
-                        break;
-                    }
-                }
-            }
-            this.state.data.forEach((value:any)=>{
-                if(value.opacity===1)
-                    value.opacity=0.1;
+        if(cluster===-2){
+            const {data}=this.state;
+            data.forEach((value:any)=>{
+                value.opacity=1;
             })
-            // this.setState({choosePoints:chooseData});
-            this.props.parent.setChoosePoints(chooseData);
-            this.props.parent.setPersonGraphs([chooseData[0]]);
-            this.setState({centerPoint:chooseData[0]})
-        })
+            this.setState({data:data});
+        }
+        else{
+            new Promise((resolve)=>{
+                let data=JSON.parse(JSON.stringify(this.state.data));
+                let chooseData:any=[];
+                data.forEach((value:any)=>{
+                    if(value.cluster===cluster)
+                        chooseData.push(value);
+                        
+                    value.opacity=0.1;
+                    
+                })
+                let centerx=0,centery=0;
+                for(let i in chooseData){
+                    centerx+=chooseData[i].x;
+                    centery+=chooseData[i].y;
+                }
+                centerx/=chooseData.length;
+                centery/=chooseData.length;
+    
+                for(let i in chooseData){
+                    chooseData[i].distance=Math.pow(chooseData[i].x-centerx,2)+Math.pow(chooseData[i].y-centery,2);
+                }
+                resolve(chooseData);
+            })
+            .then((res:any)=>{
+                res.sort((a:any,b:any)=>a.distance-b.distance);
+                this.props.parent.setChoosePoints(res);
+                this.props.parent.setPersonGraphs([res[0]]);
+                this.setState({centerPoint:res[0]})
+            })
+           
+        }
+        
+    }
+    setEps(value:any):void{
+        this.setState({eps:value});
+    }
+    setMinSamples(value:any):void{
+        this.setState({minSamples:value});
+    }
+    setKm(value:any){
+        this.setState({km:value});
     }
     reDbscan():void{
         const {url,dimensions,attrWeight,strWeight,attrChecked,dataType}=this.props;
         const {eps,minSamples}=this.state;
+        let model="";
+        if(this.props.reTsneData.length>0)
+            model="model";
+
         let checkedArr:any=[];
         for(let key in attrChecked){
-            checkedArr.push({name:key,value:attrChecked[key]})
+            checkedArr.push({name:key,value:attrChecked[key]});
         }
-        axios.post(url+'/reDbscan',{dataType:dataType,dimensions:dimensions,attrWeight:attrWeight,strWeight:strWeight,attrChecked:checkedArr,eps:eps,minSamples:minSamples})
+        axios.post(url+'/reCluster',{dataType:dataType,dimensions:dimensions,attrWeight:attrWeight,strWeight:strWeight,attrChecked:checkedArr,eps:eps,minSamples:minSamples,algorithm:'dbscan',model:model})
         .then(res=>{
             const {data,choosePoints}=this.state;
             let newCluterData=res.data.data;
@@ -312,6 +351,32 @@ class Scatter extends React.Component<Props,any>{
             }
             this.setState({data:data,choosePoints:choosePoints});
         })
+    }
+    reKMeans():void{
+        const {url,dimensions,attrWeight,strWeight,attrChecked,dataType}=this.props;
+        const {km}=this.state;
+        let model="";
+        if(this.props.reTsneData.length>0)
+            model="model";
+        let checkedArr:any=[];
+        for(let key in attrChecked){
+            checkedArr.push({name:key,value:attrChecked[key]});
+        }
+        axios.post(url+'/reCluster',{dataType:dataType,dimensions:dimensions,attrWeight:attrWeight,strWeight:strWeight,attrChecked:checkedArr,km:km,algorithm:'kmeans',model:model})
+        .then(res=>{
+            const {data,choosePoints}=this.state;
+            let newCluterData=res.data.data;
+            for(let i in data){
+                data[i]['cluster']=newCluterData[Number(data[i]['id'])]['cluster'];
+            }
+            for(let i in choosePoints){
+                choosePoints[i]['cluster']=newCluterData[Number(choosePoints[i]['id'])]['cluster'];
+            }
+            this.setState({data:data,choosePoints:choosePoints});
+        })
+    }
+    cannel():void{
+        this.props.parent.setShowClusterPanel('none');
     }
     componentWillReceiveProps(nextProps:Props):void{
         if(nextProps.choosePoints!==this.props.choosePoints){
@@ -379,21 +444,25 @@ class Scatter extends React.Component<Props,any>{
         
     }
     render():React.ReactElement{
-        let data=this.state.data;
+        const {data,choosePoints,eps,minSamples,km}=this.state;
+        const {dataType,attrChecked,attrWeight,strWeight,url,dimensions}=this.props;
         //所有点
         let points=[];
         let useColor:Array<number>=[];
+        let noise=false;
         for(let i=0;i<data.length;i++){
-            if(data[i].cluster!==-1&&useColor.indexOf(data[i].cluster)<0)
-            useColor.push(data[i].cluster);
+            if(data[i].cluster!==-1&& data[i].cluster!==-2 && useColor.indexOf(data[i].cluster)<0)
+                useColor.push(data[i].cluster);
+            else if(data[i].cluster===-1)
+                noise=true;
             points.push(
-                <circle r="2px" cx={data[i].x} cy={data[i].y} key={data[i].id} fill={data[i].cluster===-1?'black':this.color[data[i].cluster]} 
+                <circle r="2px" cx={data[i].x} cy={data[i].y} key={data[i].id} fill={data[i].cluster<0?this.otherColor[2+data[i].cluster]:this.color[data[i].cluster]} 
                  onClick={this.searchGraph.bind(this,data[i])} opacity={data[i].opacity}></circle>
             )
         }
         //圈选的点，匹配到的点
-        let pointsChoose=this.state.choosePoints.map((value:ChoosePointData,index:number)=>
-            <circle r="2px" opacity={1} cx={value.x} cy={value.y} key={index} fill={this.color[value.cluster]} onClick={this.searchGraph.bind(this,value)}></circle>
+        let pointsChoose=choosePoints.map((value:ChoosePointData,index:number)=>
+            <circle r="2px" opacity={1} cx={value.x} cy={value.y} key={index} fill={value.cluster<0?this.otherColor[2+value.cluster]:this.color[value.cluster]} onClick={this.searchGraph.bind(this,value)}></circle>
         )
         //点击的点，需要匹配的点
         let centerPoint=null;
@@ -405,6 +474,20 @@ class Scatter extends React.Component<Props,any>{
         for(let i=0;i<useColor.length;i++){
             colorRect.push(<rect key={i} onClick={this.getClusterNodes.bind(this,i)} x={this.svgWidth-(useColor.length-i)*10-10} y={this.svgHeight-12} height={10} width={10} fill={this.color[i]}></rect>)
         }
+        let clustersText=null;
+        let allClustersText=null;
+        let allClustersRect=null;
+        let noiseText=null;
+        let noiseRect=null;
+        if(useColor.length>0){
+            clustersText=<text fontSize="10px" x={this.svgWidth-(useColor.length*10)-55} y={this.svgHeight-3}>Clusters:</text>
+            allClustersRect=<rect onClick={this.getClusterNodes.bind(this,-2)} x={this.svgWidth-useColor.length*10-75} y={this.svgHeight-12} height={10} width={10} fill={this.otherColor[0]}></rect>
+            allClustersText=<text fontSize="10px" x={this.svgWidth-(useColor.length*10)-95} y={this.svgHeight-3}>All:</text>
+        }
+        if(noise){
+            noiseRect=<rect onClick={this.getClusterNodes.bind(this,-1)} x={this.svgWidth-useColor.length*10-115} y={this.svgHeight-12} height={10} width={10} fill={this.otherColor[1]}></rect>
+            noiseText=<text fontSize="10px" x={this.svgWidth-(useColor.length*10)-150} y={this.svgHeight-3}>Noise:</text>
+        }
         return(
             <div className="scatter">
                 <svg style={{width:'100%',height:'100%'}} ref={this.svgRef} id="svg_scatter">
@@ -412,6 +495,11 @@ class Scatter extends React.Component<Props,any>{
                     <g>{pointsChoose}</g>
                     <g>{centerPoint}</g>
                     {colorRect}
+                    {clustersText}
+                    {allClustersRect}
+                    {allClustersText}
+                    {noiseRect}
+                    {noiseText}
                 </svg>
                 {/* <canvas ref={this.canvasRef} style={{position:'absolute',top:'0',left:'0'}}
                 onMouseMove={this.onMouseMove} onMouseDown={this.onMouseDown} onMouseUp={this.onMouseUp}></canvas> */}
@@ -433,6 +521,59 @@ class Scatter extends React.Component<Props,any>{
                         <Col span={20}><Button style={{ margin: '0 10%' ,width:'100%'}} size='small' onClick={this.reDbscan}>Apply</Button></Col>
                     </Row>
                 </div> */}
+                <div className="clusterPanel" style={{display:this.props.showClusterPanel}}>
+                    <Row style={{ height: '50px',margin:'10px 10px',fontSize:'1rem' }}>DBSCAN Paramenter:</Row>
+                    <Row style={{ height: '50px',margin:'10px 10px' }}>
+                    <Col span={5}>Eps:</Col>
+                    <Col span={5}>
+                        <InputNumber
+                        min={1}
+                        max={20}
+                        size='small'
+                        style={{ margin: '0 5px', width: '100%' }}
+                        value={eps}
+                        onChange={this.setEps}
+                        />
+                    </Col>
+                    <Col span={1}></Col>
+                    <Col span={5}>Min_samples:</Col>
+                    <Col span={5}>
+                        <InputNumber
+                        min={1}
+                        max={20}
+                        size='small'
+                        style={{ margin: '0 5px', width: '100%' }}
+                        value={minSamples}
+                        onChange={this.setMinSamples}
+                        />
+                    </Col>
+                    <Col span={1}></Col>
+                    </Row>
+
+                    <Row style={{ height: '50px',margin:'10px 10px' ,fontSize:'1rem'}}>K-Means Paramenter:</Row>
+                    <Row style={{ height: '50px',margin:'0 10px' }}>
+                    <Col span={5}>N_cluster:</Col>
+                    <Col span={5}>
+                        <InputNumber
+                        min={1}
+                        max={20}
+                        size='small'
+                        style={{ margin: '0 5px', width: '100%' }}
+                        value={km}
+                        onChange={this.setKm}
+                        />
+                    </Col>
+                    <Col span={9}></Col>
+                    </Row>
+                    <Row>
+                    <Col span={8}><Button style={{ margin: '5px 5px'}} size='large' onClick={this.reDbscan}>Run Dbscan</Button></Col>
+                    <Col span={8}><Button style={{ margin: '5px 5px'}} size='large' onClick={this.reKMeans}>Run KMeans</Button></Col>
+                    <Col span={8}><Button style={{ margin: '5px 5px'}} size='large' onClick={this.cannel}>Cancel</Button></Col>
+                    </Row>
+                    <Row>
+                        <NodeList dimensions={dimensions} url={url} dataType={dataType} attrChecked={attrChecked} attrWeight={attrWeight} strWeight={strWeight} parent={this.props.parent.setPersonGraphs}></NodeList>
+                    </Row>
+                </div>
             </div>
         )
     }

@@ -33,7 +33,7 @@ class App extends React.Component<any, any> {
       personGraphs: [],//选中的人所在的子图
       centerPoint: {},//点击的点
       dimensions: 128,//向量维度
-      num: 8,//匹配的限制数量
+      num: 20,//匹配的限制数量
       strWeight: 1,//拓扑权重
       attrWeight: 1,//属性权重
       strWeight_slider: 1,//拓扑权重(保存滑块的值)
@@ -54,8 +54,7 @@ class App extends React.Component<any, any> {
       str_x: '',
       str_y: '',
 
-      eps: null,
-      minSample: null,
+      showClusterPanel:'none',
     }
     this.setDataType = this.setDataType.bind(this);
     this.setReTsneData = this.setReTsneData.bind(this);
@@ -79,6 +78,7 @@ class App extends React.Component<any, any> {
     this.setAttrX = this.setAttrX.bind(this);
     this.setAttrY = this.setAttrY.bind(this);
     this.match = this.match.bind(this);
+    this.setShowClusterPanel=this.setShowClusterPanel.bind(this);
   }
   setDataType(e: ChangeEvent<HTMLSelectElement>): void {
     let value = e.target.value;
@@ -125,7 +125,7 @@ class App extends React.Component<any, any> {
   //确认权重
   changeWeight(): void {
     const { strWeight_slider, attrWeight_slider, attrCheckedBox } = this.state;
-    this.setState({ strWeight: strWeight_slider, attrWeight: attrWeight_slider, attrChecked: JSON.parse(JSON.stringify(attrCheckedBox)), choosePoints: [], centerPoint: {} });
+    this.setState({ strWeight: strWeight_slider, attrWeight: attrWeight_slider, attrChecked: JSON.parse(JSON.stringify(attrCheckedBox)), choosePoints: [], centerPoint: {},reTsneData:[] });
   }
   //设置属性类型
   setAttr(value: attr): void {
@@ -213,10 +213,22 @@ class App extends React.Component<any, any> {
   setStrY(e: React.ChangeEvent<HTMLSelectElement>) {
     this.setState({ str_y: e.target.value });
   }
+  setShowClusterPanel(value:string){
+    this.setState({showClusterPanel:value})
+  }
 
   match(): void {//匹配相似图
-    const { dimensions, strWeight, attrWeight, attrChecked, attrValue, attrSliderValue, dataType, num, attrCheckedBox } = this.state;
-    const graph = this.state.personGraphs[0];
+    const { dimensions, strWeight, attrWeight, attrChecked, attrValue, attrSliderValue, dataType, num } = this.state;
+    let index=0;
+    console.log(this.state.personGraphs)
+    if(this.state.personGraphs.length>1){
+      const div=document.getElementById('target0');
+      let totalH =div?.scrollHeight || 0;
+      let clientH=div?.clientHeight || 0;
+      index=Math.floor((div?.scrollTop||0)/(totalH-clientH)*this.state.personGraphs.length);
+    }
+    
+    const graph = this.state.personGraphs[index];
     const url = 'http://localhost:8080';
     if (attrValue !== attrSliderValue)
       this.setState({ attrValue: JSON.parse(JSON.stringify(attrSliderValue)) })
@@ -240,7 +252,7 @@ class App extends React.Component<any, any> {
   render(): React.ReactElement {
     const { dataType, dimensions, strWeight, attrWeight, num, choosePoints, reTsneData, strWeight_slider, attrWeight_slider,
       centerPoint, personGraphs, attr, attrSliderValue, attrValue, attrChecked, attrCheckedBox, displaySlider, displayDrawPanel,
-      attrList, strList, attr_x, attr_y, str_x, str_y } = this.state;
+      attrList, strList, attr_x, attr_y, str_x, str_y,showClusterPanel} = this.state;
     let attrEl: Array<React.ReactElement> = [];
     for (let key in attr) {
       attrEl.push(
@@ -310,19 +322,19 @@ class App extends React.Component<any, any> {
         <div className="controlView">
           <div className="controlPanel">
             <div className="title controlTitle">Control Panel</div>
-            <div className="content" style={{ textAlign: 'left' }}>
+            <div className="content" style={{ textAlign: 'left' ,overflow:'hidden'}}>
               <Row style={{ height: '27px' }}>
                 <Col span={7}>
                   DataSet:
               </Col>
                 <Col span={15}>
                   <select style={{ width: '100%', border: '1px solid #ccc' }} onChange={this.setDataType} value={dataType}>
-                    <option value="Author">Author</option>
-                    <option value="Family">Family</option>
+                    <option value="Author">Co-author</option>
+                    <option value="Family">Genealogy</option>
                   </select>
                 </Col>
               </Row>
-              <Row style={{ height: '27px' }}>
+              <Row style={{ height: '30px' }}>
                 <Col span={7}>Dimensions:</Col>
                 <Col span={10}>
                   <Slider
@@ -392,12 +404,12 @@ class App extends React.Component<any, any> {
                   />
                 </Col>
               </Row> */}
-              <Row style={{ height: '27px' }}>
+              <Row style={{ height: '30px' }}>
                 <Col span={7}>Match count:</Col>
                 <Col span={10}>
                   <Slider
                     min={1}
-                    max={20}
+                    max={50}
                     onChange={this.changeNum}
                     value={typeof num === 'number' ? num : 0}
                     tipFormatter={null}
@@ -408,7 +420,7 @@ class App extends React.Component<any, any> {
                 <Col span={4}>
                   <InputNumber
                     min={1}
-                    max={20}
+                    max={50}
                     size='small'
                     style={{ margin: '0 16px', width: '100%' }}
                     value={num}
@@ -416,31 +428,33 @@ class App extends React.Component<any, any> {
                   />
                 </Col>
               </Row>
-              <Row style={{ height: '27px' }}>
+              {/* <Row style={{ height: '30px' }}>
                 <Col span={2}>Eps:</Col>
-                <Col span={4}>
+                <Col span={5}>
                   <InputNumber
                     min={1}
                     max={20}
                     size='small'
-                    style={{ margin: '0', width: '100%' }}
-                    value={num}
-                    onChange={this.changeNum}
+                    style={{ margin: '0 5px', width: '100%' }}
+                    value={eps_input}
+                    onChange={this.setEpsInput}
                   />
                 </Col>
+                <Col span={1}></Col>
                 <Col span={2}>MS:</Col>
-                <Col span={4}>
+                <Col span={5}>
                   <InputNumber
                     min={1}
                     max={20}
                     size='small'
-                    style={{ margin: '0', width: '100%' }}
-                    value={num}
-                    onChange={this.changeNum}
+                    style={{ margin: '0 5px', width: '100%' }}
+                    value={minSamples_input}
+                    onChange={this.setMinSamplesInput}
                   />
                 </Col>
-                <Col span={4}><Button style={{ margin: '0 5px' }} size='small'>DBSCAN</Button></Col>
-              </Row>
+                <Col span={1}></Col>
+                <Col span={6}><Button style={{ margin: '0 2px',width:'100%' }} size='small' onClick={this.setDBSCAN}>DBSCAN</Button></Col>
+              </Row> */}
               <Row style={{ height: '27px' }}>
                 <Col span={2}>
                   <Checkbox checked={strWeight_slider === 1 ? true : false} onChange={this.changeStrWeight}></Checkbox>
@@ -504,10 +518,10 @@ class App extends React.Component<any, any> {
 
               <div style={{ position: 'absolute', left: displayDrawPanel, width: '100%', height: '100%' }}>
                 <DrawPanel url='http://localhost:8080/matchModel' num={num} dimensions={dimensions} strWeight={strWeight} attrWeight={attrWeight}
-                  attrChecked={attrChecked} attrValue={attrValue} dataType={dataType}
+                  attrChecked={attrChecked} attrValue={attrValue} dataType={dataType} attrSliderValue={attrSliderValue}
                   parent={{
                     setChoosePoints: this.setChoosePoints, setCenterPoint: this.setCenterPoint,
-                    setReTsneData: this.setReTsneData
+                    setReTsneData: this.setReTsneData,setAttrValue:(value:any)=>this.setState({ attrValue: value})
                   }} />
               </div>
 
@@ -531,30 +545,41 @@ class App extends React.Component<any, any> {
           </div>
 
           <div className="scatterView">
-            <div className="title">Projection View</div>
+            <div className="title">Projection View
+              <div className="showCluster" onClick={this.setShowClusterPanel.bind(this,'block')}></div>
+            </div>
             <div className="content">
               <ScatterPlot url="http://localhost:8080" choosePoints={choosePoints} centerPoint={centerPoint} reTsneData={reTsneData}
                 dimensions={dimensions} strWeight={strWeight} attrWeight={attrWeight} attrChecked={attrChecked} attrValue={attrValue}
-                dataType={dataType}
-                parent={{ setChoosePoints: this.setChoosePoints.bind(this), setPersonGraphs: this.setPersonGraphs.bind(this) }} />
+                dataType={dataType} showClusterPanel={showClusterPanel}
+                parent={{
+                  setChoosePoints: this.setChoosePoints.bind(this), setPersonGraphs: this.setPersonGraphs.bind(this),
+                  setShowClusterPanel:this.setShowClusterPanel.bind(this)
+                }} />
             </div>
           </div>
 
           <div className="forceComputeView">
             <div className='title'>Candidate View</div>
             <div className='content'>
-              <ForceCompute graphs={choosePoints} dataType={dataType} parent={this}/>
+              <ForceCompute graphs={choosePoints} dataType={dataType} parent={this} personGraphs={personGraphs}/>
             </div>
           </div>
 
           <div className="parallelView">
             <div className='title'>Parallel Coordinate</div>
             <div className='content'>
-              <Parallel url="http://localhost:8080/getAttr" choosePoints={choosePoints} centerPoint={centerPoint} personGraphs={personGraphs}
+              <Parallel url="http://localhost:8080" choosePoints={choosePoints} centerPoint={centerPoint} personGraphs={personGraphs}
                 attrWeight={attrWeight} attrChecked={attrChecked} attrValue={attrValue} reTsneData={reTsneData} dataType={dataType}
                 parent={{ setAttr: this.setAttr, initAttrChecked: this.initAttrChecked,setAttrList:this.setAttrList,setStrList:this.setStrList }} />
             </div>
           </div>
+
+        
+          
+
+        </div>
+        <div className="clusterBackGround" style={{display:showClusterPanel}}>
 
         </div>
 

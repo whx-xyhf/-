@@ -9,6 +9,8 @@ interface Props{
     dimensions:number,
     strWeight:number,
     attrWeight:number,
+    dataType:string,
+    attrChecked: any,
 }
 
 class NodeList extends React.Component<Props,any>{
@@ -27,14 +29,18 @@ class NodeList extends React.Component<Props,any>{
     }
     //搜索
     search():void{//根据搜索框的字段搜索作者
-        axios.post(this.props.url+'/searchPerson',{wd:this.state.wd})
+        axios.post(this.props.url+'/searchPerson',{wd:this.state.wd,dataType:this.props.dataType})
         .then(res=>{
             this.setState({searchValue:res.data.data});
         })
     }
     searchGraph(e:any):void{//根据名字搜索包含该节点的网络
-        const {url,dimensions,attrWeight,strWeight} = this.props;
-        axios.post(url+'/searchGraphByPersonId',{wd:e.target.dataset['num'],dimensions:dimensions,strWeight:strWeight,attrWeight:attrWeight})
+        const {url,dimensions,attrWeight,strWeight,attrChecked,dataType}=this.props;
+        let checkedArr:any=[];
+        for(let key in attrChecked){
+            checkedArr.push({name:key,value:attrChecked[key]})
+        }
+        axios.post(url+'/searchGraphByPersonId',{wd:e.target.dataset['num'],dimensions:dimensions,strWeight:strWeight,attrWeight:attrWeight,attrChecked:checkedArr,dataType:dataType})
         .then(res=>{
             // console.log(res.data.data);
             this.props.parent(res.data.data);

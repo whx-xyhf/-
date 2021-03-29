@@ -25,7 +25,7 @@ if __name__=='__main__':
     # with open('./data/Family/att5.json','r') as fr:
     #     attrData=json.load(fr)
     time_interval = 1
-    dimensions = 5
+    dimensions = 128
     dirPath = './data/Family/'
     attrArrayDic=[]
     attrDic={}

@@ -55,11 +55,11 @@ class TargetTree extends React.Component<Props,any>{
     render():React.ReactElement{
         // console.log(this.state.layOutNodes)
         let nodes=this.state.layOutNodes.map((value:any,index:number)=>{
-            return <circle r={this.circleR} cx={value.y} cy={value.x} key={index} fill="#ccc" strokeWidth="1px" stroke="white"
+            return <circle r={this.circleR} cx={value.y} cy={value.x} key={index} fill={this.props.circleFill?this.props.circleFill:'#ccc'} strokeWidth="1px" stroke="white"
             onMouseOver={this.showInfo.bind(this,value)} onMouseOut={this.hideInfo} cursor='pointer'></circle>
         })
         let links=this.state.layOutLinks.map((value:any,index:number)=>{
-            return <path d={value.d} fill="none" strokeWidth="1px" stroke="#ccc" key={index}></path>
+            return <path d={value.d} fill="none" strokeWidth="1px" stroke={this.props.stroke?this.props.stroke:'#ccc'} key={index}></path>
         })
         return (
             <svg ref={this.svgRef} style={{width:'100%',height:'100%'}} onClick={this.props.onClick?this.props.onClick.bind(this.props.parent,this.props.graph):null}>

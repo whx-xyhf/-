@@ -3,6 +3,30 @@ from ged4py.algorithm import graph_edit_dist
 from dataProcessing.gedNew import GraphEditDistance
 import networkx as nx
 import copy
+from zss import simple_distance, Node
+import json
+
+def getModel(edges):
+    newList = []
+    data = {}
+    for i in edges:
+        if i[0] not in newList:
+            newList.append(i[0])
+        if i[1] not in newList:
+            newList.append(i[1])
+
+    for i in range(len(newList)):
+        data[newList[i]] = Node(i)
+    for edge in edges:
+        data[edge[0]].addkid(data[edge[1]])
+    if len(newList)==0:
+        return Node(0)
+    else:
+        return data[0]
+
+def getTed(edges1,edges2):
+    return simple_distance(getModel(edges1),getModel(edges2))
+
 
 def getGed(edges1,edges2,nodes1,nodes2):
     g1=nx.Graph()

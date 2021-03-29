@@ -3,7 +3,7 @@ import NodeLink from './NodeLink';
 import TargetTree from './TargetTree';
 
 //定义边数组
-type edges = Array<number>;
+// type edges = Array<number>;
 type graph = {
     id: number,
     // nodes:Array<number>,
@@ -13,6 +13,7 @@ type graph = {
 
 interface Props {
     graphs: Array<graph>,
+    personGraphs:Array<graph>
     dataType: string,
     parent: any;
 }
@@ -43,7 +44,14 @@ class ForceCompute extends React.Component<Props, any>{
     }
     componentWillReceiveProps(nextProps: Props) {
         if (nextProps.graphs !== this.props.graphs || nextProps.dataType !== this.props.dataType) {
-            this.setState({ showCount: 12 });
+            
+            this.setState({ showCount: 12 ,selectIndex:-1});
+
+        }
+        if(nextProps.personGraphs!==this.props.personGraphs){
+            if(nextProps.graphs.length>0)
+                if(nextProps.personGraphs[0].id===nextProps.graphs[0].id)
+                    this.setState({ showCount: 12 ,selectIndex:0});
         }
     }
 
@@ -63,7 +71,7 @@ class ForceCompute extends React.Component<Props, any>{
                                     Nodes:{value.str.nodes} Year:{value.year}
                                 </div>
                                 <div className="candidateContent">
-                                    <NodeLink graph={value} onClick={this.selectCondidate} parent={parent} />
+                                    <NodeLink graph={value} onClick={this.selectCondidate} parent={parent} circleFill='#696969' stroke='#A0A0A0'/>
                                 </div>
                             </div>
                         </div>
@@ -84,7 +92,7 @@ class ForceCompute extends React.Component<Props, any>{
                             Nodes:{value.str.nodes} Depth:{value.str.depth}
                                 </div>
                                 <div className="candidateContent">
-                                    <TargetTree graph={value} onClick={this.selectCondidate} parent={parent} />
+                                    <TargetTree graph={value} onClick={this.selectCondidate} parent={parent} circleFill='#696969' stroke='#A0A0A0'/>
                                 </div>
                             </div>
                         </div>

@@ -13,6 +13,7 @@ interface Props {
     attrWeight: number,
     attrChecked: attr,
     attrValue: attr,
+    attrSliderValue:attr,
     dataType: string,
 }
 type node = {
@@ -42,25 +43,29 @@ class DrawPanel extends React.Component<Props, any>{
     private circleR:number=5;
     private padding = { top: 10, bottom: 10, left: 40, right: 10 };
     private modelGraohs = [
-        { id: -1, nodes: [1, 2, 3], edges: [[1, 2], [2, 3]] },
-        { id: -2, nodes: [1, 2, 3, 4, 5, 6], edges: [[1, 2], [1, 3], [1, 4], [1, 5], [1, 6]] },
+        { id: -1, nodes: [1, 2, 3,4], edges: [[1, 2], [2, 3],[3,4]] },
+        { id: -2, nodes: [1, 2, 3, 4, 5, 6,7,8,9], edges: [[1, 2], [1, 3], [1, 4], [1, 5], [1, 6],[1,7],[1,8],[1,9]] },
         { id: -3, nodes: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], edges: [[1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [6, 7], [6, 8], [6, 9], [6, 10]] },
+        {id:-4,nodes:[1,2,3,4,5,6],edges:[[1,2],[1,3],[1,4],[1,5],[1,6],[2,3],[2,4],[2,5],[2,6],[3,4],[3,5],[3,6],[4,5],[4,6],[5,6]]},
+        {id:-5,nodes:[1,2,3,4,5,6,7,8,9],edges:[[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,9],[9,1]]},
+        {id:-6,nodes:[1,2,3,4,5,6,7,8,9,10],edges:[[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,9],[9,10],[10,2],[1, 2], [1, 3], [1, 4], [1, 5], [1, 6],[1,7],[1,8],[1,9],[1,10]]},
     ];
     private modelTrees = [
-        { id: -4, children: [{ id: 1, children: [{ id: 2 }] }] },
+        { id: -7, children: [{ id: 1, children: [{ id: 2 }] }] },
 
 
-        { id: -5, children: [{ id: 1, children: [{ id: 2 }, { id: 3 }, { id: 4 }] }] },
+        { id: -7, children: [{ id: 1, children: [{ id: 2 }, { id: 3 }, { id: 4 }] }] },
 
 
-        { id: -6, children: [{ id: 1, children: [{ id: 2, children: [{ id: 3 }, { id: 4 }] }, { id: 5, children: [{ id: 6 }, { id: 7 }] }] }] },
+        { id: -8, children: [{ id: 1, children: [{ id: 2, children: [{ id: 3 }, { id: 4 }] }, { id: 5, children: [{ id: 6 }, { id: 7 }] }] }] },
 
 
-        { id: -7, children: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }] },
+        { id: -9, children: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }] },
+        { id: -10, children: [{ id: 1,children:[{id:2,children:[{id:6},{id:7}]},{id:3},{id:4},{id:5,children:[{id:8}]}] }] }
     ];
     constructor(props: Props) {
         super(props);
-        this.state = { nodes: [], links: [], id: -10 };
+        this.state = { nodes: [], links: [], id: -100 };
         this.svgRef = React.createRef();
         this.beginDrawNode = this.beginDrawNode.bind(this);
         this.beginDrawLine = this.beginDrawLine.bind(this);
@@ -103,9 +108,11 @@ class DrawPanel extends React.Component<Props, any>{
     //匹配与定制图相似的图
     matchModel(): void {
         let { links, nodes, id } = this.state;
-        const { url, dimensions, strWeight, attrWeight, attrChecked, attrValue, dataType } = this.props;
+        const { url, dimensions, strWeight, attrWeight, attrChecked, attrValue, dataType ,attrSliderValue} = this.props;
+        if (attrValue !== attrSliderValue)
+            this.props.parent.setAttrValue(JSON.parse(JSON.stringify(attrSliderValue)) );
         if (this.record.indexOf('model') < 0) {
-            id = -10;
+            id = -100;
         }
         let edges = links.map((value: link) => 
         ['id' in value.source?value.source.id:value.source.data.id, 'id' in value.target?value.target.id:value.target.data.id]);
@@ -123,7 +130,7 @@ class DrawPanel extends React.Component<Props, any>{
         }
         axios.post(url, {
             name: String(id), nodes: nodesId, edges: edges, features: features, num: this.props.num, dimensions: dimensions, strWeight: strWeight,
-            attrWeight: attrWeight, attrChecked: checkedArr, attrValue: attrValue, dataType: dataType
+            attrWeight: attrWeight, attrChecked: checkedArr, attrValue: attrSliderValue, dataType: dataType
         }, { timeout: 1200000 }).then(res => {
             // console.log(res.data)
             this.props.parent.setReTsneData(res.data.all);
@@ -147,8 +154,8 @@ class DrawPanel extends React.Component<Props, any>{
             //获取纵横比
             let height_force = y_max - y_min;
             let width_force = x_max - x_min;
-            let scaleWidth = this.svgWidth / 4 * 3;
-            let scaleHeight = this.svgHeight / 4 * 3;
+            let scaleWidth = this.svgWidth / 4*3;
+            let scaleHeight = this.svgHeight / 4*3 ;
             if (x_max >= this.svgWidth || x_min <= 0 || y_min <= 0 || y_max >= this.svgHeight) {
                 scaleWidth = this.svgWidth;
                 scaleHeight = this.svgHeight;
@@ -201,7 +208,7 @@ class DrawPanel extends React.Component<Props, any>{
     chooseModelTree(data: any): void {
         this.pen = "model";
         this.record.push("model");
-        let treeData = d3.tree().size([this.svgHeight - this.padding.top, this.svgWidth - this.padding.left])(d3.hierarchy(data));
+        let treeData = d3.tree().size([this.svgHeight/3*2 - this.padding.top, this.svgWidth/3*2 - this.padding.left])(d3.hierarchy(data));
         let treeDataLinks = treeData.links();
         treeDataLinks.forEach((value: any) => {
             value.d = d3.linkHorizontal()  //d3.linkVertical()  d3.linkHorizontal().x(d => d.y).y(d => d.x)
@@ -304,12 +311,12 @@ class DrawPanel extends React.Component<Props, any>{
                  fill="none" strokeWidth="1px" stroke="#ccc" key={index} strokeDasharray={value.end ? '0' : '5 5'}></path>
         )
         const model = dataType === 'Author' ? this.modelGraohs.map((value: any, index: number) =>
-            <div className='modelGraph' key={index} style={{ width: '109px', left: `${112 * index+3}px`}}>
-                <NodeLink key={index} graph={value} parent={this} onClick={this.chooseModelGraph} />
+            <div className='modelGraph' key={index} style={{ width: '70px', left: `${73 * index+3}px`}}>
+                <NodeLink key={index} graph={value} parent={this} onClick={this.chooseModelGraph} circleFill='#696969' stroke='#A0A0A0' />
             </div>
         ) : this.modelTrees.map((value: any, index: number) =>
-            <div className='modelGraph' key={index} style={{ width: '109px', left: `${112 * index+3}px`}}>
-                <TargetTree key={index} graph={value} parent={this} onClick={this.chooseModelTree} />
+            <div className='modelGraph' key={index} style={{ width: '70px', left: `${73 * index+3}px`}}>
+                <TargetTree key={index} graph={value} parent={this} onClick={this.chooseModelTree} circleFill='#696969' stroke='#A0A0A0'/>
             </div>
         )
 

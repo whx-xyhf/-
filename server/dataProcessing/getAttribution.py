@@ -119,7 +119,7 @@ def run(url1,url2,url3,url4,url5,url6,url7,dimensions,isExist=False):
         for i in node2Num:
             num2Node[node2Num[i]]=i
         index=0
-        attrName=['author','cite','rank','paper','weight','year']
+        attrName=['AU','CI','RA','PA','WE','YE']
         for graph in subGraphs:
             print(index)
             relateData=getRelatedData(originData,num2Node,graph)
@@ -139,10 +139,10 @@ def run(url1,url2,url3,url4,url5,url6,url7,dimensions,isExist=False):
                 papersLue=[]
                 rank=0
                 for paper in papers:
-                    papersLue.append({'title':paper['title'],'author':paper['author'],'cite':paper['cite']})
+                    papersLue.append({'title':paper['title'],'author':paper['author'],'cite':paper['cite'],'year':paper['year']})
                     rank+=paper['author'].index(num2Node[node]) + 1
                 graph['authorInfo'][node]={'name':num2Node[node],'cite':authorInfo['cite'],
-                                           'count':authorInfo['count'],'rank':rank/len(papersLue),'paper':papersLue,'yaer':authorInfo['year']}
+                                           'count':authorInfo['count'],'rank':rank/len(papersLue),'paper':papersLue,'year':authorInfo['year']}
             index+=1
         saveJson(url3,subGraphs)
         #归一化
@@ -176,10 +176,10 @@ def run(url1,url2,url3,url4,url5,url6,url7,dimensions,isExist=False):
 
 if __name__=='__main__':
     time_interval = 1
-    dimensions=6
+    dimensions=128
     dirPath = './data/Author/'
     run(dirPath+'data_weight.json',dirPath+'node2Num.json',
         dirPath+'subGraphs_'+str(time_interval)+'.json',dirPath+'orignNetNum.csv',
         dirPath+'vectors_'+str(time_interval)+'_'+str(dimensions)+'.csv',
         dirPath+'attrVectors_'+str(time_interval)+'.json',
-        dirPath+'attrMeanStd_'+str(time_interval)+'.json',dimensions,True)
+        dirPath+'attrMeanStd_'+str(time_interval)+'.json',dimensions,False)

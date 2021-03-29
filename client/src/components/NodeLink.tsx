@@ -130,11 +130,11 @@ class NodeLink extends React.Component<Props,any>{
         // console.log(this.state.layOutNodes)
         const {layOutNodes,layOutLinks,focusNode}=this.state;
         let nodes=layOutNodes.map((value:any,index:number)=>{
-            return <circle r={this.circleR} cx={value.x} cy={value.y} key={index} fill="#ccc" strokeWidth="1px" stroke="white" cursor='pointer'></circle>
+            return <circle r={this.circleR} cx={value.x} cy={value.y} key={index} fill={this.props.circleFill?this.props.circleFill:'#ccc'} strokeWidth="1px" stroke="white" cursor='pointer'></circle>
         })
         let links=layOutLinks.map((value:any)=>{
             return <line x1={value.source.x} y1={value.source.y} x2={value.target.x} 
-            y2={value.target.y} fill="none" strokeWidth="1px" stroke="#ccc" key={value.index}></line>
+            y2={value.target.y} fill="none" strokeWidth="1px" stroke={this.props.stroke?this.props.stroke:'#ccc'} key={value.index}></line>
         })
         return (
             <svg ref={this.svgRef} style={{width:'100%',height:'100%'}} onClick={this.props.onClick?this.props.onClick.bind(this.props.parent,this.props.graph,this.state.layOutNodes,this.state.layOutLinks,this.props.graph.id):null}>

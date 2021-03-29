@@ -6,14 +6,16 @@ from dataProcessing.Ged import getGed
 from dataProcessing.getCCATsne import reTsne
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from dataProcessing.graph2vec import WeisfeilerLehmanMachine
-from dataProcessing.getdbscan import runDBSCAN,reDBSCAN
+from dataProcessing.getdbscan import runCluster,reRunCluster
 import networkx as nx
 import os
 import time
+from scipy import interpolate
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 time_interval=1
+modelName=-100
 
 @app.after_request
 def cors(environ):
@@ -42,18 +44,12 @@ def index():
         print(attrStr)
         with open('./dataProcessing/data/'+dataType+'/vectors2d_'+str(time_interval)+'_'+dimensions+'_'+strWeight+'_'+attrWeight+'_'+attrStr+'.json','r') as fr:
             vectors=json.load(fr)
-        with open('./dataProcessing/data/'+dataType+'/dbscanParameter.json','r') as fr:
-            parameter=json.load(fr)
-            for i in parameter:
-                if i['dimensions']==int(dimensions) and i['strWeight']==int(strWeight) and i['attrWeight']==int(attrWeight) and i['attrStr']==attrStr:
-                    eps=i['eps']
-                    min_samples=i['min_samples']
 
         for i in range(len(data)):
             data[i]['x']=float(vectors[str(data[i]['id'])]['x'])
             data[i]['y']=float(vectors[str(data[i]['id'])]['y'])
-            data[i]['cluster']=vectors[str(data[i]['id'])]['cluster']
-        res = make_response(jsonify({'code': 200, "data": data,'eps':eps,'minSamples':min_samples}))
+            data[i]['cluster']=-2
+        res = make_response(jsonify({'code': 200, "data": data}))
     return res
 
 @app.route("/searchPerson",methods = ['POST', 'GET'])
@@ -156,7 +152,7 @@ def searchGraphByGraphId():#根据图id搜索该图
                     #     graph['names'] = nodeName
                     graph['x'] = float(vectors[str(graph['id'])]['x'])
                     graph['y'] = float(vectors[str(graph['id'])]['y'])
-                    graph['cluster'] = vectors[str(graph['id'])]['cluster']
+                    # graph['cluster'] = vectors[str(graph['id'])]['cluster']
                     resData.append(graph)
                     break
             res = make_response(jsonify({'code': 200, "data": resData}))
@@ -216,7 +212,13 @@ def match():#匹配相似图
         if os.path.exists(file):
             with open(file, 'r') as fr:
                 record = json.load(fr)
-            record.insert(0, oneRecord)
+            flag=True
+            for i in record:
+                if i['graph']['id']==sourceGraph['id']:
+                    flag=False
+                    break
+            if flag:
+                record.insert(0, oneRecord)
             with open(file, 'w') as fw:
                 json.dump(record,fw)
         else:
@@ -246,6 +248,7 @@ def matchModel():
         edges = request.get_json()['edges']
         nodes = request.get_json()['nodes']
         name=request.get_json()['name']
+        modelName=name
         strWeight = request.get_json()['strWeight']
         attrWeight = request.get_json()['attrWeight']
         dimensions = str(request.get_json()['dimensions'])
@@ -286,46 +289,35 @@ def matchModel():
                 attrStr += '0'
                 attrVector.append(0)
 
-        dimensionsAttr=len(attrStr)
         dimensionsStr=int(dimensions)
-
-        with open('./dataProcessing/data/'+dataType+'/dbscanParameter.json', 'r') as fr:
-            parameter = json.load(fr)
-            for p in parameter:
-                if p['dimensions'] == dimensions and p['strWeight'] == strWeight and p['attrWeight'] == attrWeight and p[
-                    'attrStr'] == attrStr:
-                    eps=p['eps']
-                    minSamples=p['min_samples']
-                    break
 
         file='./dataProcessing/data/'+dataType+'/'+ 'vectors2d_' + str(time_interval) + '_' + str(dimensionsStr) + '_' + str(
                     strWeight) + '_' + str(attrWeight) + '_' + attrStr +'model'+name+ '.json'
         if os.path.exists(file):
             with open(file,'r') as fr:
-                Data=json.load(fr)
-            dataSet=[]
-            ids=[]
-            for i in Data:
-                dataSet.append([float(data[i]['x']), float(data[i]['y'])])
-                ids.append(i)
-            tsneData,dic=reDBSCAN(dataSet, id, eps,minSamples)
-            with open('./dataProcessing/data/'+dataType+'/' + 'cluster_points_' + str(time_interval) + '_' + str(dimensionsStr) + '_' + str(
-                    strWeight) + '_' + str(attrWeight) + '_' + attrStr + 'model' + '.json',
-                      'w') as fw:  # 每个标签有哪些点
-                json.dump(dic, fw)
+                tsneData=json.load(fr)
+
+                for i in tsneData:
+                    if "cluster" in tsneData[i]:
+                        break
+                    else:
+                        tsneData[i]["cluster"]=-2
         else:
             tsneData=reTsne(name,docVectors,attrVector,dirPath = './dataProcessing/data/'+dataType+'/',dimensionsStr=dimensionsStr,dimensionsAttrChecked=attrStr
-                       ,strWeight=strWeight,attrWeight=attrWeight,eps=eps,min_samples=minSamples,saveFile=True)
+                       ,strWeight=strWeight,attrWeight=attrWeight,saveFile=True)
 
         newData=[]
+
         for i in range(len(data)):
             data[i]['x']=float(tsneData[str(data[i]['id'])]['x'])
             data[i]['y']=float(tsneData[str(data[i]['id'])]['y'])
-            data[i]['cluster'] = tsneData[str(data[i]['id'])]['cluster']
+            if "cluster" in tsneData[str(data[i]['id'])]:
+                data[i]['cluster'] = tsneData[str(data[i]['id'])]['cluster']
+            else:
+                data[i]['cluster']=-2
             data[i]['distance']=math.pow(data[i]['x']-float(tsneData[name]['x']),2)+math.pow(data[i]['y']-float(tsneData[name]['y']),2)
             newData.append(data[i])
         centerPoint={'id':int(name),'nodes':nodes,'edges':edges,'attr':attrValue_,'x':float(tsneData[name]['x']),'y':float(tsneData[name]['y']),'distance':100000}
-        newData.append(centerPoint)
         newData=sorted(newData,key=lambda x:x['distance'])
         res = make_response(jsonify({'code': 200, "all": newData,'match':newData[:num],'center':centerPoint}))
 
@@ -344,59 +336,23 @@ def readHistoryRecord():
         with open(file,'r') as fr:
             data=json.load(fr)
         for i in data:
-            if i['dimensions']==dimensions and i['attrChecked']==attrChecked and i['strWeight']==strWeight and i['attrWeight']==attrWeight:
+            if i['dimensions']==dimensions:
                 resData.append({'graph':i['graph'],'date':i['date']})
         res = make_response(jsonify({'code': 200, 'data':resData}))
     return res
 
-@app.route("/getCluster",methods = ['POST', 'GET'])
-def getCluster():
-    if request.method == 'POST':
-        dimensions = str(request.get_json()['dimensions'])
-        attrChecked = request.get_json()['attrChecked']
-        dataType = request.get_json()['dataType']
-        strWeight = request.get_json()['strWeight']
-        attrWeight = request.get_json()['attrWeight']
-        cluster=str(request.get_json()['cluster'])
-        with open('./dataProcessing/data/'+dataType+'/subGraphs_'+str(time_interval)+'.json','r') as fr:
-            data=json.load(fr)
-        attrStr = ''
-        for i in data[0]['attr']:
-            if {'name': i, 'value': True} in attrChecked:
-                attrStr += '1'
-            else:
-                attrStr += '0'
-        with open('./dataProcessing/data/'+dataType+'/'+ 'cluster_points_' + str(time_interval) + '_' + str(dimensions) + '_' + str(
-                    strWeight) + '_' + str(attrWeight) + '_' + attrStr + '.json','r') as fr:
-            clusterData=json.load(fr)
-            ids=clusterData[cluster]
-        with open('./dataProcessing/data/'+dataType+'/vectors2d_' + str(
-                time_interval) + '_' + str(dimensions) + '_' + str(strWeight) + '_' + str(attrWeight) + '_' +attrStr+ '.json', 'r') as fr:
-            vectors = json.load(fr)
-        centerx=0
-        centery=0
-        for i in ids:
-            centerx+=float(vectors[i]['x'])
-            centery+=float(vectors[i]['y'])
-        centerx/=len(ids)
-        centery/=len(ids)
-        resData=[]
-        for i in ids:
-            resData.append({'id':i,'distance':math.pow(float(vectors[i]['x'])-centerx,2)+math.pow(float(vectors[i]['y'])-centery,2)})
-        resData = sorted(resData, key=lambda x: x['distance'])
-        res = make_response(jsonify({'code': 200, 'data': resData}))
-    return res
-
-@app.route("/reDbscan",methods = ['POST', 'GET'])
-def reDbscan():
+@app.route("/reCluster",methods = ['POST', 'GET'])
+def reCluster():
     if request.method == 'POST':
         dimensions = request.get_json()['dimensions']
         attrChecked = request.get_json()['attrChecked']
         dataType = request.get_json()['dataType']
         strWeight = request.get_json()['strWeight']
         attrWeight = request.get_json()['attrWeight']
-        eps = request.get_json()['eps']
-        minSamples=request.get_json()['minSamples']
+        algorithm=request.get_json()['algorithm']
+        model=request.get_json()['model']
+
+
         with open('./dataProcessing/data/' + dataType + '/subGraphs_' + str(time_interval) + '.json', 'r') as fr:
             data = json.load(fr)
         attrStr = ''
@@ -405,11 +361,50 @@ def reDbscan():
                 attrStr += '1'
             else:
                 attrStr += '0'
-        vectors=runDBSCAN('./dataProcessing/data/' + dataType + '/',dimensions,strWeight,attrWeight,attrStr,eps,minSamples,time_interval)
+        if model=="model":
+            filePath='./dataProcessing/data/' + dataType + '/vectors2d_' + str(time_interval) + '_' + str(dimensions) + '_' + str(strWeight) + '_' + str(
+            attrWeight) + '_' + attrStr+"model"+str(modelName) + '.json'
+        else:
+            filePath = './dataProcessing/data/' + dataType + '/vectors2d_' + str(time_interval) + '_' + str(
+                dimensions) + '_' + str(strWeight) + '_' + str(
+                attrWeight) + '_' + attrStr + '.json'
+        if algorithm=='dbscan':
+            eps = request.get_json()['eps']
+            minSamples=request.get_json()['minSamples']
+            vectors = runCluster( dimensions, strWeight, attrWeight, attrStr,
+                                 algorithm=algorithm,eps=eps, min_samples=minSamples,filePath=filePath)
+
+        elif algorithm=='kmeans':
+            km = request.get_json()['km']
+            vectors = runCluster(dimensions, strWeight, attrWeight, attrStr,
+                                 algorithm=algorithm,n_clusters=km,filePath=filePath)
         res = make_response(jsonify({'code': 200, "data": vectors}))
     return res
 
-
+@app.route("/doInterpolate",methods = ['POST', 'GET'])
+def doInterpolate():
+    if request.method == 'POST':
+        data = request.get_json()['data']
+        num=request.get_json()['num']
+        newData={}
+        for i in data:
+            x=[]
+            y=[]
+            z=[]
+            newData[i]=[]
+            for j in range(len(data[i])):
+                x.append(data[i][j][1])
+                y.append(data[i][j][2])
+                z.append(data[i][j][3])
+            xnew = np.linspace(min(x), max(x), len(data[i])*num)
+            fy = interpolate.interp1d(x, y, kind="cubic")
+            fz = interpolate.interp1d(x, z, kind="cubic")
+            ynew = fy(xnew)
+            znew = fz(xnew)
+            for k in range(len(xnew)):
+                newData[i].append([data[i][0][0],xnew[k],ynew[k],znew[len(xnew)-k-1]])
+        res = make_response(jsonify({'code': 200, "data": newData}))
+    return res
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0",
