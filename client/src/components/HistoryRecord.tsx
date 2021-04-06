@@ -61,7 +61,7 @@ class HistoryRecord extends React.Component<Props, any>{
         const {record}=this.state;
         const {dataType,parent}=this.props;
         let el=record.map((value:any,index:number)=>{
-            if(dataType==='Author')
+            if(dataType==='Author' || dataType==='Weibo')
                 return (
                     <div className="forceBox" key={index}>
                     <div className="condidateBox" >
@@ -70,7 +70,7 @@ class HistoryRecord extends React.Component<Props, any>{
                             Date:{value.date.split(' ')[0]}
                         </div>
                         <div className="candidateContent">
-                            <NodeLink graph={value.graph} onClick={this.selectCondidate} parent={parent}/>
+                            <NodeLink graph={value.graph} onClick={this.selectCondidate} parent={parent} circleFill='#696969' stroke='#A0A0A0'/>
                         </div>
                     </div>
                     </div>
@@ -84,7 +84,7 @@ class HistoryRecord extends React.Component<Props, any>{
                             Date:{value.date.split(' ')[0]}
                         </div>
                         <div className="candidateContent">
-                            <TargetTree graph={value.graph} onClick={this.selectCondidate} parent={parent}/>
+                            <TargetTree graph={value.graph} onClick={this.selectCondidate} parent={parent} circleFill='#696969' stroke='#A0A0A0'/>
                         </div>
 
                     </div>

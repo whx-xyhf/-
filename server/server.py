@@ -57,16 +57,23 @@ def search():#根据关键字匹配人名
     if request.method == 'POST':
         resData={}
         dataType = request.get_json()['dataType']
-        with open('./dataProcessing/data/'+dataType+'/node2Num.json','r') as fr:
-            data=json.load(fr)
-            wd=request.get_json()['wd']
-            if wd=="":
-                res = make_response(jsonify({'code': 200, "data": data}))
-            else:
-                for key in data:
-                    if key.lower().find(wd.lower())>=0:
-                        resData[key]=data[key]
-                res = make_response(jsonify({'code': 200, "data": resData}))
+        if dataType=="Author" or dataType=="Weibo":
+            with open('./dataProcessing/data/'+dataType+'/node2Num.json','r') as fr:
+                data=json.load(fr)
+                wd=request.get_json()['wd']
+                if wd=="":
+                    res = make_response(jsonify({'code': 200, "data": data}))
+                else:
+                    for key in data:
+                        if key.lower().find(wd.lower())>=0:
+                            resData[key]=data[key]
+
+        if dataType=="Family":
+            with open('./dataProcessing/data/'+dataType+'/subGraphs_1.json','r') as fr:
+                data=json.load(fr)
+            for i in range(20):
+                resData[data[i]['id']]=data[i]['id']
+        res = make_response(jsonify({'code': 200, "data": resData}))
     return res
 
 @app.route("/searchGraphByPersonId",methods = ['POST', 'GET'])
@@ -80,7 +87,7 @@ def searchGraphByPersonId():#根据人id搜索包含该人的网络
         dimensions = str(request.get_json()['dimensions'])
         attrChecked = request.get_json()['attrChecked']
         dataType = request.get_json()['dataType']
-        if dataType=='Author':
+        if dataType=='Author' or dataType=="Weibo":
             with open('./dataProcessing/data/'+dataType+'/node2Num.json','r') as fr:
                 node2Num=json.load(fr)#{www:1}
                 for key in node2Num:
@@ -109,10 +116,11 @@ def searchGraphByPersonId():#根据人id搜索包含该人的网络
                         resData.append(graph)
             elif dataType=='Family':
                 for graph in data:
-                    if graph['nodes'].count(wd)>0:
+                    if graph['id']==wd:
                         graph['x']=float(vectors[str(graph['id'])]['x'])
                         graph['y']=float(vectors[str(graph['id'])]['y'])
                         resData.append(graph)
+                        break
             res = make_response(jsonify({'code': 200, "data": resData}))
     return res
 
@@ -127,11 +135,11 @@ def searchGraphByGraphId():#根据图id搜索该图
         dimensions = str(request.get_json()['dimensions'])
         attrChecked = request.get_json()['attrChecked']
         dataType = request.get_json()['dataType']
-        if dataType == 'Author':
-            with open('./dataProcessing/data/'+dataType+'/node2Num.json','r') as fr:
-                node2Num=json.load(fr)#{www:1}
-                for key in node2Num:
-                    num2node[node2Num[key]]=key#{1:www}
+        # if dataType == 'Author':
+        #     with open('./dataProcessing/data/'+dataType+'/node2Num.json','r') as fr:
+        #         node2Num=json.load(fr)#{www:1}
+        #         for key in node2Num:
+        #             num2node[node2Num[key]]=key#{1:www}
         with open('./dataProcessing/data/'+dataType+'/subGraphs_'+str(time_interval)+'.json','r') as fr:
             data=json.load(fr)
         attrStr = ''
@@ -187,25 +195,39 @@ def match():#匹配相似图
         with open('./dataProcessing/data/'+dataType+'/vectors2d_' + str(
                 time_interval) + '_' + dimensions + '_' + strWeight + '_' + attrWeight + '_' +attrStr+ '.json', 'r') as fr:
             vectors = json.load(fr)
-            for i in range(len(data)):
-                if data[i]['id']!=sourceGraph['id']:
-                    flag = True
-                    if attrWeight != 0:
-                        for key in useAttr:
-                            if data[i]['attr'][key] < attrRange[key][0] or data[i]['attr'][key] > attrRange[key][1]:
-                                flag = False
-                                break
-                    if flag:
-                        data[i]['x'] = float(vectors[str(data[i]['id'])]['x'])
-                        data[i]['y'] = float(vectors[str(data[i]['id'])]['y'])
-                        data[i]['cluster'] = vectors[str(data[i]['id'])]['cluster']
-                        distance=math.pow(float(vectors[str(sourceGraph['id'])]['x'])-data[i]['x'],2)+math.pow(float(vectors[str(sourceGraph['id'])]['y'])-data[i]['y'],2)
-                        data[i]['distance']=distance
-                    else:
-                        data[i]['distance'] = float('inf')
-                    resData.append(data[i])
-            resData=sorted(resData,key=lambda x:x['distance'])#sort(key=lambda x:x["distance"])
-            res = make_response(jsonify({'code': 200, "data": resData[:num]}))
+        for i in range(len(data)):
+            if data[i]['id']!=sourceGraph['id']:
+                flag = True
+                if attrWeight != 0:
+                    for key in useAttr:
+                        if data[i]['attr'][key] < attrRange[key][0] or data[i]['attr'][key] > attrRange[key][1]:
+                            flag = False
+                            break
+                if flag:
+                    data[i]['x'] = float(vectors[str(data[i]['id'])]['x'])
+                    data[i]['y'] = float(vectors[str(data[i]['id'])]['y'])
+                    data[i]['cluster'] = -2
+                    distance=math.pow(float(vectors[str(sourceGraph['id'])]['x'])-data[i]['x'],2)+math.pow(float(vectors[str(sourceGraph['id'])]['y'])-data[i]['y'],2)
+                    data[i]['distance']=distance
+                else:
+                    data[i]['distance'] = float('inf')
+                resData.append(data[i])
+        resData=sorted(resData,key=lambda x:x['distance'])[:num]#sort(key=lambda x:x["distance"])
+        if int(strWeight)==1 and int(attrWeight)==1 and dataType=="Weibo":
+            with open('./dataProcessing/data/' + dataType + '/vectors2d_' + str(time_interval) + '_' + dimensions + '_1_0_'  + attrStr + '.json',
+                      'r') as fr:
+                structureVectors=json.load(fr)
+            for i in range(len(resData)):
+                ged = getGed(sourceGraph['edges'], resData[i]['edges'], sourceGraph['nodes'], resData[i]['nodes'])
+                # resData[i]['ged']=ged
+                distance = math.pow(float(structureVectors[str(sourceGraph['id'])]['x']) - float(structureVectors[str(resData[i]['id'])]['x']), 2) + math.pow(
+                    float(structureVectors[str(sourceGraph['id'])]['y']) - float(structureVectors[str(resData[i]['id'])]['y']), 2)
+                nodes=abs(sourceGraph['str']['nodes']-resData[i]['str']['nodes'])
+                resData[i]['distance'] = distance
+                resData[i]['n']=nodes
+            resData = sorted(resData, key=lambda x: (x['n'],x['distance']))
+            # resData = sorted(resData, key=lambda x: x['ged'])
+        res = make_response(jsonify({'code': 200, "data": resData}))
         file = './dataProcessing/data/' + dataType + '/' + 'historyRecord' + str(time_interval) + '.json'
         date=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         oneRecord = {'graph': sourceGraph, 'dimensions': dimensions, 'attrChecked': attrChecked,'date':date,'strWeight':strWeight,'attrWeight':attrWeight}
@@ -219,8 +241,8 @@ def match():#匹配相似图
                     break
             if flag:
                 record.insert(0, oneRecord)
-            with open(file, 'w') as fw:
-                json.dump(record,fw)
+                with open(file, 'w') as fw:
+                    json.dump(record,fw)
         else:
             with open(file, 'w') as fw:
                 json.dump([oneRecord],fw)

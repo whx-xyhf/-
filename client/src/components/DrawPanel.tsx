@@ -49,19 +49,20 @@ class DrawPanel extends React.Component<Props, any>{
         {id:-4,nodes:[1,2,3,4,5,6],edges:[[1,2],[1,3],[1,4],[1,5],[1,6],[2,3],[2,4],[2,5],[2,6],[3,4],[3,5],[3,6],[4,5],[4,6],[5,6]]},
         {id:-5,nodes:[1,2,3,4,5,6,7,8,9],edges:[[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,9],[9,1]]},
         {id:-6,nodes:[1,2,3,4,5,6,7,8,9,10],edges:[[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,9],[9,10],[10,2],[1, 2], [1, 3], [1, 4], [1, 5], [1, 6],[1,7],[1,8],[1,9],[1,10]]},
+        {id:-7,nodes:[1,2,3,5,6,7,8,9,10,11,12,13],edges:[[1,2],[1,3],[1,5],[1,6],[5,7],[5,8],[5,6],[6,9],[6,10],[5,11],[6,11],[11,12],[12,13]]}
     ];
     private modelTrees = [
-        { id: -7, children: [{ id: 1, children: [{ id: 2 }] }] },
+        { id: -8, children: [{ id: 1, children: [{ id: 2 }] }] },
 
 
-        { id: -7, children: [{ id: 1, children: [{ id: 2 }, { id: 3 }, { id: 4 }] }] },
+        { id: -9, children: [{ id: 1, children: [{ id: 2 }, { id: 3 }, { id: 4 }] }] },
 
 
-        { id: -8, children: [{ id: 1, children: [{ id: 2, children: [{ id: 3 }, { id: 4 }] }, { id: 5, children: [{ id: 6 }, { id: 7 }] }] }] },
+        { id: -10, children: [{ id: 1, children: [{ id: 2, children: [{ id: 3 }, { id: 4 }] }, { id: 5, children: [{ id: 6 }, { id: 7 }] }] }] },
 
 
-        { id: -9, children: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }] },
-        { id: -10, children: [{ id: 1,children:[{id:2,children:[{id:6},{id:7}]},{id:3},{id:4},{id:5,children:[{id:8}]}] }] }
+        { id: -11, children: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }] },
+        { id: -12, children: [{ id: 1,children:[{id:2,children:[{id:6},{id:7}]},{id:3},{id:4},{id:5,children:[{id:8}]}] }] }
     ];
     constructor(props: Props) {
         super(props);
@@ -303,22 +304,32 @@ class DrawPanel extends React.Component<Props, any>{
         const nodeEl = nodes.map((value: node, index: number) =>
             <circle r={this.circleR} cx={value.x} cy={value.y} key={index} fill="white" strokeWidth="1px" stroke="#3072ad" onClick={this.drawLine.bind(this, value)}></circle>
         )
-        const linkEl = dataType === 'Author' ? links.map((value: link, index: number) =>
+        let linkEl=null;
+        let model=null;
+        if(dataType === 'Author' || dataType==="Weibo"){
+            linkEl= links.map((value: link, index: number) =>
             <line x1={value.source.x} y1={value.source.y} x2={value.target.x}
                 y2={value.target.y} fill="none" strokeWidth="1px" stroke="#ccc" key={index} strokeDasharray={value.end ? '0' : '5 5'}></line>
-        ) : links.map((value: link, index: number) =>
-            <path d={value.d}
-                 fill="none" strokeWidth="1px" stroke="#ccc" key={index} strokeDasharray={value.end ? '0' : '5 5'}></path>
         )
-        const model = dataType === 'Author' ? this.modelGraohs.map((value: any, index: number) =>
+        model=this.modelGraohs.map((value: any, index: number) =>
             <div className='modelGraph' key={index} style={{ width: '70px', left: `${73 * index+3}px`}}>
                 <NodeLink key={index} graph={value} parent={this} onClick={this.chooseModelGraph} circleFill='#696969' stroke='#A0A0A0' />
             </div>
-        ) : this.modelTrees.map((value: any, index: number) =>
-            <div className='modelGraph' key={index} style={{ width: '70px', left: `${73 * index+3}px`}}>
-                <TargetTree key={index} graph={value} parent={this} onClick={this.chooseModelTree} circleFill='#696969' stroke='#A0A0A0'/>
-            </div>
         )
+    }
+        else{
+            linkEl=links.map((value: link, index: number) =>
+            <path d={value.d}
+                 fill="none" strokeWidth="1px" stroke="#ccc" key={index} strokeDasharray={value.end ? '0' : '5 5'}></path>
+            )
+            model=this.modelTrees.map((value: any, index: number) =>
+                <div className='modelGraph' key={index} style={{ width: '70px', left: `${73 * index+3}px`}}>
+                    <TargetTree key={index} graph={value} parent={this} onClick={this.chooseModelTree} circleFill='#696969' stroke='#A0A0A0'/>
+                </div>
+            )
+            
+        }
+
 
         return (
             <div style={{width:'100%',height:'100%'}}>

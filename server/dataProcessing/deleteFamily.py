@@ -9,7 +9,7 @@ def getEdge(tree,edges):
             getEdge(tree["children"][i],edges)
     return edges
 def getdeep(list,node):
-    n=0
+    n=1
     for i in range(len(list)):
         if list[i][1]==node:
             n=getdeep(list,list[i][0])+1
@@ -138,7 +138,8 @@ with open('./data/Family/subGraphs_1.json','r') as f:
     for i in range(len(data)):
         print(i)
         edges=getEdge(data[i],[])
-        data[i]['str']={"nodes":getCount(data[i]),"depth":getDepth(edges)}
+        depth=getDepth(edges)
+        data[i]['str']={"nodes":getCount(data[i]),"depth":depth}
         data[i]['attr']={"PN":getPN(data[i]),"AA":getAgeSum(data[i])/data[i]['str']["nodes"],"VN":len(getVN(data[i],[])),"TS":getTS(data[i]),"AG":getAG(data[i])/(data[i]['str']["nodes"]-1)}
 
 with open('./data/Family/subGraphs_1.json','w')as fw:

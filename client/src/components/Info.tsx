@@ -1,6 +1,7 @@
 import * as React from 'react';
 // import NodeLink from './NodeLink';
 import PNodeLink from './PNodeLink';
+import NodeLink from './NodeLink';
 import PTargetTree from './PTargetTree';
 import HistoryRecord from './HistoryRecord';
 import axios from 'axios';
@@ -73,6 +74,9 @@ class Info extends React.Component<Props, any>{
             let el = null;
             if (this.props.dataType === "Author") {
                 el = <PNodeLink graph={graph} key={index} />;
+            }
+            else if(this.props.dataType === "Weibo"){
+                el=<NodeLink graph={graph} key={index}/>
             }
             else if (this.props.dataType === "Family") {
                 el = <PTargetTree graph={graph} key={index} />

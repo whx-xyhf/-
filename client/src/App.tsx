@@ -28,6 +28,7 @@ class App extends React.Component<any, any> {
     this.state = {
       dataType: 'Author',//数据集名称
       // dataType:'Family',//数据集名称
+      // dataType:'Weibo',
       reTsneData: [],//重新降维的数据
       choosePoints: [],//圈选的点
       personGraphs: [],//选中的人所在的子图
@@ -79,6 +80,8 @@ class App extends React.Component<any, any> {
     this.setAttrY = this.setAttrY.bind(this);
     this.match = this.match.bind(this);
     this.setShowClusterPanel=this.setShowClusterPanel.bind(this);
+    this.reset=this.reset.bind(this);
+    this.addPersonGraph=this.addPersonGraph.bind(this);
   }
   setDataType(e: ChangeEvent<HTMLSelectElement>): void {
     let value = e.target.value;
@@ -93,6 +96,11 @@ class App extends React.Component<any, any> {
   }
   setPersonGraphs(data: ChoosePointData): void {
     this.setState({ personGraphs: data });
+  }
+  addPersonGraph(data:any):void{
+    const {personGraphs}=this.state;
+    personGraphs.splice(0,0,data);
+    this.setState({personGraphs:personGraphs})
   }
   setCenterPoint(data: ChoosePointData): void {
     this.setState({ centerPoint: data });
@@ -216,6 +224,9 @@ class App extends React.Component<any, any> {
   setShowClusterPanel(value:string){
     this.setState({showClusterPanel:value})
   }
+  reset(){
+    this.setState({choosePoints: [], centerPoint: {},personGraphs:[]});
+  }
 
   match(): void {//匹配相似图
     const { dimensions, strWeight, attrWeight, attrChecked, attrValue, attrSliderValue, dataType, num } = this.state;
@@ -331,6 +342,7 @@ class App extends React.Component<any, any> {
                   <select style={{ width: '100%', border: '1px solid #ccc' }} onChange={this.setDataType} value={dataType}>
                     <option value="Author">Co-author</option>
                     <option value="Family">Genealogy</option>
+                    <option value="Weibo">micro-blog retweeting</option>
                   </select>
                 </Col>
               </Row>
@@ -466,7 +478,7 @@ class App extends React.Component<any, any> {
                 <Col span={2} style={{ margin: '0 0 0 -2px' }}>Attr</Col>
                 <Col><Button onClick={this.changeWeight} style={{ margin: '0 5px' }} size='small'>Project</Button></Col>
                 <Col><Button onClick={this.match} style={{ margin: '0 5px' }} size='small'>Match</Button></Col>
-                <Col><Button style={{ margin: '0 5px' }} size='small'>Reset</Button></Col>
+                <Col><Button style={{ margin: '0 5px' }} size='small' onClick={this.reset}>Reset</Button></Col>
               </Row>
             </div>
           </div>
@@ -551,10 +563,10 @@ class App extends React.Component<any, any> {
             <div className="content">
               <ScatterPlot url="http://localhost:8080" choosePoints={choosePoints} centerPoint={centerPoint} reTsneData={reTsneData}
                 dimensions={dimensions} strWeight={strWeight} attrWeight={attrWeight} attrChecked={attrChecked} attrValue={attrValue}
-                dataType={dataType} showClusterPanel={showClusterPanel}
+                dataType={dataType} showClusterPanel={showClusterPanel} personGraphs={personGraphs}
                 parent={{
-                  setChoosePoints: this.setChoosePoints.bind(this), setPersonGraphs: this.setPersonGraphs.bind(this),
-                  setShowClusterPanel:this.setShowClusterPanel.bind(this)
+                  setChoosePoints: this.setChoosePoints.bind(this), setPersonGraphs: this.setPersonGraphs.bind(this),addPersonGraph:this.addPersonGraph.bind(this)
+                  ,setShowClusterPanel:this.setShowClusterPanel.bind(this)
                 }} />
             </div>
           </div>

@@ -26,11 +26,11 @@ if __name__=='__main__':
     #     attrData=json.load(fr)
     time_interval = 1
     dimensions = 128
-    dirPath = './data/Family/'
+    dirPath = './data/Weibo/'
     attrArrayDic=[]
     attrDic={}
     attrName=[]
-    with open('./data/Family/subGraphs_1.json','r') as fr:
+    with open(dirPath+'subGraphs_1.json','r') as fr:
         data=json.load(fr)
         for i in data[0]['attr']:
             attrName.append(i)

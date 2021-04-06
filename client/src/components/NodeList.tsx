@@ -29,10 +29,25 @@ class NodeList extends React.Component<Props,any>{
     }
     //搜索
     search():void{//根据搜索框的字段搜索作者
-        axios.post(this.props.url+'/searchPerson',{wd:this.state.wd,dataType:this.props.dataType})
-        .then(res=>{
-            this.setState({searchValue:res.data.data});
-        })
+        if(this.props.dataType==="Author"){
+            axios.post(this.props.url+'/searchPerson',{wd:this.state.wd,dataType:this.props.dataType})
+            .then(res=>{
+                this.setState({searchValue:res.data.data});
+            })
+        }
+        else if(this.props.dataType==="Family"){
+            const {url,dimensions,attrWeight,strWeight,attrChecked,dataType}=this.props;
+            let checkedArr:any=[];
+            for(let key in attrChecked){
+                checkedArr.push({name:key,value:attrChecked[key]})
+            }
+            axios.post(url+'/searchGraphByPersonId',{wd:this.state.wd,dimensions:dimensions,strWeight:strWeight,attrWeight:attrWeight,attrChecked:checkedArr,dataType:dataType})
+            .then(res=>{
+                // console.log(res.data.data);
+                this.props.parent.addPersonGraph(res.data.data[0]);
+            })
+        }
+        
     }
     searchGraph(e:any):void{//根据名字搜索包含该节点的网络
         const {url,dimensions,attrWeight,strWeight,attrChecked,dataType}=this.props;
@@ -43,22 +58,15 @@ class NodeList extends React.Component<Props,any>{
         axios.post(url+'/searchGraphByPersonId',{wd:e.target.dataset['num'],dimensions:dimensions,strWeight:strWeight,attrWeight:attrWeight,attrChecked:checkedArr,dataType:dataType})
         .then(res=>{
             // console.log(res.data.data);
-            this.props.parent(res.data.data);
+            this.props.parent.setPersonGraphs(res.data.data);
         })
     }
     componentDidMount():void{
-        this.search();
+        // this.search();
     }
     render():React.ReactElement{
         const { Search } = Input;
-        const suffix = (
-            <AudioOutlined
-              style={{
-                fontSize: 16,
-                color: '#1890ff',
-              }}
-            />
-          );
+ 
 
         let liList:Array<React.ReactElement>=[];
         for(let wd in this.state.searchValue){
@@ -71,8 +79,8 @@ class NodeList extends React.Component<Props,any>{
                 {/* <input type="text" value={this.state.wd} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>this.change(e)}></input>
                 <input type="button" value="search" onClick={this.search}></input> */}
                 <div className="search">
-                    <Space direction="vertical">
-                        <Search value={this.state.wd} placeholder="input search author" onSearch={this.search} style={{ width: 200 }} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>this.change(e)}/>
+                    <Space direction="vertical" style={{width:'100%'}}>
+                        <Search value={this.state.wd} placeholder="input search " onSearch={this.search} style={{ width: '100%' }} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>this.change(e)}/>
                     </Space>
                 </div>
                 

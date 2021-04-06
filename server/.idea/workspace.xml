@@ -13,11 +13,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/server.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="162" column="32" selection-start-line="162" selection-start-column="32" selection-end-line="162" selection-end-column="32" />
+            <state relative-caret-position="177">
+              <caret line="112" column="49" lean-forward="true" selection-start-line="112" selection-start-column="49" selection-end-line="112" selection-end-column="49" />
               <folding>
                 <element signature="e#0#72#0" expanded="true" />
               </folding>
@@ -25,26 +25,23 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/dataProcessing/getAttribution.py">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dataProcessing/graph2vec.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="364">
-              <caret line="179" column="30" selection-start-line="179" selection-start-column="30" selection-end-line="179" selection-end-column="30" />
+            <state relative-caret-position="3100">
+              <caret line="134" column="29" selection-start-line="134" selection-start-column="29" selection-end-line="134" selection-end-column="29" />
               <folding>
-                <element signature="e#0#11#0" expanded="true" />
+                <element signature="e#22#33#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/dataProcessing/getdbscan.py">
+        <entry file="file://$PROJECT_DIR$/dataProcessing/deleteFamily.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="567">
-              <caret line="132" column="150" selection-start-line="132" selection-start-column="150" selection-end-line="132" selection-end-column="150" />
-              <folding>
-                <element signature="e#4#15#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="3500">
+              <caret line="140" column="29" selection-start-line="140" selection-start-column="29" selection-end-line="140" selection-end-column="29" />
             </state>
           </provider>
         </entry>
@@ -52,8 +49,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/dataProcessing/addFamilyAttr.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1325">
-              <caret line="55" column="35" selection-start-line="55" selection-start-column="35" selection-end-line="55" selection-end-column="35" />
+            <state relative-caret-position="650">
+              <caret line="28" column="29" selection-start-line="28" selection-start-column="29" selection-end-line="28" selection-end-column="29" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -64,8 +61,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/dataProcessing/tongji.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="9650">
-              <caret line="395" column="84" selection-start-line="395" selection-start-column="84" selection-end-line="395" selection-end-column="84" />
+            <state relative-caret-position="750">
+              <caret line="39" column="59" selection-start-line="39" selection-start-column="59" selection-end-line="39" selection-end-column="59" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -76,8 +73,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/dataProcessing/Ged.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="200">
-              <caret line="14" column="31" selection-start-line="14" selection-start-column="31" selection-end-line="14" selection-end-column="31" />
+            <state relative-caret-position="1250">
+              <caret line="56" column="36" selection-start-line="56" selection-start-column="36" selection-end-line="56" selection-end-column="36" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -88,8 +85,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/dataProcessing/getCCATsne.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="716">
-              <caret line="169" column="34" selection-start-line="169" selection-start-column="34" selection-end-line="169" selection-end-column="34" />
+            <state relative-caret-position="328">
+              <caret line="178" column="21" selection-start-line="178" selection-start-column="21" selection-end-line="178" selection-end-column="21" />
               <folding>
                 <element signature="e#6#16#0" expanded="true" />
               </folding>
@@ -113,15 +110,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>barnes_hut</find>
-      <find>precomputed</find>
-      <find>PAIRWISE_DISTANCE_FUNCTIONS</find>
-      <find>math.sqrt</find>
-      <find>paper</find>
-      <find>position</find>
-      <find>Ma,Yuxin</find>
-      <find>vectors2d</find>
-      <find>upper right</find>
       <find>date</find>
       <find>returnMinptsCandidate</find>
       <find>-1</find>
@@ -143,6 +131,15 @@
       <find>qu,huamin</find>
       <find>&quot;100&quot;</find>
       <find>matchModel</find>
+      <find>1112</find>
+      <find>dataType</find>
+      <find>if dataType</find>
+      <find>if dataType==&quot;Au</find>
+      <find>if dataType==</find>
+      <find>getGed</find>
+      <find>match</find>
+      <find>vectorExtend</find>
+      <find>num2node</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -169,17 +166,20 @@
         <option value="$PROJECT_DIR$/a.json" />
         <option value="$PROJECT_DIR$/dataProcessing/gedNew.py" />
         <option value="$PROJECT_DIR$/dataProcessing/subGraphPartition.py" />
-        <option value="$PROJECT_DIR$/dataProcessing/Ged.py" />
         <option value="$PROJECT_DIR$/dataProcessing/getTreeEidtDistanceReady.py" />
-        <option value="$PROJECT_DIR$/dataProcessing/tongji.py" />
         <option value="$PROJECT_DIR$/text.py" />
-        <option value="$PROJECT_DIR$/dataProcessing/graph2vec.py" />
-        <option value="$PROJECT_DIR$/dataProcessing/deleteFamily.py" />
-        <option value="$PROJECT_DIR$/dataProcessing/addFamilyAttr.py" />
-        <option value="$PROJECT_DIR$/dataProcessing/getCCATsne.py" />
         <option value="$PROJECT_DIR$/dataProcessing/getdbscan.py" />
-        <option value="$PROJECT_DIR$/server.py" />
         <option value="$PROJECT_DIR$/dataProcessing/getAttribution.py" />
+        <option value="$PROJECT_DIR$/dataProcessing/deleteFamily.py" />
+        <option value="$PROJECT_DIR$/dataProcessing/data/weibo/number.csv" />
+        <option value="$PROJECT_DIR$/dataProcessing/data/weibo/origin.csv" />
+        <option value="$PROJECT_DIR$/dataProcessing/graph2vec.py" />
+        <option value="$PROJECT_DIR$/dataProcessing/processWeiBo.py" />
+        <option value="$PROJECT_DIR$/dataProcessing/addFamilyAttr.py" />
+        <option value="$PROJECT_DIR$/dataProcessing/Ged.py" />
+        <option value="$PROJECT_DIR$/dataProcessing/tongji.py" />
+        <option value="$PROJECT_DIR$/server.py" />
+        <option value="$PROJECT_DIR$/dataProcessing/getCCATsne.py" />
       </list>
     </option>
   </component>
@@ -206,19 +206,6 @@
               <item name="server" type="b2602c69:ProjectViewProjectNode" />
               <item name="server" type="462c0819:PsiDirectoryNode" />
               <item name="dataProcessing" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="server" type="b2602c69:ProjectViewProjectNode" />
-              <item name="server" type="462c0819:PsiDirectoryNode" />
-              <item name="dataProcessing" type="462c0819:PsiDirectoryNode" />
-              <item name="data" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="server" type="b2602c69:ProjectViewProjectNode" />
-              <item name="server" type="462c0819:PsiDirectoryNode" />
-              <item name="dataProcessing" type="462c0819:PsiDirectoryNode" />
-              <item name="data" type="462c0819:PsiDirectoryNode" />
-              <item name="Author" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -249,7 +236,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.getAttribution">
+  <component name="RunManager" selected="Python.server">
     <configuration name="addFamilyAttr" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="server" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -263,48 +250,6 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/dataProcessing/addFamilyAttr.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="deleteFamily" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="server" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/dataProcessing" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/dataProcessing/deleteFamily.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="getAttribution" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="server" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/dataProcessing" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/dataProcessing/getAttribution.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -355,6 +300,27 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="processWeiBo" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="server" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/dataProcessing" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/dataProcessing/processWeiBo.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="server" type="PythonConfigurationType" factoryName="Python">
       <module name="server" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -376,13 +342,34 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="tongji" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="server" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/dataProcessing" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/dataProcessing/tongji.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.getAttribution" />
         <item itemvalue="Python.getCCATsne" />
         <item itemvalue="Python.addFamilyAttr" />
-        <item itemvalue="Python.deleteFamily" />
         <item itemvalue="Python.graph2vec" />
+        <item itemvalue="Python.tongji" />
+        <item itemvalue="Python.processWeiBo" />
       </list>
     </recent_temporary>
   </component>
@@ -410,13 +397,14 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.26948482" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.26948482" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3286119" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49867898" weight="0.33427763" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49867898" visible="true" weight="0.31444758" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39943343" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -461,155 +449,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/dbscanParameter.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="104" selection-start-column="104" selection-end-column="104" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/vectors2d_1_128_1_1_111111.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="115">
-          <caret column="3528" selection-start-column="3528" selection-end-column="3528" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/cluster_points_1_128_1_1_111111.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="7773" selection-start-column="7771" selection-end-column="7773" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/getTsne.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="377">
-          <caret line="203" column="60" selection-start-line="203" selection-start-column="60" selection-end-line="203" selection-end-column="60" />
-          <folding>
-            <element signature="e#6#16#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://E:/familyTree_data_processing/Lib/Lib/site-packages/sklearn/manifold/t_sne.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="244">
-          <caret line="676" column="54" lean-forward="true" selection-start-line="676" selection-start-column="54" selection-end-line="676" selection-end-column="54" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://E:/familyTree_data_processing/Lib/Lib/site-packages/openpyxl/worksheet/worksheet.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="130">
-          <caret line="312" selection-start-line="312" selection-end-line="312" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/gedNew.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="217">
-          <caret line="147" column="51" selection-start-line="147" selection-start-column="51" selection-end-line="147" selection-end-column="51" />
-          <folding>
-            <element signature="e#0#37#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/historyRecord1.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret column="5227" selection-start-column="5227" selection-end-column="5227" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/vectors2d_1_128_1_0_111111.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="25">
-          <caret column="164" selection-start-column="157" selection-end-column="164" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/vectors2d_1_128_0_1_111111.json">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Family/vectors2d_1_128_1_0_11111.json" />
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Family1/subGraphs_1/3.json">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Family/vectors_1_128.csv">
-      <provider editor-type-id="LargeFileEditor" />
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Family/dbscanParameter.json" />
-    <entry file="file://$PROJECT_DIR$/dataProcessing/subGraphPartition.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2302">
-          <caret line="164" column="53" selection-start-line="164" selection-start-column="53" selection-end-line="164" selection-end-column="53" />
-          <folding>
-            <element signature="e#6#22#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://E:/familyTree_data_processing/vue-app/pythonCode/getTreeEditDistanceGo.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="200">
-          <caret line="22" column="43" lean-forward="true" selection-start-line="22" selection-start-column="43" selection-end-line="22" selection-end-column="43" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://E:/familyTree_data_processing/Code/getModelTreeEdges.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-4210" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Family/subGraphs_tree/17.json" />
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Family/subGraphs_tree/3.json" />
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Family/subGraphs_tree.json" />
-    <entry file="file://$PROJECT_DIR$/dataProcessing/getTreeEidtDistanceReady.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="840">
-          <caret line="50" column="34" lean-forward="true" selection-start-line="50" selection-start-column="34" selection-end-line="50" selection-end-column="34" />
-          <folding>
-            <element signature="e#0#37#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://F:/allProcess/nbs.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="100">
-          <caret line="4" column="11" lean-forward="true" selection-start-line="4" selection-start-column="11" selection-end-line="4" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://F:/allProcess/NBS(1).py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-900">
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://F:/allProcess/getKDE.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="158">
-          <caret line="18" column="19" lean-forward="true" selection-start-line="18" selection-start-column="19" selection-end-line="18" selection-end-column="19" />
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/subGraphs_1/1.json">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/新建文本文档.txt">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Family/新建文本文档.txt" />
     <entry file="file://$PROJECT_DIR$/text.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2750">
@@ -659,34 +498,129 @@
     <entry file="file://$PROJECT_DIR$/dataProcessing/data/Family/subGraphs_1/3.json">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Family/subGraphs_1.json">
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/vectors2d_1_128_1_1_111111model-10.json" />
+    <entry file="file://$PROJECT_DIR$/dataProcessing/getdbscan.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="268">
-          <caret column="17066336" selection-start-column="17066336" selection-end-column="17066336" />
+        <state relative-caret-position="3200">
+          <caret line="132" column="150" selection-start-line="132" selection-start-column="150" selection-end-line="132" selection-end-column="150" />
+          <folding>
+            <element signature="e#4#15#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/deleteFamily.py">
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/subGraphs_1/1.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3575">
-          <caret line="143" column="53" selection-start-line="143" selection-start-column="53" selection-end-line="143" selection-end-column="53" />
+        <state>
+          <caret column="86" lean-forward="true" selection-start-column="86" selection-end-column="86" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dataProcessing/getAttribution.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4425">
+          <caret line="179" column="30" selection-start-line="179" selection-start-column="30" selection-end-line="179" selection-end-column="30" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/weibo/main.json" />
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/weibo/origin.csv" />
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/node2Num.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="375">
+          <caret column="1881" selection-start-column="1881" selection-end-column="1881" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Weibo/maxmin.json" />
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/weibo/number.csv" />
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/orignNetNum.csv">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="600">
+          <caret line="24" column="7" lean-forward="true" selection-start-line="24" selection-start-column="7" selection-end-line="24" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/attrMeanStd_1.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="97" lean-forward="true" selection-start-column="97" selection-end-column="97" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/orignNet.csv">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="500">
+          <caret line="20" column="25" lean-forward="true" selection-start-line="20" selection-start-column="25" selection-end-line="20" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Weibo/subGraphs_1/0.json" />
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/shuju/maxmin.json" />
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/shuju/main.json" />
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Weibo/originNet.csv" />
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Weibo/originNetNum.csv" />
+    <entry file="file://$PROJECT_DIR$/dataProcessing/processWeiBo.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="6" selection-start-line="6" selection-end-line="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Weibo/vectors_1_128.csv" />
+    <entry file="file://$USER_HOME$/Documents/WeChat Files/wxid_xwaq4baua2qz22/FileStorage/File/2021-03/shuju(2)/shuju/main.json" />
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Weibo/subGraphs_1.json" />
+    <entry file="file://$PROJECT_DIR$/dataProcessing/gedNew.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-480">
+          <folding>
+            <element signature="e#0#37#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/shuju/name.csv" />
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/shuju/number.json" />
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/shuju/other.csv" />
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Weibo/name.csv" />
+    <entry file="file://E:/语音合成软件/代码/txt2mp3.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="206">
+          <caret line="135" column="52" lean-forward="true" selection-start-line="135" selection-start-column="52" selection-end-line="135" selection-end-column="52" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Family3/新建文本文档.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="12" selection-start-column="12" selection-end-column="12" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/dataProcessing/graph2vec.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3150">
-          <caret line="136" column="40" selection-start-line="136" selection-start-column="40" selection-end-line="136" selection-end-column="40" />
+        <state relative-caret-position="3100">
+          <caret line="134" column="29" selection-start-line="134" selection-start-column="29" selection-end-line="134" selection-end-column="29" />
           <folding>
             <element signature="e#22#33#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/dataProcessing/deleteFamily.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3500">
+          <caret line="140" column="29" selection-start-line="140" selection-start-column="29" selection-end-line="140" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/dataProcessing/addFamilyAttr.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1325">
-          <caret line="55" column="35" selection-start-line="55" selection-start-column="35" selection-end-line="55" selection-end-column="35" />
+        <state relative-caret-position="650">
+          <caret line="28" column="29" selection-start-line="28" selection-start-column="29" selection-end-line="28" selection-end-column="29" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
@@ -695,8 +629,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/dataProcessing/tongji.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="9650">
-          <caret line="395" column="84" selection-start-line="395" selection-start-column="84" selection-end-line="395" selection-end-column="84" />
+        <state relative-caret-position="750">
+          <caret line="39" column="59" selection-start-line="39" selection-start-column="59" selection-end-line="39" selection-end-column="59" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
@@ -705,8 +639,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/dataProcessing/Ged.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="200">
-          <caret line="14" column="31" selection-start-line="14" selection-start-column="31" selection-end-line="14" selection-end-column="31" />
+        <state relative-caret-position="1250">
+          <caret line="56" column="36" selection-start-line="56" selection-start-column="36" selection-end-line="56" selection-end-column="36" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>
@@ -723,65 +657,55 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/attrMeanStd_1.json">
+    <entry file="file://E:/familyTree_data_processing/OriginalData/27063-0001-Data.txt">
+      <provider selected="true" editor-type-id="LargeFileEditor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Family/subGraphs_1.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1168">
+          <caret column="17066336" selection-start-column="17066336" selection-end-column="17066336" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/data_weight.json">
+      <provider selected="true" editor-type-id="LargeFileEditor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/vectors_1_128.csv">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/vectors2d_1_128_1_1_111111model-10.json">
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/attrVectors_1.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="100">
+          <caret column="602" lean-forward="true" selection-start-column="602" selection-end-column="602" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/vectors2d_1_128_1_1_111111.json">
       <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/subGraphs_1.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret column="849" lean-forward="true" selection-start-column="849" selection-end-column="849" />
+        </state>
+      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/dataProcessing/getCCATsne.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="716">
-          <caret line="169" column="34" selection-start-line="169" selection-start-column="34" selection-end-line="169" selection-end-column="34" />
+        <state relative-caret-position="328">
+          <caret line="178" column="21" selection-start-line="178" selection-start-column="21" selection-end-line="178" selection-end-column="21" />
           <folding>
             <element signature="e#6#16#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/node2Num.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="115">
-          <caret column="2151" selection-start-column="2142" selection-end-column="2151" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/orignNetNum.csv">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/data/Author/subGraphs_1.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="476">
-          <caret column="2687575" selection-start-column="2687570" selection-end-column="2687575" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/server.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="162" column="32" selection-start-line="162" selection-start-column="32" selection-end-line="162" selection-end-column="32" />
+        <state relative-caret-position="177">
+          <caret line="112" column="49" lean-forward="true" selection-start-line="112" selection-start-column="49" selection-end-line="112" selection-end-column="49" />
           <folding>
             <element signature="e#0#72#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/getdbscan.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="567">
-          <caret line="132" column="150" selection-start-line="132" selection-start-column="150" selection-end-line="132" selection-end-column="150" />
-          <folding>
-            <element signature="e#4#15#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/dataProcessing/getAttribution.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="364">
-          <caret line="179" column="30" selection-start-line="179" selection-start-column="30" selection-end-line="179" selection-end-column="30" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
           </folding>
         </state>
       </provider>

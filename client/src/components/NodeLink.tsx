@@ -41,7 +41,7 @@ class NodeLink extends React.Component<Props,any>{
         });
         // console.log(nodesid,links)
         d3.forceSimulation(nodesid)
-        .force("link", d3.forceLink(links).id(d=>d.id))
+        .force("link", d3.forceLink(links).id((d:any)=>d.id))
         .force("charge", d3.forceManyBody())
         .force("center", d3.forceCenter(width / 2, height / 2))
         .on('tick', function () {

@@ -53,8 +53,8 @@ class DistributeAttr extends React.Component<Props, any>{
         // x_min_max[0]=0;
         let y_min_max = d3.extent(data, (d: any) => d[graphType][yAttr]);
         // y_min_max[0]=0;
-        let xscale = d3.scaleLinear(x_min_max, [this.padding.left, this.svgWidth - this.padding.right]);
-        let yscale = d3.scaleLinear(y_min_max, [this.svgHeight - this.padding.bottom, this.padding.top]);
+        let xscale = d3.scaleLinear(x_min_max as unknown as any, [this.padding.left, this.svgWidth - this.padding.right]);
+        let yscale = d3.scaleLinear(y_min_max as unknown as any, [this.svgHeight - this.padding.bottom, this.padding.top]);
 
         data.forEach((value: any) => {
             value.x = xscale(value[graphType][xAttr]);
@@ -171,7 +171,7 @@ class DistributeAttr extends React.Component<Props, any>{
         const { data, centerPoint, choosePoints} = this.state;
         const {x,y,display,graphType,personGraphs} = this.props;
         let allPointEl = data.map((value: any, index: number) =>
-            <circle key={index} cx={value.x} cy={value.y} r='2px' fill='#1890ff' fillOpacity={0.4} stroke='white' strokeWidth='0.5px'
+            <circle key={index} cx={value.x} cy={value.y} r='3px' fill='#1890ff' fillOpacity={0.4} stroke='white' strokeWidth='0.5px'
                 onClick={this.searchGraph.bind(this, value)}></circle>
         )
         
@@ -179,12 +179,12 @@ class DistributeAttr extends React.Component<Props, any>{
         //点击的点，需要匹配的点
         let centerPointEl = null;
         if (centerPoint != null) {
-            centerPointEl = <circle r="2px" cx={centerPoint.x} cy={centerPoint.y} fill={this.centerColor} stroke='white' strokeWidth='0.5px'
+            centerPointEl = <circle r="3.5px" cx={centerPoint.x} cy={centerPoint.y} fill={this.centerColor} stroke='white' strokeWidth='0.5px'
                 onClick={this.searchGraph.bind(this, centerPoint)}></circle>
         }
         //圈选的点，匹配到的点
         let pointsChooseEl = choosePoints.map((value: ChoosePointData, index: number) =>
-            <circle r="2px" cx={value.x} cy={value.y} key={index} fill={this.lightColor} stroke='white' strokeWidth='0.5px'
+            <circle r="3px" cx={value.x} cy={value.y} key={index} fill={this.lightColor} stroke='white' strokeWidth='0.5px'
                 onClick={this.searchGraph.bind(this, value)}></circle>
         )
 
@@ -192,7 +192,7 @@ class DistributeAttr extends React.Component<Props, any>{
         let persongraphs = personGraphs.map((value: any, index: number) =>{
             for(let i=0;i<data.length;i++){
                 if(data[i].id===value.id){
-                    return <circle r="2px" cx={data[i].x} cy={data[i].y} key={index} fill={this.centerColor} stroke='white' strokeWidth='0.5px'
+                    return <circle r="3.5px" cx={data[i].x} cy={data[i].y} key={index} fill={this.centerColor} stroke='white' strokeWidth='0.5px'
                     onClick={this.searchGraph.bind(this, value)}></circle>
                 }
             }

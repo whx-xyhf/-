@@ -37,8 +37,7 @@ class ForceCompute extends React.Component<Props, any>{
         this.setState({ selectIndex: index });
     }
     scrollBottom(e:React.UIEvent<HTMLDivElement, UIEvent>){
-        
-        if(Math.ceil(e.currentTarget.scrollHeight-e.currentTarget.scrollTop)===e.currentTarget.clientHeight){
+        if(Math.floor(e.currentTarget.scrollHeight-e.currentTarget.scrollTop)===e.currentTarget.clientHeight){
             this.setState({showCount:this.state.showCount+12});
         }
     }
@@ -69,6 +68,27 @@ class ForceCompute extends React.Component<Props, any>{
                                 <div className="candidateTitle">
                                     Graph:{value.id}<br />
                                     Nodes:{value.str.nodes} Year:{value.year}
+                                </div>
+                                <div className="candidateContent">
+                                    <NodeLink graph={value} onClick={this.selectCondidate} parent={parent} circleFill='#696969' stroke='#A0A0A0'/>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                }
+            }
+
+            )
+        }
+        else if(dataType === 'Weibo'){
+            graphElements = this.props.graphs.map((value: graph, index: number) => {
+                if (index < showCount) {
+                    return (
+                        <div className="forceBox" key={index} onClick={this.selectIndex.bind(this, index)}>
+                            <div className="condidateBox" style={{ borderColor: index === selectIndex ? selectBorder : '#ccc' }}>
+                                <div className="candidateTitle">
+                                    Graph:{value.id}<br />
+                                    Nodes:{value.str.nodes} Edges:{value.str.edges}
                                 </div>
                                 <div className="candidateContent">
                                     <NodeLink graph={value} onClick={this.selectCondidate} parent={parent} circleFill='#696969' stroke='#A0A0A0'/>

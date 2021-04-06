@@ -399,14 +399,14 @@ def run1(dataType, sampleNum, matchNum, dimensions, weight, dimensionsAttrChecke
                 gedValue.append(ged)
                 for name in attrNames:
                     attrValue[name].append(abs(targetAttr[name] - sourceAttr[name]))
-            gedValueMeanEverySample.append(np.sum(np.array(gedValue)))
+            gedValueMeanEverySample.append(np.mean(np.array(gedValue)))
             gedValueStdEverySample.append(np.std(np.array(gedValue)))
             for name in attrNames:
-                attrEverySample[name].append(np.sum(np.array(attrValue[name])))
-        gedValueMeanEveryWeight.append(np.sum(np.array(gedValueMeanEverySample)))
+                attrEverySample[name].append(np.mean(np.array(attrValue[name])))
+        gedValueMeanEveryWeight.append(np.mean(np.array(gedValueMeanEverySample)))
         gedValueStdEveryWeight.append(np.std(np.array(gedValueStdEverySample)))
         for name in attrNames:
-            attrEveryWeight[name].append(np.sum(np.array(attrEverySample[name])))
+            attrEveryWeight[name].append(np.mean(np.array(attrEverySample[name])))
 
     dirname = '+'.join(attrNames)
 
@@ -464,12 +464,12 @@ def createExcel(data,path,columnNames,matchNodes):
 
 if __name__=="__main__":
     start=datetime.now()
-    dataType="Family"
+    dataType="Author"
     dir=1
     sampleNum = [50]
-    matchNum = [20,40,60]
+    matchNum = [5,10,15]
     dimensions = 128
-    dimensionsAttrChecked = ['11111']
+    dimensionsAttrChecked = ['111111']
     weight = [[1, 0],[0,1],[1,1],[2,1],[3,1]]
     for p in range(len(dimensionsAttrChecked)):
         for j in range(len(sampleNum)):

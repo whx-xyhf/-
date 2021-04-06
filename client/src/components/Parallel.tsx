@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 import {Switch} from 'antd';
 
 
+
 interface Props {
     reTsneData: any,
     url: string,
@@ -31,13 +32,15 @@ class Parallel extends React.Component<Props, any>{
     // public rectColor:Array<string>=['#FEF0D9','#FDCC8A','#FC8D59','#E34A33','#B30000'];
     public rectHeight: number = 10;
     public yscale: any = null;
+    public xscale: any = null;
     public rectWidthMax: number = 0;
     // public rectColor=d3.interpolate(d3.rgb(254,240,217),d3.rgb(179,0,0));
     public rectColor = d3.interpolateYlOrRd;
+    // public color = ["#a50026", "#d73027", "#f46d43", "#fdae61", "#fee090", "#ffffbf", "#e0f3f8", "#abd9e9", "#74add1", "#4575b4"];
     constructor(props: Props) {
         super(props);
         this.svgRef = React.createRef();
-        this.state = { data: [], rect: {},rectArray:{}, opacity:0.7,personGraphsOpacity:1};
+        this.state = { data: [], rect: {},rectArray:{}, opacity:0.7,personGraphsOpacity:1,polygonHull:[]};
         this.getAttrData = this.getAttrData.bind(this);
         this.compute = this.compute.bind(this);
         this.doInterpolate=this.doInterpolate.bind(this);
@@ -57,6 +60,7 @@ class Parallel extends React.Component<Props, any>{
         }
         //x方向比例尺
         let xscale = d3.scalePoint(attr_name, [this.padding.left, this.svgWidth - this.padding.right]);
+        this.xscale=xscale;
         //y方向比例尺
         let min_max: any = new Map(Array.from(attr_name, key => [key, d3.extent(data, (d: any) => d.attr[key])]));
         let attr: attr = {};
@@ -99,11 +103,11 @@ class Parallel extends React.Component<Props, any>{
             let c = d3.extent(rectArray[i], (d: Array<number>) => { return Math.sqrt(d[3]) })//d[3]/d[2]});
             if (v[0] === v[1] && c[0] === c[1])
                 c[0] = 0;
-            let rectWidthScale = d3.scaleLinear(v, [5, rectWidthMax]);
+            let rectWidthScale = d3.scaleLinear(v as unknown as any, [5, rectWidthMax]);
             // let mean=d3.mean(rectArray[i],(d:any)=>d[3])||0;
             // let std=this.getStd(rectArray[i],mean);
             // console.log(mean,std)
-            let colorScale = d3.scaleLinear(c, [0.05,0.9]);
+            let colorScale = d3.scaleLinear(c as unknown as any, [0.05,0.9]);
 
             rectArray[i].forEach((value: Array<number>) => {
                 
@@ -166,6 +170,7 @@ class Parallel extends React.Component<Props, any>{
             else
                 d += `L${data[i][0]} ${data[i][1]} `;
         }
+        // d=d3.line().curve(d3.curveBasis)(data) as unknown as string;
         return d;
     }
     // getStd(values: Array<number>,mean:number,valueof: (datum: any, index: number, array: Iterable<number>) => number
@@ -203,7 +208,7 @@ class Parallel extends React.Component<Props, any>{
             for (let i in res.data.data) {
                 let c = d3.extent(res.data.data[i], (d: Array<number>) => { if (d[2] !== 0) return d[3] })//d[3]/d[2]});
 
-                let colorScale = d3.scaleLinear(c, [0.05,0.9]);
+                let colorScale = d3.scaleLinear(c as unknown as any, [0.05,0.9]);
     
                 res.data.data[i].forEach((value: Array<number>) => {
                     if (value[2] !== 0 ) {
@@ -276,7 +281,11 @@ class Parallel extends React.Component<Props, any>{
             this.setState({personGraphsOpacity:1})
         }
         if (nextProps.choosePoints !== this.props.choosePoints) {
-
+            let pointsMax:any={};
+            let pointsMin:any={};
+            let points1:any=[];
+            let points2:any=[];
+            let points:any=[];
             let rectArray = JSON.parse(JSON.stringify(this.state.rectArray));
             for (let i in rectArray) {
                 rectArray[i].forEach((value: Array<number>) => {
@@ -290,15 +299,40 @@ class Parallel extends React.Component<Props, any>{
                     let y = Math.floor((this.svgHeight - this.padding.bottom - this.yscale.get(i)(value.attr[i])) / this.rectHeight);
                     rectArray[i][y][2] += 1;
                     rectArray[i][y][3] += value.attr[i];
+                    if(i in pointsMax){
+                        let py=this.yscale.get(i)(value.attr[i]);
+                        if(pointsMax[i]<py)
+                            pointsMax[i]=py
+                    }
+                    else{
+                        pointsMax[i]=this.yscale.get(i)(value.attr[i]);
+                    }
+                    if(i in pointsMin){
+                        let py=this.yscale.get(i)(value.attr[i]);
+                        if(pointsMin[i]>py)
+                            pointsMin[i]=py
+                    }
+                    else{
+                        pointsMin[i]=this.yscale.get(i)(value.attr[i]);
+                    }
+                    points.push([this.xscale(i),this.yscale.get(i)(value.attr[i])])
+                    
                 }
+                
             })
+            for(let i in pointsMax){
+                    points1.push([this.xscale(i),pointsMax[i]]);
+                    points2.push([this.xscale(i),pointsMin[i]]);
+            }
+
+            points1=points1.concat(points2.reverse())
 
             let rectWidthMax = this.rectWidthMax;
             // console.log(rectArray)
             for (let i in rectArray) {
                 let v = d3.extent(rectArray[i], (d: Array<number>) => { if (d[2] !== 0) return d[2] });
                 let c = d3.extent(rectArray[i], (d: Array<number>) => { if (d[2] !== 0) return d[3] });
-                let rectWidthScale = d3.scaleLinear(v, [5, rectWidthMax]);
+                let rectWidthScale = d3.scaleLinear(v as unknown as any, [5, rectWidthMax]);
                 // let mean=d3.mean(rectArray[i],(d:any)=>d[3])||0;
                 // let std=this.getStd(rectArray[i],mean);
                 // console.log(mean,std)
@@ -314,14 +348,14 @@ class Parallel extends React.Component<Props, any>{
                     }
                 })
             }
-            this.setState({ rect: rectArray });
+            this.setState({ rect: rectArray ,polygonHull:points});
             this.doInterpolate(rectArray);
         }
     }
     render() {
-        //所有线
+        // 所有线
         let path = this.state.data.map((value: any, index: number) => {
-            if (this.props.choosePoints.length === 0)
+            if (this.props.choosePoints.length === 0 && this.props.personGraphs.length===0)
                 return (<path d={this.line(value.pathData)} key={index} strokeWidth={0.5} strokeOpacity={'opacity' in value ? value.opacity : 0.1} stroke={this.pathStroke} fill='none' ></path>)
             else
                 return (<path d={this.line(value.pathData)} key={index} strokeWidth={0.5} strokeOpacity={'opacity' in value ? value.opacity : 0.1} stroke={this.pathStrokeChoose} fill='none' ></path>)
@@ -341,7 +375,7 @@ class Parallel extends React.Component<Props, any>{
         let pathCenter = null;
         for (let i in this.state.data) {
             if (this.state.data[i].id === this.props.centerPoint.id) {
-                pathCenter = <path d={this.line(this.state.data[i].pathData)} strokeWidth={1.5} strokeOpacity={0.5} stroke={this.pathStrokeCenter} fill='none'></path>
+                pathCenter = <path d={this.line(this.state.data[i].pathData)} strokeWidth={1.5} strokeOpacity={1} stroke={this.pathStrokeCenter} fill='none'></path>
                 break;
             }
         }
@@ -350,11 +384,12 @@ class Parallel extends React.Component<Props, any>{
         let personGraphs = this.props.personGraphs.map((value: any, index: number) => {
             for (let i in this.state.data) {
                 if (this.state.data[i].id === value.id) {
-                    return (<path d={this.line(this.state.data[i].pathData)} key={index} strokeWidth={1} strokeOpacity={0.5} stroke={this.pathStrokeCenter} fill='none' opacity={this.state.personGraphsOpacity}></path>)
+                    return (<path d={this.line(this.state.data[i].pathData)} key={index} strokeWidth={1.5} strokeOpacity={1} stroke={index===0?this.pathStrokeCenter:this.pathStroke} fill='none' opacity={this.state.personGraphsOpacity}></path>)
                 }
             }
             return null;
         })
+        
 
         //画矩形
         // let rectLeft:Array<React.ReactElement>=[];
@@ -379,6 +414,7 @@ class Parallel extends React.Component<Props, any>{
             })
             for(let index=this.state.rect[i].length-1;index>=0;index--){
                 let offset =(1-index / this.state.rect[i].length) * 100 + "%";
+                // stop.push(<stop key={i+index} offset={offset} stopColor={this.color[this.state.rect[i][index][3]]}></stop>);
                 
                 stop.push(<stop key={i+index} offset={offset} stopColor={this.rectColor(this.state.rect[i][index][3])}></stop>);
 
@@ -389,10 +425,16 @@ class Parallel extends React.Component<Props, any>{
             pathGaosi.push(<path d={d} fill={'url(#lineColor' + i + ')'} fillOpacity={this.state.opacity} key={i}></path>);
         }
 
+        // let polygonHullEl=null;
+        if(this.state.polygonHull.length>0){
+            
+            // let createCurve=d3.line()
+            // polygonHullEl=<path d={createCurve(this.state.polygonHull) as unknown as string} fill="#red" fillOpacity={0.5}></path>
+        }
 
         return (
             <div className='parallel'>
-                <Switch defaultChecked size="small" style={{position:'absolute',right:'15px',top:'10px'}} onChange={this.switch} />
+                <Switch className="parallelSwitch" defaultChecked size="small" style={{position:'absolute',right:'15px',top:'5px'}} onChange={this.switch} />
                 <svg style={{ width: '100%', height: '100%' }} ref={this.svgRef} id='svg_parallel'>
                     <defs>
                         <linearGradient id='linearColor' x1="0%" y1="0%" x2='0%' y2="100%">
@@ -410,9 +452,10 @@ class Parallel extends React.Component<Props, any>{
                     {pathCenter}
                     {personGraphs}
                     {pathGaosi}
+                    {/* {polygonHullEl} */}
                     <g className="axis"></g>
                     <g className="text"></g>
-
+                    <text x={this.svgWidth-this.padding.right} y={15} fontSize="10px">HeatMap</text>
                     <rect fill='url(#linearColor)' x={this.svgWidth - this.padding.right / 2 + 10} y={this.svgHeight - this.padding.bottom - 100} height={100} width={20}></rect>
                     {/* <text style={{transform:`translate(${this.svgWidth-this.padding.right+85}px,${this.svgHeight-this.padding.bottom-100}px) rotate(90deg)`}}>Z-score</text> */}
                     {/* <text x={this.svgWidth - this.padding.right / 2 - 5} y={this.svgHeight - this.padding.bottom - 95}>2</text> */}
